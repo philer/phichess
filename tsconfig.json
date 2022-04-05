@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": false,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
+    "lib": ["es2021", "dom"],
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "target": "es2021",
+    "plugins": [{
+      "name": "typescript-plugin-css-modules",
+      "options": {"customMatcher": ".(css|scss)$"},
+    }],
+    "typeRoots": [
+      "node_modules/@types",
+      "src/**/*.d.ts"
+    ]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

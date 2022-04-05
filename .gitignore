@@ -1,0 +1,19 @@
+/dist
+/build
+/example
+
+# Languages & Build tools
+node_modules
+*.pyc
+__pycache__
+/*.egg-info
+.venv
+
+# Editors, IDEs, OS files
+*~
+*.swp
+*.sublime-*
+
+# Misc.
+*.old
+*.backup
