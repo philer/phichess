@@ -5,3 +5,33 @@
   justify-content: center;
   align-items: center;
 }
+
+.game {
+  display: flex;
+  align-items: stretch;
+}
+
+.graveyard, .tools {
+  padding: 0 .5rem;
+  width: 2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  font-size: 3vmin;
+  font-weight: bold;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.graveyard {
+  justify-content: space-between;
+
+
+  :global(.b) {
+    text-shadow: 0 0 3px #fffc
+  }
+}

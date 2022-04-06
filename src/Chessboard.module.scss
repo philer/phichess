@@ -1,16 +1,56 @@
 .root {
-  width: 75vmin;
-  height: 75vmin;
+  --board-size: 75vmin;
+  --square-size: calc(1/8 * var(--board-size));
+  width: var(--board-size);
+  height: var(--board-size);
+
   display: grid;
   grid-template-rows: repeat(8, 1fr);
   grid-template-columns: repeat(8, 1fr);
 
-  :nth-child(2n) {
-    background: #ccc;
-    color: black;
+  transform: rotate(-90deg);
+  transition: .67s transform;
+
+  font-family: "Linux Libertine";
+  user-select: none;
+
+  box-shadow: 3px 3px 10px #0009, 3px 3px 40px #0009;
+
+  > div {
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+
+    transform: rotate(90deg);
+    transition: .67s transform;
+
+    font-size: var(--square-size);
+    line-height: var(--square-size);
+
+    text-shadow: 1px 1px 5px #000c;
+
+    &:global(.w), &:global(.b) { cursor: pointer }
+    &.white { background-color: #bbbfc0 }
+    &.black { background-color: #555960 }
+
+    &.selected {
+      &.white { background-color: #ada }
+      &.black { background-color: #575 }
+    }
   }
-  :nth-child(2n + 1) {
-    background: #555;
-    color: white;
+
+  &.flipped {
+    transform: rotate(90deg);
+    > div {
+      transform: rotate(-90deg);
+    }
   }
+}
+
+.piece {
+  font-family: "Linux Libertine";
 }
