@@ -8,6 +8,14 @@ export abstract class Result<T = unknown, E = unknown> implements Promise<T> {
     return new Err(value)
   }
 
+  static wrap<T = unknown, E = unknown>(fn: () => T): Result<T, E> {
+    try {
+      return Result.of(fn())
+    } catch (err) {
+      return Result.err(err as E)
+    }
+  }
+
   abstract map<Y = T>(fn: (value: T) => Y): Result<Y, E>
 
   abstract flatMap<Y = T>(fn: (value: T) => Result<Y, E>): Result<Y, E>

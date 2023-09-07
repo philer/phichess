@@ -6,6 +6,7 @@ import { Result } from "./result"
 export type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"
 export type Rank = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8"
 export type Piece = "K" | "Q" | "R" | "B" | "N"
+export type PieceOrPawn = Piece | ""
 export type Check = "" | "+" | "#"
 export type Color = "w" | "b"
 
@@ -14,7 +15,7 @@ export type ColorPiece = `${Color}${""|Piece}`
 
 export type Board = Partial<Record<Square, ColorPiece>>
 
-export type Move
+export type AlgebraicMove
   = `${Square}${Check}`
   | `${File}x${Square}${Check}`
   | `${Piece}${""|"x"}${Square}${Check}`
@@ -26,11 +27,36 @@ export type Move
   | `${File}${1|8}${""|"="}${Piece}${Check}`
   | `${File}x${File}${1|8}${""|"="}${Piece}${Check}`
 
-export type Game = [Square, Square][]
+export type Move = {
+  // algebraic: string
+  // piece: ColorPiece
+  from: Square
+  to: Square
+  // capture?: ColorPiece
+  promotion?: ColorPiece
+  // check: bool
+}
+
+export type Game = Readonly<{
+  board: Board
+  history: Move[]
+  toMove: Color
+  canCastle: Readonly<{
+    whiteLong: boolean
+    whiteShort: boolean
+    blackLong: boolean
+    blackShort: boolean
+  }>
+  // enPassant?: Square
+}>
 
 
 export const squares: readonly Square[]
-  = Array.from("abcdefgh").flatMap(rank => Array.from("12345678").map(file => rank + file as Square))
+  = Array.from("abcdefgh").flatMap(
+    file => Array.from("12345678",
+      rank => `${file}${rank}` as Square,
+    ),
+  )
 
 export const startBoard: Board = {
   a8: "bR", b8: "bN", c8: "bB", d8: "bQ", e8: "bK", f8: "bB", g8: "bN", h8: "bR",
@@ -156,7 +182,8 @@ const PIECE_NAMES = {
   "": "pawn",
 }
 
-export const toAlgebraic = (from: Square, to: Square, board: Board): Result<Move, string> => {
+export const toAlgebraic = ({ from, to }: Move, board: Board): Result<AlgebraicMove, string> => {
+  // TODO promotion
   const piece = board[from]
   if (!piece) {
     return Result.err(`There is no piece on ${from}`)
@@ -164,7 +191,7 @@ export const toAlgebraic = (from: Square, to: Square, board: Board): Result<Move
   const color = piece[0] as Color
   const pieceName = piece.slice(1) as Piece|""
   const opponentPiece = board[to]
-  let takes = ""
+  let takes: "" | "x" = ""
   if (opponentPiece) {
     if (opponentPiece[0] === color) {
       return Result.err(`Can't take your own piece on ${to}`)
@@ -187,120 +214,213 @@ export const toAlgebraic = (from: Square, to: Square, board: Board): Result<Move
   if (candidates.length > 1) {
 
   }
-  return Result.of(`${piece}${from}${takes}${to}`)
+  return Result.of(`${pieceName}${from}${takes}${to}`)
 }
 
 
-export const applyMove = (index: number, move: Move, board: Board): Result<Board, string> => {
-  const color = index % 2 ? "w" : "b"
-
-  if (/^[a-h][1-8][+#]?$/.test(move)) {
-    const [file, rank, check] = move as unknown as [File, Rank, Check?]
-    const square: Square = `${file}${rank}`
-    // TODO
+export const applyMove = (
+  { from, to, promotion }: Move,
+  {
+    board,
+    board: { [from]: piece, [to]: capture, ...remainingBoard },
+    toMove,
+    history,
+    canCastle,
+  }: Game,
+): Result<Game, string> => {
+  // const piece = board[move.from]
+  if (!piece) {
+    return Result.err(`There is no piece on ${from}`)
+  }
+  if (piece[0] !== toMove) {
+    return Result.err(`It is ${toMove === "w" ? "white" : "black"}'s turn.`)
+  }
+  // const capture = board[move.to]
+  if (capture && capture[0] === toMove) {
+    return Result.err("You can't capture your own piece.")
   }
 
-  if (/^[a-h]x[a-h][1-8][+#]?$/.test(move)) {
-    const [from, file, rank, check] = move as unknown as [File|Rank, File, Rank, Check?]
-    const square: Square = `${file}${rank}`
-    // TODO
-  }
+  const opponent = toMove === "w" ? "b" : "w"
+  const pieceName: PieceOrPawn = piece[1] ?? ""
 
-  if (/^[KQRBN][a-h][1-8][+#]?$/.test(move)) {
-    const [piece, file, rank, check] = move as unknown as [Piece, File, Rank, Check?]
-    const square: Square = `${file}${rank}`
-    switch (piece) {
-      case "N": {
-        const candidates = knightSquares(square).filter(sqr => board[sqr] === `${color}N`)
-        if (candidates.length === 0) {
-          return Result.err(`No knight in range of ${square}`)
+  // const blockedSquare =
+  // match(pieceName)
+  // .with("", () =>
+  switch (pieceName) {
+    case "": {
+      const forwards = toMove === "w" ? 1 : -1
+      const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
+      const rankDelta = to.charCodeAt(1) - from.charCodeAt(1)
+      if (fileDelta === 0) {
+        if (rankDelta !== forwards) {
+          if (rankDelta === 2 * forwards) {
+            if (from[0] !== (toMove === "w" ? "2" : "7")) {
+              return Result.err("Pawns can only move by two ranks on their first move.")
+            }
+            if (board[shift(0, forwards, from) as Square]) {
+              return Result.err("There is a piece in the way.")
+            }
+          }
+          return Result.err("Pawns can only move forwards by one or two squares.")
         }
-        if (candidates.length > 1) {
-          return Result.err(`There are multiple knights in range of ${square}`)
+        if (capture) {
+          return Result.err("Pawns can only capture diagonally.")
         }
-        return Result.of(executeMove(candidates[0], square, board))
+      } else if (fileDelta === 1 || fileDelta === -1) {
+        if (!capture) {
+          const enPassantSquare = shift(fileDelta, 0, from) as Square
+          capture = board[enPassantSquare]
+          if (!capture) {
+            return Result.err("Pawns can only move diagonally when capturing.")
+          }
+          if (capture !== opponent) {
+            return Result.err("Pawns can only capture pawns en passant.")
+          }
+          const prev = history[history.length - 1]
+          if (prev.to !== enPassantSquare || prev.from !== shift(0, 2 * forwards, enPassantSquare)) {
+            return Result.err("Pawns can only be captured en passant immediately after moving by two ranks on their first move.")
+          }
+          // @ts-ignore remainingBoard isn't empty
+          delete remainingBoard[enPassantSquare]
+        }
       }
-      case "B":  // TODO
-      case "R":  // TODO
-      case "Q":  // TODO
-      case "K":  // TODO
-        return Result.err("NOT IMPLEMENTED")
+      break
+    }
+    case "Q": {
+      break
+    }
+    case "R": {
+      break
+    }
+    case "B": {
+      break
+    }
+    case "N": {
+      break
+    }
+    case "K": {
+      break
     }
   }
 
-  if (/^[KQRBN][a-h1-8][a-h][1-8][+#]?$/.test(move)) {
-    const [piece, from, file, rank, check] = move as unknown as [Piece, File|Rank, File, Rank, Check?]
-    const square: Square = `${file}${rank}`
-    switch (piece) {
-      case "N": {
-        const candidates = knightSquares(square).filter(sqr => sqr.includes(from) && board[sqr] === `${color}N`)
-        if (candidates.length === 0) {
-          return Result.err(appendFrom(from, `No knight in range of ${square}`))
-        }
-        if (candidates.length > 1) {
-          return Result.err(appendFrom(from, `There are multiple knights in range of ${square}`))
-        }
-        return Result.of(executeMove(candidates[0], square, board))
-      }
-      case "B":  // TODO
-      case "R":  // TODO
-      case "Q":  // TODO
-      case "K":  // TODO
-    }
-  }
-
-  if (/^[KQRBN]x[a-h][1-8][+#]?$/.test(move)) {
-    const [piece, file, rank, check] = move as unknown as [Piece, File, Rank, Check?]
-    const square: Square = `${file}${rank}`
-    const target = board[square]
-    if (target === undefined) {
-      return Result.err(`There is no piece on ${square}`)
-    }
-    if (target[0] === color) {
-      return Result.err(`Can't take your own piece on ${square}`)
-    }
-    return applyMove(index, `${piece}${square}${check || ""}`, board)
-  }
-
-  if (/^[KQRBN][a-h1-8]x[a-h][1-8][+#]?$/.test(move)) {
-    const [piece, from, file, rank, check] = move as unknown as [Piece, File|Rank, File, Rank, Check?]
-    const square: Square = `${file}${rank}`
-    const target = board[square]
-    // TODO
-  }
-
-  if (/^O-O[+#]?$/.test(move)) {
-    const [check] = move as unknown as [Check?]
-    // TODO
-  }
-
-  if (/^O-O-O[+#]?$/.test(move)) {
-    const [check] = move as unknown as [Check?]
-    // TODO
-  }
-
-  if (/^[a-h][1-8]=?[KQRBN][+#]?$/.test(move)) {
-    const [file, rank, piece, check] = move as unknown as [File, Rank, Piece, Check?]
-    const square: Square = `${file}${rank}`
-    // TODO
-  }
-
-  if (/^[a-h]x[a-h][1-8]=?[KQRBN][+#]?$/.test(move)) {
-    const [from, file, rank, piece, check] = move as unknown as [File, File, Rank, Piece, Check?]
-    const square: Square = `${file}${rank}`
-    // TODO
-  }
-
-  return Result.err(`Invalid move notation '${move}'`)
+  return Result.of({
+    board: { ...remainingBoard, [to]: piece },
+    toMove: toMove === "w" ? "b": "w",
+    history: [...history, { from, to, promotion }],
+    canCastle,
+  })
 }
 
+// export const executeMove = ({ from, to }: Move, { [from]: piece, ...board }: Board): Board =>
+//   ({ ...board, [to]: piece })
 
-export const executeMove = (from: Square, to: Square, { [from]: piece, ...board }: Board): Board =>
-  ({ ...board, [to]: piece })
+// export const applyMove = (index: number, move: Move, board: Board): Result<Board, string> => {
+//   const color = index % 2 ? "w" : "b"
+
+//   if (/^[a-h][1-8][+#]?$/.test(move)) {
+//     const [file, rank, check] = move as unknown as [File, Rank, Check?]
+//     const square: Square = `${file}${rank}`
+//     // TODO
+//   }
+
+//   if (/^[a-h]x[a-h][1-8][+#]?$/.test(move)) {
+//     const [from, file, rank, check] = move as unknown as [File|Rank, File, Rank, Check?]
+//     const square: Square = `${file}${rank}`
+//     // TODO
+//   }
+
+//   if (/^[KQRBN][a-h][1-8][+#]?$/.test(move)) {
+//     const [piece, file, rank, check] = move as unknown as [Piece, File, Rank, Check?]
+//     const square: Square = `${file}${rank}`
+//     switch (piece) {
+//       case "N": {
+//         const candidates = knightSquares(square).filter(sqr => board[sqr] === `${color}N`)
+//         if (candidates.length === 0) {
+//           return Result.err(`No knight in range of ${square}`)
+//         }
+//         if (candidates.length > 1) {
+//           return Result.err(`There are multiple knights in range of ${square}`)
+//         }
+//         return Result.of(executeMove(candidates[0], square, board))
+//       }
+//       case "B":  // TODO
+//       case "R":  // TODO
+//       case "Q":  // TODO
+//       case "K":  // TODO
+//         return Result.err("NOT IMPLEMENTED")
+//     }
+//   }
+
+//   if (/^[KQRBN][a-h1-8][a-h][1-8][+#]?$/.test(move)) {
+//     const [piece, from, file, rank, check] = move as unknown as [Piece, File|Rank, File, Rank, Check?]
+//     const square: Square = `${file}${rank}`
+//     switch (piece) {
+//       case "N": {
+//         const candidates = knightSquares(square).filter(sqr => sqr.includes(from) && board[sqr] === `${color}N`)
+//         if (candidates.length === 0) {
+//           return Result.err(appendFrom(from, `No knight in range of ${square}`))
+//         }
+//         if (candidates.length > 1) {
+//           return Result.err(appendFrom(from, `There are multiple knights in range of ${square}`))
+//         }
+//         return Result.of(executeMove(candidates[0], square, board))
+//       }
+//       case "B":  // TODO
+//       case "R":  // TODO
+//       case "Q":  // TODO
+//       case "K":  // TODO
+//     }
+//   }
+
+//   if (/^[KQRBN]x[a-h][1-8][+#]?$/.test(move)) {
+//     const [piece, file, rank, check] = move as unknown as [Piece, File, Rank, Check?]
+//     const square: Square = `${file}${rank}`
+//     const target = board[square]
+//     if (target === undefined) {
+//       return Result.err(`There is no piece on ${square}`)
+//     }
+//     if (target[0] === color) {
+//       return Result.err(`Can't take your own piece on ${square}`)
+//     }
+//     return applyMove(index, `${piece}${square}${check || ""}`, board)
+//   }
+
+//   if (/^[KQRBN][a-h1-8]x[a-h][1-8][+#]?$/.test(move)) {
+//     const [piece, from, file, rank, check] = move as unknown as [Piece, File|Rank, File, Rank, Check?]
+//     const square: Square = `${file}${rank}`
+//     const target = board[square]
+//     // TODO
+//   }
+
+//   if (/^O-O[+#]?$/.test(move)) {
+//     const [check] = move as unknown as [Check?]
+//     // TODO
+//   }
+
+//   if (/^O-O-O[+#]?$/.test(move)) {
+//     const [check] = move as unknown as [Check?]
+//     // TODO
+//   }
+
+//   if (/^[a-h][1-8]=?[KQRBN][+#]?$/.test(move)) {
+//     const [file, rank, piece, check] = move as unknown as [File, Rank, Piece, Check?]
+//     const square: Square = `${file}${rank}`
+//     // TODO
+//   }
+
+//   if (/^[a-h]x[a-h][1-8]=?[KQRBN][+#]?$/.test(move)) {
+//     const [from, file, rank, piece, check] = move as unknown as [File, File, Rank, Piece, Check?]
+//     const square: Square = `${file}${rank}`
+//     // TODO
+//   }
+
+//   return Result.err(`Invalid move notation '${move}'`)
+// }
 
 
-export const replay = (moves: Game) =>
-  moves.reduce(
-    (result, move, idx) => result.flatMap(board => applyMove(idx, move, board)),
-    Result.of<Board, string>(startBoard),
-  )
+
+// export const replay = (moves: Game) =>
+//   moves.reduce(
+//     (result, move, idx) => result.flatMap(board => applyMove(idx, move, board)),
+//     Result.of<Board, string>(startBoard),
+//   )
