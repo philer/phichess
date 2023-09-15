@@ -3,21 +3,31 @@ import { useReducer, useState } from "preact/hooks"
 
 import "./global.scss"
 
-import { Board, ColorPiece, executeMove, Game, Move, Square, startBoard } from "./chess"
+import { applyMove, Board, ColorPiece, Game, Move, Square, START_GAME } from "./chess"
 import { Chessboard, Utf8Piece } from "./Chessboard"
 
 import * as classes from "./App.module.scss"
 
 
 const App = () => {
-  const [game, setGame] = useState<Game>([])
+  const [game, setGame] = useState<Game>(START_GAME)
   const [selectedSquare, setSelectedSquare] = useState<Square>()
   const [flipped, setFlipped] = useState(false)
+
+  const handleSquareClick = (square: Square) => {
+    if (selectedSquare) {
+      if (game.board[square]?.[0])
+    } else {
+      if (game.board[square]) {
+        setSelectedSquare(square)
+      }
+    }
+  }
 
   return (
     <div class={classes.root}>
       <div class={classes.game}>
-        <div class={classes.graveyard}>
+        {/*<div class={classes.graveyard}>
           <div>
             {graveyard
               .filter(([color]) => color === "w")
@@ -31,12 +41,12 @@ const App = () => {
               .map((piece, idx) => <Utf8Piece key={idx + piece} piece={piece} />)
             }
           </div>
-        </div>
+        </div>*/}
         <Chessboard
-          board={board}
+          board={game.board}
           flipped={flipped}
           selected={selectedSquare}
-          onClickSquare={setSelectedSquare}
+          onClickSquare={handleSquareClick}
         />
         <div class={classes.tools}>
           <button onClick={() => setFlipped(yes => !yes)}>⇅</button>

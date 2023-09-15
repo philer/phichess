@@ -13,7 +13,14 @@ export type Color = "w" | "b"
 export type Square = `${File}${Rank}`
 export type ColorPiece = `${Color}${""|Piece}`
 
-export type Board = Partial<Record<Square, ColorPiece>>
+export type Board = Readonly<Partial<Record<Square, ColorPiece>>>
+
+export const START_BOARD: Board = Object.freeze({
+  a8: "bR", b8: "bN", c8: "bB", d8: "bQ", e8: "bK", f8: "bB", g8: "bN", h8: "bR",
+  a7: "b", b7: "b", c7: "b", d7: "b", e7: "b", f7: "b", g7: "b", h7: "b",
+  a2: "w", b2: "w", c2: "w", d2: "w", e2: "w", f2: "w", g2: "w", h2: "w",
+  a1: "wR", b1: "wN", c1: "wB", d1: "wQ", e1: "wK", f1: "wB", g1: "wN", h1: "wR",
+})
 
 export type AlgebraicMove
   = `${Square}${Check}`
@@ -47,8 +54,19 @@ export type Game = Readonly<{
     blackLong: boolean
     blackShort: boolean
   }>
-  // enPassant?: Square
 }>
+
+export const START_GAME: Game = Object.freeze({
+  board: START_BOARD,
+  history: [],
+  toMove: "w",
+  canCastle: Object.freeze({
+    whiteLong: true,
+    whiteShort: true,
+    blackLong: true,
+    blackShort: true,
+  }),
+})
 
 
 export const squares: readonly Square[]
@@ -57,13 +75,6 @@ export const squares: readonly Square[]
       rank => `${file}${rank}` as Square,
     ),
   )
-
-export const startBoard: Board = {
-  a8: "bR", b8: "bN", c8: "bB", d8: "bQ", e8: "bK", f8: "bB", g8: "bN", h8: "bR",
-  a7: "b", b7: "b", c7: "b", d7: "b", e7: "b", f7: "b", g7: "b", h7: "b",
-  a2: "w", b2: "w", c2: "w", d2: "w", e2: "w", f2: "w", g2: "w", h2: "w",
-  a1: "wR", b1: "wN", c1: "wB", d1: "wQ", e1: "wK", f1: "wB", g1: "wN", h1: "wR",
-}
 
 
 const shift = (fileDelta: number, rankDelta: number, square: Square): Square | undefined => {
@@ -76,9 +87,36 @@ const shift = (fileDelta: number, rankDelta: number, square: Square): Square | u
   return String.fromCharCode(rank + a) + file as Square
 }
 
-function* range(file: -1|0|1, rank: -1|0|1, square: Square) {
+function* ray(file: -1|0|1, rank: -1|0|1, square: Square) {
   for (let target, i = 1 ; target = shift(i * file, i * rank, square) ; ++i) {
     yield target
+  }
+}
+
+/**
+ * Iterate squares between start and end (excluding both) in a
+ * vertical, horizontal or diagonal line.
+ */
+function* range(from: Square, to: Square) {
+  const fromFile = from.charCodeAt(0)
+  const fromRank = from.charCodeAt(1)
+  const toFile = to.charCodeAt(0)
+  const toRank = to.charCodeAt(1)
+  const fileDelta = toFile - fromFile
+  const rankDelta = toRank - fromRank
+  const delta = Math.abs(fileDelta || rankDelta)
+  const fileStep = Math.sign(fileDelta)
+  const rankStep = Math.sign(rankDelta)
+  for (let i = 1 ; i < delta ; ++i) {
+    yield `${String.fromCharCode(fromFile + fileStep)}${String.fromCharCode(fromRank + rankStep)}` as Square
+  }
+}
+
+function findBlockedSquare(board: Board, from: Square, to: Square) {
+  for (const square of range(from, to)) {
+    if (board[square]) {
+      return square
+    }
   }
 }
 
@@ -111,18 +149,18 @@ const knightSquares = (square: Square): Square[] =>
 
 const bishopPaths = (square: Square): Iterable<Square>[] =>
   [
-    range(+1, +1, square),
-    range(+1, -1, square),
-    range(-1, +1, square),
-    range(-1, -1, square),
+    ray(+1, +1, square),
+    ray(+1, -1, square),
+    ray(-1, +1, square),
+    ray(-1, -1, square),
   ]
 
 const rookPaths = (square: Square): Iterable<Square>[] =>
   [
-    range(+1, 0, square),
-    range(-1, 0, square),
-    range(0, +1, square),
-    range(0, -1, square),
+    ray(+1, 0, square),
+    ray(-1, 0, square),
+    ray(0, +1, square),
+    ray(0, -1, square),
   ]
 
 const queenPaths = (square: Square): Iterable<Square>[] =>
@@ -182,6 +220,7 @@ const PIECE_NAMES = {
   "": "pawn",
 }
 
+
 export const toAlgebraic = ({ from, to }: Move, board: Board): Result<AlgebraicMove, string> => {
   // TODO promotion
   const piece = board[from]
@@ -228,29 +267,28 @@ export const applyMove = (
     canCastle,
   }: Game,
 ): Result<Game, string> => {
-  // const piece = board[move.from]
   if (!piece) {
     return Result.err(`There is no piece on ${from}`)
   }
   if (piece[0] !== toMove) {
     return Result.err(`It is ${toMove === "w" ? "white" : "black"}'s turn.`)
   }
-  // const capture = board[move.to]
+  if (from === to) {
+    return Result.err("Nothing moved.")
+  }
   if (capture && capture[0] === toMove) {
     return Result.err("You can't capture your own piece.")
   }
 
   const opponent = toMove === "w" ? "b" : "w"
-  const pieceName: PieceOrPawn = piece[1] ?? ""
+  const pieceName = (piece[1] ?? "") as PieceOrPawn
 
-  // const blockedSquare =
-  // match(pieceName)
-  // .with("", () =>
+  const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
+  const rankDelta = to.charCodeAt(1) - from.charCodeAt(1)
+
   switch (pieceName) {
     case "": {
       const forwards = toMove === "w" ? 1 : -1
-      const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
-      const rankDelta = to.charCodeAt(1) - from.charCodeAt(1)
       if (fileDelta === 0) {
         if (rankDelta !== forwards) {
           if (rankDelta === 2 * forwards) {
@@ -267,6 +305,9 @@ export const applyMove = (
           return Result.err("Pawns can only capture diagonally.")
         }
       } else if (fileDelta === 1 || fileDelta === -1) {
+        if (rankDelta !== forwards) {
+          return Result.err("Pawns can only move forwards by one or two squares.")
+        }
         if (!capture) {
           const enPassantSquare = shift(fileDelta, 0, from) as Square
           capture = board[enPassantSquare]
@@ -283,22 +324,47 @@ export const applyMove = (
           // @ts-ignore remainingBoard isn't empty
           delete remainingBoard[enPassantSquare]
         }
+      } else {
+        return Result.err("Pawns can't move like that.")
+      }
+      if (to[1] === "1" || to[1] === "8") {
+        if (!promotion) {
+          return Result.err("Promotion required")
+        }
+        piece = promotion
       }
       break
     }
-    case "Q": {
-      break
-    }
-    case "R": {
-      break
-    }
-    case "B": {
+    case "K": {
+      if (Math.abs(rankDelta) > 1 || Math.abs(fileDelta) > 1) {
+        return Result.err("The king can only move by on square.")
+      }
       break
     }
     case "N": {
+      const dr = Math.abs(rankDelta)
+      const df = Math.abs(fileDelta)
+      if (!(df === 1 && dr === 2 || df === 2 && dr === 1)) {
+        return Result.err("Knights must move by 2/1 or 1/2.")
+      }
       break
     }
-    case "K": {
+    case "B":
+    case "R":
+    case "Q": {
+      const isRookMove = rankDelta === 0 || fileDelta === 0
+      const isBishopMove = Math.abs(rankDelta) === Math.abs(fileDelta)
+      if (!(
+        pieceName === "B" && isBishopMove
+        || pieceName === "R" && isRookMove
+        || pieceName === "Q" && (isBishopMove || isRookMove)
+      )) {
+        return Result.err(`${PIECE_NAMES[pieceName]}s can only move in a straight line.`)
+      }
+
+      if (findBlockedSquare(board, from, to)) {
+        return Result.err(`There is a piece in the way.`)
+      }
       break
     }
   }
@@ -422,5 +488,5 @@ export const applyMove = (
 // export const replay = (moves: Game) =>
 //   moves.reduce(
 //     (result, move, idx) => result.flatMap(board => applyMove(idx, move, board)),
-//     Result.of<Board, string>(startBoard),
+//     Result.of<Board, string>(START_BOARD),
 //   )
