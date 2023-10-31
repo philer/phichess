@@ -31,8 +31,8 @@ export const Chessboard = ({
 }: ChessboardProps) =>
   <div class={clsx(classes.root, flipped && classes.flipped)}>
     {squares
-      .map(square => [square, board[square]] as const)
-      .map(([square, piece], idx) =>
+      .map(square => ({ square, piece: board[square] } as const))
+      .map(({ square, piece }, idx) =>
         <div
           key={`${square}${piece || ""}`}
           class={clsx(

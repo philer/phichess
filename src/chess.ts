@@ -35,15 +35,18 @@ export type AlgebraicMove
   | `${File}${1|8}${""|"="}${Piece}${Check}`
   | `${File}x${File}${1|8}${""|"="}${Piece}${Check}`
 
-export type Move = {
-  // algebraic: string
-  // piece: ColorPiece
+/** Data provided by a user that is intended to be applied to a specific game state */
+export type MoveInput = {
   from: Square
   to: Square
-  // capture?: ColorPiece
-  promotion?: ColorPiece
-  // check: bool
+  promotion?: Piece
+}
+/** Validated move details deduced from a specific game state */
+export type Move = MoveInput & {
   algebraic?: AlgebraicMove
+  // piece: ColorPiece
+  // capture?: ColorPiece
+  // check: bool
 }
 
 export type Game = Readonly<{
@@ -224,7 +227,8 @@ const PIECE_NAMES = {
   "": "pawn",
 }
 
-export const toAlgebraic = ({ from, to }: Move, board: Board): Result<AlgebraicMove, string> => {
+/** Generate algebraic notation for a legal move. */
+export const toAlgebraic = ({ from, to, promotion }: MoveInput, board: Board): Result<AlgebraicMove, string> => {
   // TODO promotion
   const piece = board[from]
   if (!piece) {
@@ -233,7 +237,10 @@ export const toAlgebraic = ({ from, to }: Move, board: Board): Result<AlgebraicM
   const color = piece[0] as Color
   const pieceName = piece.slice(1) as Piece | ""
   const opponentPiece = board[to]
+    // en passant
+    ?? (pieceName === "" && from[0] !== to[0] ? to[1] + from[0] : undefined)
   let takes: "" | "x" = ""
+  const promoted = promotion ? `=${promotion}` : ""
   if (opponentPiece) {
     if (opponentPiece[0] === color) {
       return Result.err(`Can't take your own piece on ${to}`)
@@ -255,20 +262,30 @@ export const toAlgebraic = ({ from, to }: Move, board: Board): Result<AlgebraicM
     return Result.err(`You have no ${PIECE_NAMES[pieceName]} on ${from}`)
   }
   if (candidates.length === 1 && !(pieceName === "" && takes)) {
-    return Result.of(`${pieceName}${takes}${to}` as AlgebraicMove)
+    return Result.of(`${pieceName}${takes}${to}${promoted}` as AlgebraicMove)
   }
   if (candidates.filter(candidate => candidate[0] === from[0]).length === 1) {
-    return Result.of(`${pieceName}${from[0]}${takes}${to}` as AlgebraicMove)
+    return Result.of(`${pieceName}${from[0]}${takes}${to}${promoted}` as AlgebraicMove)
   }
   if (candidates.filter(candidate => candidate[1] === from[1]).length === 1) {
-    return Result.of(`${pieceName}${from[1]}${takes}${to}` as AlgebraicMove)
+    return Result.of(`${pieceName}${from[1]}${takes}${to}${promoted}` as AlgebraicMove)
   }
-  return Result.of(`${pieceName}${from}${takes}${to}` as AlgebraicMove)
+  return Result.of(`${pieceName}${from}${takes}${to}${promoted}` as AlgebraicMove)
 }
 
+/**
+ * Does the given move require specifying a promoted piece,
+ * i.e. does a pawn reach the end of the board from its player's perspective?
+ * */
+export const requiresPromotion = ({ from, to }: MoveInput, board: Board) =>
+  board[from]?.length === 1 && to[1] === (board[from] === "w" ? "8": "1")
 
+/**
+ * Validate a move given as user input against the current game state and
+ * return an updated game state if the move is legal.
+ */
 export const applyMove = (
-  { from, to, promotion }: Move,
+  { from, to, promotion }: MoveInput,
   {
     board,
     board: { [from]: piece, [to]: capture, ...remainingBoard },
@@ -278,7 +295,6 @@ export const applyMove = (
     graveyard,
   }: Game,
 ): Result<Game, string> => {
-  console.log("apply", board[from], from, board[to], to)
   if (!piece) {
     return Result.err(`There is no piece on ${from}`)
   }
@@ -310,7 +326,6 @@ export const applyMove = (
             return Result.err("Pawns can only move by two ranks on their first move.")
           }
           if (board[shift(0, forwards, from) as Square]) {
-            console.log(board[shift(0, forwards, from) as Square], shift(0, forwards, from))
             return Result.err("There is a piece in the way.")
           }
         }
@@ -344,7 +359,10 @@ export const applyMove = (
         if (!promotion) {
           return Result.err("Promotion required")
         }
-        piece = promotion
+        if (!"QNRB".includes(promotion)) {
+          return Result.err(`Cannot promote to '${promotion}'`)
+        }
+        piece = `${toMove}${promotion}`
       }
       break
     }

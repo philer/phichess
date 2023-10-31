@@ -3,7 +3,7 @@ import { useMemo, useState } from "preact/hooks"
 
 import "./global.scss"
 
-import { applyMove, type Game, type Square, START_GAME } from "./chess"
+import { applyMove, type Game, MoveInput, requiresPromotion, type Square, START_GAME } from "./chess"
 import { Chessboard, Utf8Piece } from "./Chessboard"
 import { pairs } from "./util"
 
@@ -22,10 +22,11 @@ const App = () => {
     if (board[square]?.[0] === toMove) {
       setSelectedSquare(square)
     } else if (selectedSquare && board[square]?.[0] !== toMove) {
+      const input: MoveInput = { from: selectedSquare, to: square }
+
       applyMove({
-        from: selectedSquare,
-        to: square,
-        // promotion:
+        ...input,
+        promotion: requiresPromotion(input, board) ? "Q" : undefined,  // TODO
       }, game)
         .map(setGame)
         .map(() => setSelectedSquare(undefined))
