@@ -41,6 +41,21 @@
       &.white { background-color: #ada }
       &.black { background-color: #575 }
     }
+    .file, .rank {
+      position: absolute;
+      font-size: .1em;
+      line-height: 1.5em;
+      height: 1.5em;
+      font-family: sans-serif;
+      font-weight: bold;
+    }
+    .rank {
+      inset: .5em auto auto .5em;
+
+    }
+    .file {
+      inset: auto .5em .5em auto;
+    }
   }
 
   &.flipped {

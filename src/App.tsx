@@ -55,7 +55,7 @@ const App = () => {
           board={board}
           flipped={flipped}
           selected={selectedSquare}
-          onClickSquare={handleSquareClick}
+          onSquareClick={handleSquareClick}
         />
         <div class={classes.tools}>
           <button onClick={() => setFlipped(yes => !yes)}>⇅</button>

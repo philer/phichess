@@ -1,4 +1,4 @@
-import { h } from "preact"
+import { Fragment, h } from "preact"
 
 import { Board, ColorPiece, Piece, Square, squares } from "./chess"
 import { clsx } from "./util"
@@ -16,12 +16,19 @@ const PIECE_TO_UTF8 = {
 
 export type ChessboardProps = {
   board: Board
-  flipped: boolean
+  flipped?: boolean
+  showCoordinates?: boolean
   selected?: Square
-  onClickSquare?: (square: Square) => void
+  onSquareClick?: (square: Square) => void
 }
 
-export const Chessboard = ({ board, flipped, selected, onClickSquare }: ChessboardProps) =>
+export const Chessboard = ({
+  board,
+  flipped = false,
+  showCoordinates = true,
+  selected,
+  onSquareClick,
+}: ChessboardProps) =>
   <div class={clsx(classes.root, flipped && classes.flipped)}>
     {squares
       .map(square => [square, board[square]] as const)
@@ -33,8 +40,18 @@ export const Chessboard = ({ board, flipped, selected, onClickSquare }: Chessboa
             (idx + ~~(idx / 8)) % 2 ? classes.white : classes.black,
             selected === square && classes.selected,
           )}
-          onClick={() => onClickSquare?.(square)}
+          onClick={() => onSquareClick?.(square)}
         >
+          {showCoordinates && (
+            <>
+              {square[1] === (flipped ? "8" : "1") && (
+                <div class={classes.file}>{square[0]}</div>
+              )}
+              {square[0] === (flipped ? "h" : "a") && (
+                <div class={classes.rank}>{square[1]}</div>
+              )}
+            </>
+          )}
           {piece && PIECE_TO_UTF8[piece.slice(1) as Piece]}
         </div>,
       )}
