@@ -79,12 +79,12 @@ export const squares: readonly Square[]
 
 const shift = (fileDelta: number, rankDelta: number, square: Square): Square | undefined => {
   const a = 97  // char code for 'a'
-  const file = +square[1] + fileDelta
-  const rank = square.charCodeAt(0) - a + rankDelta
+  const file = square.charCodeAt(0) - a + fileDelta
+  const rank = +square[1] + rankDelta
   if (0 > rank || rank > 7 || 0 > file || file > 7) {
     return undefined
   }
-  return String.fromCharCode(rank + a) + file as Square
+  return String.fromCharCode(file + a) + rank as Square
 }
 
 function* ray(file: -1|0|1, rank: -1|0|1, square: Square) {
@@ -267,6 +267,7 @@ export const applyMove = (
     canCastle,
   }: Game,
 ): Result<Game, string> => {
+  console.log("apply", board[from], from, board[to], to)
   if (!piece) {
     return Result.err(`There is no piece on ${from}`)
   }
@@ -291,15 +292,16 @@ export const applyMove = (
       const forwards = toMove === "w" ? 1 : -1
       if (fileDelta === 0) {
         if (rankDelta !== forwards) {
-          if (rankDelta === 2 * forwards) {
-            if (from[0] !== (toMove === "w" ? "2" : "7")) {
-              return Result.err("Pawns can only move by two ranks on their first move.")
-            }
-            if (board[shift(0, forwards, from) as Square]) {
-              return Result.err("There is a piece in the way.")
-            }
+          if (rankDelta !== 2 * forwards) {
+            return Result.err("Pawns can only move forwards by one or two squares.")
           }
-          return Result.err("Pawns can only move forwards by one or two squares.")
+          if (from[1] !== (toMove === "w" ? "2" : "7")) {
+            return Result.err("Pawns can only move by two ranks on their first move.")
+          }
+          if (board[shift(0, forwards, from) as Square]) {
+            console.log(board[shift(0, forwards, from) as Square], shift(0, forwards, from))
+            return Result.err("There is a piece in the way.")
+          }
         }
         if (capture) {
           return Result.err("Pawns can only capture diagonally.")
