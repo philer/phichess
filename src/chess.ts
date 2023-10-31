@@ -127,11 +127,10 @@ function findBlockedSquare(board: Board, from: Square, to: Square) {
   }
 }
 
-const findOnPath = (pieces: ColorPiece[], path: Iterable<Square>, board: Board) => {
+const findOnPath = (piece: ColorPiece, path: Iterable<Square>, board: Board) => {
   for (const square of path) {
-    const piece = board[square]
-    if (piece) {
-      return pieces.includes(piece) ? square : undefined
+    if (board[square]) {
+      return board[square] === piece ? square : undefined
     }
   }
 }
@@ -188,13 +187,14 @@ const kingSquares = (square: Square): Square[] =>
 
 export const isInCheck = (color: Color, board: Board) => {
   const opponent = color === "w" ? "b" : "w"
-  const [king] = Object.entries(board)
+  const [kingSquare] = Object.entries(board)
     .find(([, piece]) => piece === `${color}K`) as unknown as [Square, Piece]
-  return pawnCaptureSquares(color, king).some(square => board[square] === opponent)
-      || knightSquares(king).some(square => board[square] === `${opponent}N`)
-      || bishopPaths(king).some(path => findOnPath([`${opponent}B`, `${opponent}Q`], path, board))
-      || rookPaths(king).some(path => findOnPath([`${opponent}R`, `${opponent}Q`], path, board))
-      || kingSquares(king).some(square => board[square] === `${opponent}K`)
+  return pawnCaptureSquares(opponent, kingSquare).some(square => board[square] === opponent)
+      || knightSquares(kingSquare).some(square => board[square] === `${opponent}N`)
+      || bishopPaths(kingSquare).some(path => findOnPath(`${opponent}B`, path, board))
+      || rookPaths(kingSquare).some(path => findOnPath(`${opponent}R`, path, board))
+      || queenPaths(kingSquare).some(path => findOnPath(`${opponent}Q`, path, board))
+      || kingSquares(kingSquare).some(square => board[square] === `${opponent}K`)
 }
 
 
@@ -250,9 +250,9 @@ export const toAlgebraic = ({ from, to, promotion }: MoveInput, board: Board): R
   const candidates = match(pieceName)
     .with("", () => takes ? pawnCaptureSquares(color, to) : [from])
     .with("N", () => knightSquares(to))
-    .with("B", () => bishopPaths(to).map(path => findOnPath([piece], path, board)))
-    .with("R", () => rookPaths(to).map(path => findOnPath([piece], path, board)))
-    .with("Q", () => queenPaths(to).map(path => findOnPath([piece], path, board)))
+    .with("B", () => bishopPaths(to).map(path => findOnPath(piece, path, board)))
+    .with("R", () => rookPaths(to).map(path => findOnPath(piece, path, board)))
+    .with("Q", () => queenPaths(to).map(path => findOnPath(piece, path, board)))
     .with("K", () => kingSquares(to))
     .exhaustive()
     .filter(isTruthy)
@@ -399,9 +399,13 @@ export const applyMove = (
       break
     }
   }
+  const newBoard = { ...remainingBoard, [to]: piece }
+  if (isInCheck(toMove, newBoard)) {
+    return Result.err("You are in check.")
+  }
   return toAlgebraic({ from, to, promotion }, board)
     .map(algebraic => ({
-      board: { ...remainingBoard, [to]: piece },
+      board: newBoard,
       toMove: toMove === "w" ? "b": "w",
       history: [...history, { from, to, promotion, algebraic }],
       canCastle,
