@@ -35,3 +35,18 @@
     text-shadow: 0 0 3px #fffc
   }
 }
+
+.history {
+  display: grid;
+  grid-template-columns: min-content 1fr 1fr;
+  gap: .5em 1em;
+  li {
+    display: contents;
+  }
+  span {
+    text-align: left;
+  }
+  .moveNumber {
+    text-align: right;
+  }
+}

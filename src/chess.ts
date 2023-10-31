@@ -1,6 +1,7 @@
 import { match } from "ts-pattern"
 
 import { Result } from "./result"
+import { isTruthy } from "./util"
 
 
 export type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"
@@ -42,6 +43,7 @@ export type Move = {
   // capture?: ColorPiece
   promotion?: ColorPiece
   // check: bool
+  algebraic?: AlgebraicMove
 }
 
 export type Game = Readonly<{
@@ -81,7 +83,7 @@ const shift = (fileDelta: number, rankDelta: number, square: Square): Square | u
   const a = 97  // char code for 'a'
   const file = square.charCodeAt(0) - a + fileDelta
   const rank = +square[1] + rankDelta
-  if (0 > rank || rank > 7 || 0 > file || file > 7) {
+  if (1 > rank || rank > 8 || 0 > file || file > 7) {
     return undefined
   }
   return String.fromCharCode(file + a) + rank as Square
@@ -220,7 +222,6 @@ const PIECE_NAMES = {
   "": "pawn",
 }
 
-
 export const toAlgebraic = ({ from, to }: Move, board: Board): Result<AlgebraicMove, string> => {
   // TODO promotion
   const piece = board[from]
@@ -228,7 +229,7 @@ export const toAlgebraic = ({ from, to }: Move, board: Board): Result<AlgebraicM
     return Result.err(`There is no piece on ${from}`)
   }
   const color = piece[0] as Color
-  const pieceName = piece.slice(1) as Piece|""
+  const pieceName = piece.slice(1) as Piece | ""
   const opponentPiece = board[to]
   let takes: "" | "x" = ""
   if (opponentPiece) {
@@ -238,22 +239,29 @@ export const toAlgebraic = ({ from, to }: Move, board: Board): Result<AlgebraicM
     takes = "x"
   }
   const candidates = match(pieceName)
-    .with("", () => pawnCaptureSquares(color, to))
+    .with("", () => takes ? pawnCaptureSquares(color, to) : [from])
     .with("N", () => knightSquares(to))
     .with("B", () => bishopPaths(to).map(path => findOnPath([piece], path, board)))
     .with("R", () => rookPaths(to).map(path => findOnPath([piece], path, board)))
     .with("Q", () => queenPaths(to).map(path => findOnPath([piece], path, board)))
     .with("K", () => kingSquares(to))
     .exhaustive()
-    .filter(sqr => sqr && board[sqr] === piece) as Square[]
+    .filter(isTruthy)
+    .filter(sqr => board[sqr] === piece)
 
   if (candidates.length === 0) {
     return Result.err(`You have no ${PIECE_NAMES[pieceName]} on ${from}`)
   }
-  if (candidates.length > 1) {
-
+  if (candidates.length === 1 && !(pieceName === "" && takes)) {
+    return Result.of(`${pieceName}${takes}${to}` as AlgebraicMove)
   }
-  return Result.of(`${pieceName}${from}${takes}${to}`)
+  if (candidates.filter(candidate => candidate[0] === from[0]).length === 1) {
+    return Result.of(`${pieceName}${from[0]}${takes}${to}` as AlgebraicMove)
+  }
+  if (candidates.filter(candidate => candidate[1] === from[1]).length === 1) {
+    return Result.of(`${pieceName}${from[1]}${takes}${to}` as AlgebraicMove)
+  }
+  return Result.of(`${pieceName}${from}${takes}${to}` as AlgebraicMove)
 }
 
 
@@ -370,13 +378,13 @@ export const applyMove = (
       break
     }
   }
-
-  return Result.of({
-    board: { ...remainingBoard, [to]: piece },
-    toMove: toMove === "w" ? "b": "w",
-    history: [...history, { from, to, promotion }],
-    canCastle,
-  })
+  return toAlgebraic({ from, to, promotion }, board)
+    .map(algebraic => ({
+      board: { ...remainingBoard, [to]: piece },
+      toMove: toMove === "w" ? "b": "w",
+      history: [...history, { from, to, promotion, algebraic }],
+      canCastle,
+    }))
 }
 
 // export const executeMove = ({ from, to }: Move, { [from]: piece, ...board }: Board): Board =>
