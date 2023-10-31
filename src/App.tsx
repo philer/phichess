@@ -11,16 +11,21 @@ import * as classes from "./App.module.scss"
 
 const App = () => {
   const [game, setGame] = useState<Game>(START_GAME)
-  const [selectedSquare, setSelectedSquare] = useState<Square>()
+  const [selectedSquare, setSelectedSquare] = useState<Square | undefined>(undefined)
   const [flipped, setFlipped] = useState(false)
 
   const handleSquareClick = (square: Square) => {
-    if (selectedSquare) {
-      if (game.board[square]?.[0])
-    } else {
-      if (game.board[square]) {
-        setSelectedSquare(square)
-      }
+    if (game.board[square]?.[0] === game.toMove) {
+      setSelectedSquare(square)
+    } else if (selectedSquare && game.board[square]?.[0] !== game.toMove) {
+      applyMove({
+        from: selectedSquare,
+        to: square,
+        // promotion:
+      }, game)
+        .map(setGame)
+        .map(() => setSelectedSquare(undefined))
+        .mapError(console.log)
     }
   }
 
