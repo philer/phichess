@@ -12,15 +12,16 @@ import * as classes from "./App.module.scss"
 
 const App = () => {
   const [game, setGame] = useState<Game>(START_GAME)
+  const { board, toMove, history, graveyard } = game
   const [selectedSquare, setSelectedSquare] = useState<Square | undefined>(undefined)
   const [flipped, setFlipped] = useState(false)
 
-  const movePairs = useMemo(() => Array.from(pairs(game.history)), [game.history])
+  const movePairs = useMemo(() => Array.from(pairs(history)), [history])
 
   const handleSquareClick = (square: Square) => {
-    if (game.board[square]?.[0] === game.toMove) {
+    if (board[square]?.[0] === toMove) {
       setSelectedSquare(square)
-    } else if (selectedSquare && game.board[square]?.[0] !== game.toMove) {
+    } else if (selectedSquare && board[square]?.[0] !== toMove) {
       applyMove({
         from: selectedSquare,
         to: square,
@@ -35,7 +36,7 @@ const App = () => {
   return (
     <div class={classes.root}>
       <div class={classes.game}>
-        {/*<div class={classes.graveyard}>
+        <div class={classes.graveyard}>
           <div>
             {graveyard
               .filter(([color]) => color === "w")
@@ -49,9 +50,9 @@ const App = () => {
               .map((piece, idx) => <Utf8Piece key={idx + piece} piece={piece} />)
             }
           </div>
-        </div>*/}
+        </div>
         <Chessboard
-          board={game.board}
+          board={board}
           flipped={flipped}
           selected={selectedSquare}
           onClickSquare={handleSquareClick}

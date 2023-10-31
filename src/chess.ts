@@ -48,7 +48,6 @@ export type Move = {
 
 export type Game = Readonly<{
   board: Board
-  history: Move[]
   toMove: Color
   canCastle: Readonly<{
     whiteLong: boolean
@@ -56,11 +55,12 @@ export type Game = Readonly<{
     blackLong: boolean
     blackShort: boolean
   }>
+  history: ReadonlyArray<Move>
+  graveyard: ReadonlyArray<ColorPiece>
 }>
 
 export const START_GAME: Game = Object.freeze({
   board: START_BOARD,
-  history: [],
   toMove: "w",
   canCastle: Object.freeze({
     whiteLong: true,
@@ -68,6 +68,8 @@ export const START_GAME: Game = Object.freeze({
     blackLong: true,
     blackShort: true,
   }),
+  history: Object.freeze([]),
+  graveyard: Object.freeze([]),
 })
 
 
@@ -273,6 +275,7 @@ export const applyMove = (
     toMove,
     history,
     canCastle,
+    graveyard,
   }: Game,
 ): Result<Game, string> => {
   console.log("apply", board[from], from, board[to], to)
@@ -384,6 +387,7 @@ export const applyMove = (
       toMove: toMove === "w" ? "b": "w",
       history: [...history, { from, to, promotion, algebraic }],
       canCastle,
+      graveyard: capture ? [...graveyard, capture] : graveyard,
     }))
 }
 
