@@ -1,26 +1,20 @@
 {
+  "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "esModuleInterop": false,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment",
-    "lib": ["es2021", "dom"],
-    "moduleResolution": "node",
-    "noImplicitAny": true,
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
     "resolveJsonModule": true,
-    "strict": true,
-    "strictPropertyInitialization": false,
-    "target": "es2021",
-    "plugins": [{
-      "name": "typescript-plugin-css-modules",
-      "options": {"customMatcher": ".(css|scss)$"},
-    }],
-    "typeRoots": [
-      "node_modules/@types",
-      "src/**/*.d.ts"
-    ]
+    /**
+     * Typecheck JS in `.svelte` and `.js` files by default.
+     * Disable checkJs if you'd like to use dynamic types in JS.
+     * Note that setting allowJs false does not prevent the use
+     * of JS in `.svelte` files.
+     */
+    "allowJs": true,
+    "checkJs": true,
+    "isolatedModules": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

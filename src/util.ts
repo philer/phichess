@@ -8,6 +8,19 @@ export const isTruthy = <T>(x: T | false | null | undefined | 0 | ""): x is T =>
 
 const sentinel = Symbol("UNSET")
 
+export function partition<T>(predicate: ((x: T) => boolean), xs: Iterable<T>): [T[], T[]] {
+  const left: T[] = []
+  const right: T[] = []
+  for (const x of xs) {
+    if (predicate(x)) {
+      left.push(x)
+    } else {
+      right.push(x)
+    }
+  }
+  return [left, right]
+}
+
 export function* pairs<T>(xs: Iterable<T>): Iterable<[T, T] | [T]> {
   let left: T | typeof sentinel = sentinel
   for (const x of xs) {
