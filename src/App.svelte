@@ -54,7 +54,8 @@
   }
 
   .graveyard,
-  .tools {
+  .tools,
+  .graveyard > div {
     padding: 0 0.5rem;
     width: 2em;
     display: flex;
