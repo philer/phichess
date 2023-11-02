@@ -77,9 +77,9 @@ export const START_GAME: Game = Object.freeze({
 
 
 export const squares: readonly Square[]
-  = Array.from("abcdefgh").flatMap(
-    file => Array.from("12345678",
-      rank => `${file}${rank}` as Square,
+  = Array.from("12345678").flatMap(
+    rank => Array.from("abcdefgh",
+      file => `${file}${rank}` as Square,
     ),
   )
 

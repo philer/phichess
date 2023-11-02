@@ -21,40 +21,74 @@
   export let flipped: boolean = false
   export let showCoordinates: boolean = true
 
+  let selectedSquare: Square | undefined = undefined
+  let draggingFromSquare: Square | undefined = undefined
+  let dragTargetSquare: Square | undefined = undefined
+  let cursorPosition: { x: number, y: number } = { x: -1, y: -1 }
+
   $: ({ board, toMove } = game)
 
-  let selected: Square | undefined = undefined
-
-  const handleSquareClick = (square: Square) => {
-    if (board[square]?.[0] === toMove) {
-      selected = square
-    } else if (selected) {
-      const input: MoveInput = { from: selected, to: square }
-      if (requiresPromotion(input, board)) {
+  const makeMove = (from: Square, to: Square) => {
+    const input: MoveInput = { from, to }
+    if (requiresPromotion(input, board)) {
         input.promotion = "Q"
       }
       applyMove(input, game)
         .map(updatedGame => {
           game = updatedGame
-          selected = undefined
+          selectedSquare = undefined
+          draggingFromSquare = undefined
         })
-        .mapError(err => console.info)
+        .mapError(console.info)
+  }
+
+  const handleSquareClick = (square: Square) => {
+    if (board[square]?.[0] === toMove) {
+      selectedSquare = square
+    } else if (selectedSquare) {
+      makeMove(selectedSquare, square)
     }
   }
 
-  const handlePieceClick = (square: Square) => {}
+  const handleSquareMousedown = (evt: MouseEvent, square: Square) => {
+    if (board[square]?.[0] === toMove) {
+      // update position first to prevent flicker
+      cursorPosition = { x: evt.clientX, y: evt.clientY }
+      draggingFromSquare = square
+    }
+  }
+
+  const handleSquareMouseup = (square: Square) => {
+    if (!draggingFromSquare) {
+      return
+    }
+    makeMove(draggingFromSquare, square)
+  }
+
+  const handleMousemove = (evt: MouseEvent) => {
+    requestAnimationFrame(() => cursorPosition = { x: evt.clientX, y: evt.clientY })
+  }
+
+  const handleMouseup = (square: Square) => {
+    draggingFromSquare = undefined
+  }
+
 </script>
 
+<svelte:document on:mousemove={draggingFromSquare && handleMousemove} on:mouseup={draggingFromSquare && handleMouseup} />
+
 <div class="root" class:flipped>
-  {#each squares as square, idx (`${square}${board[square] || ""}`)}
+  {#each flipped ? squares : squares.toReversed() as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
     {@const white = (idx + ~~(idx / 8)) % 2 > 0}
     <div
       class={clsx(piece && piece[0])}
       class:white={white}
       class:black={!white}
-      class:selected={selected === square}
+      class:selected={selectedSquare === square}
       on:click={() => handleSquareClick(square)}
+      on:mousedown={evt => handleSquareMousedown(evt, square)}
+      on:mouseup={() => handleSquareMouseup(square)}
     >
       {#if showCoordinates}
         {#if square[1] === (flipped ? "8" : "1")}
@@ -65,7 +99,12 @@
         {/if}
       {/if}
       {#if piece}
-        <div on:click={() => handlePieceClick(square)}>
+        <div
+          class:piece
+          style:position={draggingFromSquare === square ? "fixed" : "static"}
+          style:top={draggingFromSquare === square ? `calc(${cursorPosition.y}px - .5em)` : "0"}
+          style:left={draggingFromSquare === square ? `calc(${cursorPosition.x}px - .5em)` : "0"}
+        >
           {PIECE_TO_UTF8[piece.slice(1)]}
         </div>
       {/if}
@@ -83,9 +122,10 @@
     display: grid;
     grid-template-rows: repeat(8, 1fr);
     grid-template-columns: repeat(8, 1fr);
+    direction: rtl;  // reverse columns for squares ordered A1, B1, C1, ..., H8
 
-    transform: rotate(-90deg);
-    transition: 0.67s transform;
+    // transform: rotate(-90deg);
+    // transition: 0.67s transform;
 
     font-family: "Linux Libertine";
     user-select: none;
@@ -99,10 +139,10 @@
       justify-content: center;
       align-items: center;
 
-      overflow: hidden;
+      overflow: visible;
 
-      transform: rotate(90deg);
-      transition: 0.67s transform;
+      // transform: rotate(90deg);
+      // transition: 0.67s transform;
 
       font-size: var(--square-size);
       line-height: var(--square-size);
@@ -143,13 +183,20 @@
       .file {
         inset: auto 0.5em 0.5em auto;
       }
-    }
-
-    &.flipped {
-      transform: rotate(90deg);
-      > div {
-        transform: rotate(-90deg);
+      .piece {
+        width: 1em;
+        height: 1em;
+        z-index: 100;
+        position: static;
+        pointer-events: none;
       }
     }
+
+    // &.flipped {
+    //   transform: rotate(90deg);
+    //   > div {
+    //     transform: rotate(-90deg);
+    //   }
+    // }
   }
 </style>
