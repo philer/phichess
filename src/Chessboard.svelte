@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Utf8Piece from "./Utf8Piece.svelte";
+  import PieceIcon from "./PieceIcon.svelte";
 import {
     applyMove, type Game,
     type MoveInput,
@@ -101,7 +101,7 @@ import {
           style:top={draggingFromSquare === square ? `calc(${cursorPosition.y}px - .5em)` : "0"}
           style:left={draggingFromSquare === square ? `calc(${cursorPosition.x}px - .5em)` : "0"}
         >
-          <Utf8Piece {piece} />
+          <PieceIcon {piece} />
         </div>
       {/if}
     </div>
@@ -151,22 +151,22 @@ import {
     font-size: var(--square-size);
     line-height: var(--square-size);
 
-    text-shadow: 1px 1px 5px #000c;
+    // text-shadow: 1px 1px 5px #000c;
     &.hasPiece {
       cursor: pointer;
     }
     &.white {
-      background-color: #99dddd;
+      background: var(--theme-white-square-background);
     }
     &.black {
-      background-color: #226666;
+      background: var(--theme-black-square-background);
     }
     &.selected {
       &.white {
-        background-color: #dda;
+        background: var(--theme-selected-white-square-background);
       }
       &.black {
-        background-color: #885;
+        background: var(--theme-selected-black-square-background);
       }
     }
     .file,
@@ -190,6 +190,9 @@ import {
     width: 1em;
     height: 1em;
     pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     &.dragging {
       z-index: 100;
       position: fixed;

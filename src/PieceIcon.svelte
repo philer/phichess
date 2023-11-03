@@ -1,7 +1,10 @@
 <script context="module" lang="ts">
-  import type { ColorPiece, Piece } from "./chess"
+    import { getContext } from "svelte"
 
-  const PIECE_TO_UTF8 = {
+  import type { ColorPiece } from "./chess"
+  import type { Theme } from "./theme"
+
+  const PIECE_TO_UTF8: Record<string, string> = {
     "K": "♚", //"♔",
     "Q": "♛", //"♕",
     "R": "♜", //"♖",
@@ -13,14 +16,17 @@
 
 <script lang="ts">
   export let piece: ColorPiece
-
-  $: utf8 = PIECE_TO_UTF8[piece.slice(1) as Piece]
+  const theme = getContext<Theme>("theme")
 </script>
 
-<span class={`piece ${piece[0]}`}>{utf8}</span>
+{#if theme.pieces.type === "font"}
+  <span class={`fontPiece ${piece[0]}`}>{PIECE_TO_UTF8[piece.slice(1)]}</span>
+{:else}
+  <img src={`/pieces/${theme.pieces.name}/${piece}.svg`} alt={piece} />
+{/if}
 
 <style lang="scss">
-  .piece {
+  .fontPiece {
     font-family: "Linux Libertine";
 
     &:global(.w) {
@@ -28,9 +34,12 @@
       -webkit-text-stroke: .012em black;
     }
     &:global(.b) {
-      // color: black;
       color: #022;
         -webkit-text-stroke: .012em #acc;
     }
+  }
+
+  img {
+    height: 90%
   }
 </style>
