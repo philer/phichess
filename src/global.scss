@@ -16,7 +16,8 @@ html, body {
   overflow: hidden;
   margin: 0;
   padding: 0;
-  background: #222226;
+  background: #223344;
+  background: linear-gradient(0deg, rgba(1,33,61,1) 0%, rgba(0,86,103,1) 100%);
   color: #ddd;
   font-family: "Source Sans Pro", Helvetica, sans-serif;
   font-size: 16pt;
@@ -37,9 +38,6 @@ button, input {
 button {
   cursor: pointer;
 }
-
-.w { color: white }
-.b { color: black }
 
 #app {
   width: 100%;

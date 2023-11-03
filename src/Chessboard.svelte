@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {
+  import Utf8Piece from "./Utf8Piece.svelte";
+import {
     applyMove, type Game,
     type MoveInput,
     requiresPromotion,
@@ -105,7 +106,7 @@
           style:top={draggingFromSquare === square ? `calc(${cursorPosition.y}px - .5em)` : "0"}
           style:left={draggingFromSquare === square ? `calc(${cursorPosition.x}px - .5em)` : "0"}
         >
-          {PIECE_TO_UTF8[piece.slice(1)]}
+          <Utf8Piece {piece} />
         </div>
       {/if}
     </div>
@@ -154,18 +155,18 @@
         cursor: pointer;
       }
       &.white {
-        background-color: #bbbfc0;
+        background-color: #99dddd;
       }
       &.black {
-        background-color: #555960;
+        background-color: #226666;
       }
 
       &.selected {
         &.white {
-          background-color: #ada;
+          background-color: #dda;
         }
         &.black {
-          background-color: #575;
+          background-color: #885;
         }
       }
       .file,
