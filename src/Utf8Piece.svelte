@@ -17,9 +17,7 @@
   $: utf8 = PIECE_TO_UTF8[piece.slice(1) as Piece]
 </script>
 
-<span class={"piece " + piece[0]}>
-  {utf8}
-</span>
+<span class={`piece ${piece[0]}`}>{utf8}</span>
 
 <style lang="scss">
   .piece {

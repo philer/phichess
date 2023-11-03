@@ -6,25 +6,13 @@ import {
     requiresPromotion,
     type Square,
     squares } from "./chess"
-  import { clsx } from "./util"
-
-  const PIECE_TO_UTF8: Record<string, string> = {
-    "K": "♚", //"♔",
-    "Q": "♛", //"♕",
-    "R": "♜", //"♖",
-    "B": "♝", //"♗",
-    "N": "♞", //"♘",
-    "": "♟", //"♙",
-  }
 
   export let game: Game
-
   export let flipped: boolean = false
   export let showCoordinates: boolean = true
 
   let selectedSquare: Square | undefined = undefined
   let draggingFromSquare: Square | undefined = undefined
-  let dragTargetSquare: Square | undefined = undefined
   let cursorPosition: { x: number, y: number } = { x: -1, y: -1 }
 
   $: ({ board, toMove } = game)
@@ -70,26 +58,33 @@ import {
     requestAnimationFrame(() => cursorPosition = { x: evt.clientX, y: evt.clientY })
   }
 
-  const handleMouseup = (square: Square) => {
+  const handleMouseup = () => {
     draggingFromSquare = undefined
   }
 
 </script>
 
-<svelte:document on:mousemove={draggingFromSquare && handleMousemove} on:mouseup={draggingFromSquare && handleMouseup} />
+<svelte:document
+  on:mousemove={draggingFromSquare && handleMousemove}
+  on:mouseup={draggingFromSquare && handleMouseup}
+/>
 
 <div class="root" class:flipped>
   {#each flipped ? squares : squares.toReversed() as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
-    {@const white = (idx + ~~(idx / 8)) % 2 > 0}
+    {@const isWhite = (idx + ~~(idx / 8)) % 2 > 0}
     <div
-      class={clsx(piece && piece[0])}
-      class:white={white}
-      class:black={!white}
-      class:selected={selectedSquare === square}
       on:click={() => handleSquareClick(square)}
+      on:keyup={evt => (evt.key === "Enter" || evt.key === "Space") && handleSquareClick(square)}
       on:mousedown={evt => handleSquareMousedown(evt, square)}
       on:mouseup={() => handleSquareMouseup(square)}
+      class="square"
+      class:white={isWhite}
+      class:black={!isWhite}
+      class:hasPiece={piece}
+      class:selected={selectedSquare === square}
+      role="button"
+      tabindex="0"
     >
       {#if showCoordinates}
         {#if square[1] === (flipped ? "8" : "1")}
@@ -102,7 +97,7 @@ import {
       {#if piece}
         <div
           class:piece
-          style:position={draggingFromSquare === square ? "fixed" : "static"}
+          class:dragging={draggingFromSquare === square}
           style:top={draggingFromSquare === square ? `calc(${cursorPosition.y}px - .5em)` : "0"}
           style:left={draggingFromSquare === square ? `calc(${cursorPosition.x}px - .5em)` : "0"}
         >
@@ -133,71 +128,72 @@ import {
 
     box-shadow: 3px 3px 10px #0009, 3px 3px 40px #0009;
 
-    > div {
-      position: relative;
+  // &.flipped {
+  //   transform: rotate(90deg);
+  //   > .square {
+  //     transform: rotate(-90deg);
+  //   }
+  // }
+  }
 
-      display: flex;
-      justify-content: center;
-      align-items: center;
+  .square {
+    position: relative;
 
-      overflow: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-      // transform: rotate(90deg);
-      // transition: 0.67s transform;
+    overflow: visible;
 
-      font-size: var(--square-size);
-      line-height: var(--square-size);
+    // transform: rotate(90deg);
+    // transition: 0.67s transform;
 
-      text-shadow: 1px 1px 5px #000c;
+    font-size: var(--square-size);
+    line-height: var(--square-size);
 
-      &:global(.w),
-      &:global(.b) {
-        cursor: pointer;
-      }
+    text-shadow: 1px 1px 5px #000c;
+    &.hasPiece {
+      cursor: pointer;
+    }
+    &.white {
+      background-color: #99dddd;
+    }
+    &.black {
+      background-color: #226666;
+    }
+    &.selected {
       &.white {
-        background-color: #99dddd;
+        background-color: #dda;
       }
       &.black {
-        background-color: #226666;
-      }
-
-      &.selected {
-        &.white {
-          background-color: #dda;
-        }
-        &.black {
-          background-color: #885;
-        }
-      }
-      .file,
-      .rank {
-        position: absolute;
-        font-size: 0.1em;
-        line-height: 1.5em;
-        height: 1.5em;
-        font-family: sans-serif;
-        font-weight: bold;
-      }
-      .rank {
-        inset: 0.5em auto auto 0.5em;
-      }
-      .file {
-        inset: auto 0.5em 0.5em auto;
-      }
-      .piece {
-        width: 1em;
-        height: 1em;
-        z-index: 100;
-        position: static;
-        pointer-events: none;
+        background-color: #885;
       }
     }
-
-    // &.flipped {
-    //   transform: rotate(90deg);
-    //   > div {
-    //     transform: rotate(-90deg);
-    //   }
-    // }
+    .file,
+    .rank {
+      position: absolute;
+      font-size: 0.1em;
+      line-height: 1.5em;
+      height: 1.5em;
+      font-family: sans-serif;
+      font-weight: bold;
+    }
+    .rank {
+      inset: 0.5em auto auto 0.5em;
+    }
+    .file {
+      inset: auto 0.5em 0.5em auto;
+    }
   }
+
+  .piece {
+    width: 1em;
+    height: 1em;
+    pointer-events: none;
+    &.dragging {
+      z-index: 100;
+      position: fixed;
+    }
+  }
+
 </style>
