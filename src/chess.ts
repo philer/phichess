@@ -30,8 +30,8 @@ export type AlgebraicMove
   | `${Piece}${File}${""|"x"}${Square}${Check}`
   | `${"N"|"B"|"R"|"Q"}${Rank}${""|"x"}${Square}${Check}`
   | `${"N"|"B"|"Q"}${Square}${""|"x"}${Square}${Check}`
-  | "O-O${Check}"
-  | "O-O-O${Check}"
+  | `O-O${Check}`
+  | `O-O-O${Check}`
   | `${File}${1|8}${""|"="}${Piece}${Check}`
   | `${File}x${File}${1|8}${""|"="}${Piece}${Check}`
 
@@ -185,17 +185,27 @@ const kingSquares = (square: Square): Square[] =>
   ].filter(Boolean) as Square[]
 
 
-export const isInCheck = (color: Color, board: Board) => {
-  const opponent = color === "w" ? "b" : "w"
-  const [kingSquare] = Object.entries(board)
-    .find(([, piece]) => piece === `${color}K`) as unknown as [Square, Piece]
-  return pawnCaptureSquares(opponent, kingSquare).some(square => board[square] === opponent)
-      || knightSquares(kingSquare).some(square => board[square] === `${opponent}N`)
-      || bishopPaths(kingSquare).some(path => findOnPath(`${opponent}B`, path, board))
-      || rookPaths(kingSquare).some(path => findOnPath(`${opponent}R`, path, board))
-      || queenPaths(kingSquare).some(path => findOnPath(`${opponent}Q`, path, board))
-      || kingSquares(kingSquare).some(square => board[square] === `${opponent}K`)
-}
+const castleSquares = (square: Square): Square[] =>
+  [
+    shift(+2, 0, square),
+    shift(-2, 0, square),
+  ].filter(Boolean) as Square[]
+
+
+export const isAttacked = (by: Color, square: Square, board: Board) =>
+  pawnCaptureSquares(by, square).some(square => board[square] === by)
+  || knightSquares(square).some(square => board[square] === `${by}N`)
+  || bishopPaths(square).some(path => findOnPath(`${by}B`, path, board))
+  || rookPaths(square).some(path => findOnPath(`${by}R`, path, board))
+  || queenPaths(square).some(path => findOnPath(`${by}Q`, path, board))
+  || kingSquares(square).some(square => board[square] === `${by}K`)
+
+export const isInCheck = (color: Color, board: Board) =>
+  isAttacked(
+    color === "w" ? "b" : "w",
+    (Object.keys(board) as Square[]).find(square => board[square] === `${color}K`) as Square,
+    board,
+  )
 
 
 const PIECE_NAMES = {
@@ -212,10 +222,17 @@ export const toAlgebraic = ({ from, to, promotion }: MoveInput, board: Board): R
   // TODO promotion
   const piece = board[from]
   if (!piece) {
-    return Result.err(`There is no piece on ${from}`)
+    return Result.err(`There is no piece on ${from}.`)
   }
   const color = piece[0] as Color
   const pieceName = piece.slice(1) as Piece | ""
+
+  // castling
+  const fileDelta = from.charCodeAt(0) - to.charCodeAt(0)
+  if (pieceName === "K" && Math.abs(fileDelta) === 2) {
+    return Result.of(fileDelta > 0 ? "O-O" : "O-O-O")
+  }
+
   const opponentPiece = board[to]
     // en passant
     ?? (pieceName === "" && from[0] !== to[0] ? to[1] + from[0] : undefined)
@@ -223,7 +240,7 @@ export const toAlgebraic = ({ from, to, promotion }: MoveInput, board: Board): R
   const promoted = promotion ? `=${promotion}` : ""
   if (opponentPiece) {
     if (opponentPiece[0] === color) {
-      return Result.err(`Can't take your own piece on ${to}`)
+      return Result.err(`Can't take your own piece on ${to}.`)
     }
     takes = "x"
   }
@@ -233,13 +250,13 @@ export const toAlgebraic = ({ from, to, promotion }: MoveInput, board: Board): R
     .with("B", () => bishopPaths(to).map(path => findOnPath(piece, path, board)))
     .with("R", () => rookPaths(to).map(path => findOnPath(piece, path, board)))
     .with("Q", () => queenPaths(to).map(path => findOnPath(piece, path, board)))
-    .with("K", () => kingSquares(to))
+    .with("K", () => kingSquares(to).concat(castleSquares(to)))
     .exhaustive()
     .filter(isTruthy)
     .filter(sqr => board[sqr] === piece)
 
   if (candidates.length === 0) {
-    return Result.err(`You have no ${PIECE_NAMES[pieceName]} on ${from}`)
+    return Result.err(`You have no ${PIECE_NAMES[pieceName]} on ${from}.`)
   }
   if (candidates.length === 1 && !(pieceName === "" && takes)) {
     return Result.of(`${pieceName}${takes}${to}${promoted}` as AlgebraicMove)
@@ -276,7 +293,7 @@ export const applyMove = (
   }: Game,
 ): Result<Game, string> => {
   if (!piece) {
-    return Result.err(`There is no piece on ${from}`)
+    return Result.err(`There is no piece on ${from}.`)
   }
   if (piece[0] !== toMove) {
     return Result.err(`It is ${toMove === "w" ? "white" : "black"}'s turn.`)
@@ -348,7 +365,38 @@ export const applyMove = (
     }
     case "K": {
       if (Math.abs(rankDelta) > 1 || Math.abs(fileDelta) > 1) {
-        return Result.err("The king can only move by on square.")
+        if (from === (toMove === "w" ? "e1" : "e8") && rankDelta === 0) {
+          // castling
+          for (const square of range(from, to)) {
+            if (board[square]) {
+              return Result.err("You can't castle on this side, there is a piece in the way.")
+            }
+          }
+          if (isInCheck(toMove, board)) {
+            return Result.err("You can't castle while in check.")
+          }
+          const rank = from[1] as Rank
+          const [kingTo, rookFrom, rookTo]: [Square, Square, Square] = fileDelta > 0
+            ? [`g${rank}`, `h${rank}`, `f${rank}`]
+            : [`c${rank}`, `a${rank}`, `d${rank}`]
+          if (isAttacked(opponent, rookTo, board)) {
+            return Result.err("The king can't castle through check.")
+          }
+          // Target square check will be validated at the end.
+          if (toMove === "w"
+            ? !(fileDelta > 0 ? canCastle.whiteShort : canCastle.whiteLong)
+            : !(fileDelta > 0 ? canCastle.blackShort : canCastle.blackLong)
+          ) {
+            return Result.err("You can no longer castle on this side.")
+          }
+          to = kingTo
+          // @ts-ignore remainingBoard isn't empty
+          remainingBoard[rookTo] = remainingBoard[rookFrom]
+          // @ts-ignore remainingBoard isn't empty
+          delete remainingBoard[rookFrom]
+        } else {
+          return Result.err("The king can only move by on square.")
+        }
       }
       break
     }
