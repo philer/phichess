@@ -123,3 +123,9 @@ export class Err<T = unknown, E = unknown> extends Result<T, E> {
     return Promise.reject(this._value)
   }
 }
+
+/** Create an Ok instance, alias to Result.of */
+export const ok = Result.of
+
+/** Create an Err instance, alias to Result.err */
+export const err = Result.err
