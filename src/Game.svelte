@@ -1,103 +1,85 @@
 <script lang="ts">
+  import { onMount } from "svelte"
+
   import { START_GAME } from "./chess"
-  import Chessboard from "./Chessboard.svelte"
-  import PieceIcon from "./PieceIcon.svelte"
-  import { pairs, partition } from "./util"
+    import History from "./History.svelte"
+  import Perspective from "./Perspective.svelte"
 
   let game = START_GAME
-  $: ({ graveyard, history } = game)
 
   let showHistory = true
-  let flipped = false
 
-  $: movePairs = history.length ? Array.from(pairs(history)) : [[]]
+  type Layout = {
+    perspectives: 1 | 2,
+    opposite: boolean,
+    autoflip: boolean,
+  }
 
-  $: [whiteGraveyard, blackGraveyard] = partition(([color]) => color === "w", graveyard)
+  let layout: Layout = {
+    perspectives: 2,
+    opposite: true,
+    autoflip: false,
+  }
+
+  let layoutContainer: HTMLDivElement
+  let flowDirection: "row" | "column" = "row"
+  let perspectiveSize: number = 100
+
+  onMount(() => {
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      const { inlineSize: width, blockSize: height } = entry.contentBoxSize[0]
+      flowDirection = width > height ? "row" : "column"
+      perspectiveSize = flowDirection === "row"
+        ? Math.min(height, width / 2)
+        : Math.min(width, height / 2)
+    })
+    resizeObserver.observe(layoutContainer)
+    return () => resizeObserver.unobserve(layoutContainer)
+  })
+
 </script>
 
 <div class="game">
-  <div class="graveyard">
-    <div>
-      {#each whiteGraveyard as piece, idx (idx + piece)}
-        <PieceIcon {piece} />
-      {/each}
-    </div>
-    <div>
-      {#each blackGraveyard as piece, idx (idx + piece)}
-        <PieceIcon {piece} />
-      {/each}
-    </div>
+
+  <div bind:this={layoutContainer} class="layout" style:flex-flow={flowDirection} style:--perspective-size={`${perspectiveSize}px`}>
+    {#each { length: layout.perspectives } as _, idx (idx)}
+      <Perspective bind:game />
+    {/each}
   </div>
-  <Chessboard bind:game {flipped} />
-  <div class="tools">
-    <button on:click={() => flipped = !flipped}>⇅</button>
-    <button on:click={() => showHistory = !showHistory}>📘</button>
-  </div>
+
   {#if showHistory}
     <aside class="history">
       <button class="close" on:click={() => showHistory = false}>✕</button>
-      <ol>
-        {#each movePairs as [whiteMove, blackMove], idx (idx)}
-          <li>
-            <span class="moveNumber">{idx + 1}.</span>
-            <span>{whiteMove?.algebraic ?? ""}</span>
-            <span>{blackMove?.algebraic ?? ""}</span>
-          </li>
-        {/each}
-      </ol>
+      <History {game} />
     </aside>
   {/if}
 </div>
 
 <style lang="scss">
   .game {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: stretch;
+    justify-content: stretch;
   }
+  .layout {
+    width: 100%;
+    height: 100%;
+    flex: 100% 1 1;
 
-  .graveyard,
-  .tools,
-  .graveyard > div {
-    padding: 0 0.5rem;
-    width: 2em;
     display: flex;
-    flex-direction: column;
     align-items: center;
-
-    font-size: 3vmin;
-    font-weight: bold;
-  }
-
-  .graveyard {
-    justify-content: space-between;
+    justify-content: space-around;
+    overflow: hidden;
   }
 
   .history {
     position: relative;
     width: 12em;
     height: 100%;
-    margin: 0 1em;
+    // margin: 0 1em;
     background: #0003;
-    ol {
-      display: grid;
-      align-content: start;
-      grid-template-columns: min-content 1fr 1fr;
-      gap: 0.5em 1em;
-
-      padding: 1em 1em .5em;
-
-      li {
-        display: contents;
-      }
-      span {
-        text-align: left;
-      }
-      .moveNumber {
-        text-align: right;
-        font-weight: bold;
-        opacity: .5;
-      }
-    }
   }
   .close {
     padding: .25em;

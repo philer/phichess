@@ -69,7 +69,7 @@ import {
   on:mouseup={draggingFromSquare && handleMouseup}
 />
 
-<div class="root" class:flipped>
+<div class="board" class:flipped>
   {#each flipped ? squares : squares.toReversed() as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
     {@const isWhite = (idx + ~~(idx / 8)) % 2 > 0}
@@ -109,11 +109,10 @@ import {
 </div>
 
 <style lang="scss">
-  .root {
-    --board-size: 75vmin;
-    --square-size: calc(1 / 8 * var(--board-size));
+  .board {
     width: var(--board-size);
     height: var(--board-size);
+    font-size: calc(0.9 * var(--square-size));
 
     display: grid;
     grid-template-rows: repeat(8, 1fr);
@@ -138,18 +137,13 @@ import {
 
   .square {
     position: relative;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: var(--square-size);
+    height: var(--square-size);
 
     overflow: visible;
 
     // transform: rotate(90deg);
     // transition: 0.67s transform;
-
-    font-size: var(--square-size);
-    line-height: var(--square-size);
 
     // text-shadow: 1px 1px 5px #000c;
     &.hasPiece {
@@ -172,7 +166,7 @@ import {
     .file,
     .rank {
       position: absolute;
-      font-size: 0.1em;
+      font-size: max(1vmin, .1em);
       line-height: 1.5em;
       height: 1.5em;
       font-family: sans-serif;
@@ -187,8 +181,8 @@ import {
   }
 
   .piece {
-    width: 1em;
-    height: 1em;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
     display: flex;
     justify-content: center;

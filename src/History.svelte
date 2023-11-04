@@ -1,0 +1,41 @@
+<script lang="ts">
+  import { type Game } from "./chess"
+    import { pairs } from "./util"
+
+  export let game: Game
+
+  $: movePairs = game.history.length ? Array.from(pairs(game.history)) : [[]]
+</script>
+
+<ol>
+  {#each movePairs as [whiteMove, blackMove], idx (idx)}
+    <li>
+      <span class="moveNumber">{idx + 1}.</span>
+      <span>{whiteMove?.algebraic ?? ""}</span>
+      <span>{blackMove?.algebraic ?? ""}</span>
+    </li>
+  {/each}
+</ol>
+
+
+<style lang="scss">
+  ol {
+    display: grid;
+    align-content: start;
+    grid-template-columns: min-content 1fr 1fr;
+    gap: 0.5em 1em;
+
+    padding: 1em 1em .5em;
+  }
+  li {
+    display: contents;
+  }
+  span {
+    text-align: left;
+  }
+  .moveNumber {
+    text-align: right;
+    font-weight: bold;
+    opacity: .5;
+  }
+</style>

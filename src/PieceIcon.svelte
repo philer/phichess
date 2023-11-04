@@ -16,13 +16,13 @@
 
 <script lang="ts">
   export let piece: ColorPiece
-  const theme = getContext<Theme>("theme")
+  const { pieces } = getContext<Theme>("theme")
 </script>
 
-{#if theme.pieces.type === "font"}
+{#if pieces.type === "font"}
   <span class={`fontPiece ${piece[0]}`}>{PIECE_TO_UTF8[piece.slice(1)]}</span>
 {:else}
-  <img src={`/pieces/${theme.pieces.name}/${piece}.svg`} alt={piece} />
+  <img src={`/pieces/${pieces.name}/${piece}.svg`} alt={piece} style:font-size={`${pieces.scale}em`} />
 {/if}
 
 <style lang="scss">
@@ -40,6 +40,6 @@
   }
 
   img {
-    height: 90%
+    height: 1em;
   }
 </style>
