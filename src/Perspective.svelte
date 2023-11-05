@@ -16,12 +16,12 @@
   <div class="graveyard">
     <div>
       {#each whiteGraveyard as piece, idx (idx + piece)}
-        <PieceIcon {piece} />
+        <PieceIcon {piece} outline />
       {/each}
     </div>
     <div>
       {#each blackGraveyard as piece, idx (idx + piece)}
-        <PieceIcon {piece} />
+        <PieceIcon {piece} outline />
       {/each}
     </div>
   </div>
@@ -31,7 +31,7 @@
   <div class="tools">
     <button on:click={() => rotate += 90}>↶</button>
     <button on:click={() => asWhite = !asWhite}>
-      <PieceIcon piece={asWhite ? "b" : "w"} />
+      <PieceIcon piece={asWhite ? "b" : "w"} outline />
     </button>
   </div>
 </div>

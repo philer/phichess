@@ -16,30 +16,42 @@
 
 <script lang="ts">
   export let piece: ColorPiece
+  export let outline: boolean = false
   const { pieces } = getContext<Theme>("theme")
 </script>
 
 {#if pieces.type === "font"}
-  <span class={`fontPiece ${piece[0]}`}>{PIECE_TO_UTF8[piece.slice(1)]}</span>
+  <span class={piece[0]} class:outline>
+    {PIECE_TO_UTF8[piece.slice(1)]}
+  </span>
 {:else}
-  <img src={`/pieces/${pieces.name}/${piece}.svg`} alt={piece} style:font-size={`${pieces.scale}em`} />
+  <img
+    src={`/pieces/${pieces.name}/${piece}.svg`}
+    alt={piece}
+    class={piece[0]}
+    class:outline
+    style:font-size={`${pieces.scale}em`}
+  />
 {/if}
 
 <style lang="scss">
-  .fontPiece {
+  span {
     font-family: "Linux Libertine";
 
-    &:global(.w) {
-      color: white;
-      -webkit-text-stroke: .012em black;
-    }
-    &:global(.b) {
-      color: #022;
-        -webkit-text-stroke: .012em #acc;
+    &:global(.w) { color: white }
+    &:global(.b) { color: #111 }
+    &.outline {
+      &:global(.w) { -webkit-text-stroke: .012em black }
+      &:global(.b) { -webkit-text-stroke: .012em white }
     }
   }
 
   img {
     height: 1em;
+
+    &.outline {
+      &:global(.w) { filter: drop-shadow(0 0 1px black); }
+      &:global(.b) { filter: drop-shadow(0 0 1px white); }
+    }
   }
 </style>
