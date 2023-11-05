@@ -9,7 +9,7 @@
   import PieceIcon from "./PieceIcon.svelte"
 
   type Point = Readonly<{ x: number, y: number }>
-  const zero: Point = Object.freeze({ x: 0, y: 0})
+  const zero: Point = Object.freeze({ x: 0, y: 0 })
 
   const rot0 = (p: Point): Point => p
   const rot90 = ({ x, y }: Point): Point => ({ x: -y, y: x })

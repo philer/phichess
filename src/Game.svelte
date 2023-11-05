@@ -40,7 +40,6 @@
 </script>
 
 <div class="game">
-
   <div bind:this={layoutContainer} class="layout" style:flex-flow={flowDirection} style:--perspective-size={`${perspectiveSize}px`}>
     {#each { length: layout.perspectives } as _, idx (idx)}
       <Perspective bind:game />
