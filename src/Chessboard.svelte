@@ -2,11 +2,13 @@
   import {
     applyMove, type Game,
     type MoveInput,
+    type Piece,
     requiresPromotion,
     type Square,
     squares,
   } from "./chess"
   import PieceIcon from "./PieceIcon.svelte"
+  import { clickOutside } from "./svelte-util"
 
   type Point = Readonly<{ x: number, y: number }>
   const zero: Point = Object.freeze({ x: 0, y: 0 })
@@ -35,37 +37,40 @@
   export let rotate: number = 0
   export let showCoordinates: boolean = true
 
-  let selectedSquare: Square | undefined = undefined
-  let draggingFromSquare: Square | undefined = undefined
-
-
-  /** Origin for relative mouse movement while dragging a piece */
-  let draggingFromPosition: Point = zero
-
-  /** Current cursor drag position relative to piece's original position */
-  let dragPositionOffset: Point = zero
-
-  $: board = game.board
+  $: ({ board, toMove } = game)
 
   $: rotateCoordinates = rotateFns[rotate % 360]
   $: reverseRotateCoordinates = reverseRotateFns[rotate % 360]
 
-  const makeMove = (from: Square, to: Square) => {
-    const input: MoveInput = { from, to }
-    if (requiresPromotion(input, board)) {
-        input.promotion = "Q"
-      }
-      applyMove(input, game)
-        .map(updatedGame => {
-          game = updatedGame
-          selectedSquare = undefined
-          draggingFromSquare = undefined
-        })
-        .mapError(console.info)
+  let promotionMove: MoveInput | undefined
+  let selectedSquare: Square | undefined
+  let draggingFromSquare: Square | undefined
+  /** Origin for relative mouse movement while dragging a piece */
+  let draggingFromPosition: Point = zero
+  /** Current cursor drag position relative to piece's original position */
+  let dragPositionOffset: Point = zero
+
+  const makeMove = (from: Square, to: Square, promotion?: Piece) => {
+    const input: MoveInput = { from, to, promotion }
+    if (requiresPromotion(input, board) && !promotion) {
+      promotionMove = input
+      return
+    }
+    applyMove(input, game)
+      .map(updatedGame => {
+        game = updatedGame
+        promotionMove = undefined
+        selectedSquare = undefined
+        draggingFromSquare = undefined
+      })
+      .mapError(console.info)
   }
 
+  const promote = (piece: Piece) =>
+    makeMove(promotionMove!.from, promotionMove!.to, piece)
+
   const handleSquareClick = (square: Square) => {
-    if (board[square]) {
+    if (board[square]?.[0] === toMove) {
       selectedSquare = square
     } else if (selectedSquare) {
       makeMove(selectedSquare, square)
@@ -73,7 +78,7 @@
   }
 
   const handleSquareMousedown = (evt: MouseEvent, square: Square) => {
-    if (board[square]) {
+    if (board[square]?.[0] === toMove) {
       draggingFromSquare = square
 
       const { target, clientX, clientY, offsetX, offsetY } = evt
@@ -118,7 +123,14 @@
   on:mouseup={draggingFromSquare && handleMouseup}
 />
 
-<div class="board" class:dragging={draggingFromSquare}>
+<div
+  class="board"
+  class:asWhite
+  class:asBlack={!asWhite}
+  class:whiteToMove={toMove === "w"}
+  class:blackToMove={toMove === "b"}
+  class:dragging={draggingFromSquare}
+>
   {#each asWhite ? squares.toReversed() : squares as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
     {@const isLight = (idx + ~~(idx / 8)) % 2 > 0}
@@ -143,7 +155,7 @@
           <div class="rank">{square[1]}</div>
         {/if}
       {/if}
-      {#if piece}
+      {#if piece && square !== promotionMove?.from}
         <div
           class:piece
           class:dragging={draggingFromSquare === square}
@@ -155,10 +167,26 @@
       {/if}
     </div>
   {/each}
+  {#if promotionMove}
+    {@const fileOffset = promotionMove.to.charCodeAt(0) - 97}
+    <div
+      use:clickOutside
+      on:click_outside={() => promotionMove = undefined}
+      class="promotion"
+      style:--promotion-file-offset={fileOffset}
+    >
+      <button on:click={() => promote("Q")}><PieceIcon piece={`${toMove}Q`}/></button>
+      <button on:click={() => promote("N")}><PieceIcon piece={`${toMove}N`}/></button>
+      <button on:click={() => promote("R")}><PieceIcon piece={`${toMove}R`}/></button>
+      <button on:click={() => promote("B")}><PieceIcon piece={`${toMove}B`}/></button>
+      <button on:click={() => promotionMove = undefined} class="close">✕</button>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
   .board {
+    position: relative;
     width: var(--board-size);
     height: var(--board-size);
     font-size: calc(0.9 * var(--square-size));
@@ -232,6 +260,46 @@
     &.dragging {
       z-index: 100;
       position: relative;
+    }
+  }
+
+  .promotion {
+    position: absolute;
+    display: flex;
+    justify-content: stretch;
+
+    top: 0;
+    flex-direction: column;
+    .asWhite.blackToMove &,
+    .asBlack.whiteToMove & {
+      top: auto;
+      bottom: 0;
+      flex-direction: column-reverse;
+    }
+
+    left: calc(var(--promotion-file-offset) * var(--square-size));
+    .asBlack & {
+      left: calc((7 - var(--promotion-file-offset)) * var(--square-size));
+    }
+
+    background: #000c;
+    .blackToMove & {
+      background: #fffc;
+      color: black;
+    }
+
+    box-shadow: 1px 1px .1em #0008;
+
+    > button {
+      height: var(--square-size);
+      width: var(--square-size);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      &.close {
+        height: calc(.5 * var(--square-size));
+        font-size: .33em;
+      }
     }
   }
 
