@@ -3,7 +3,8 @@ root: true
 
 plugins:
 - "@typescript-eslint"
-- import
+- "@stylistic"
+# - import
 - simple-import-sort
 
 extends:
@@ -31,100 +32,98 @@ overrides:
     parser: '@typescript-eslint/parser'
 
 rules:
+  "@stylistic/arrow-parens":
+    - warn
+    - as-needed
+  "@stylistic/comma-dangle":
+    - warn
+    - always-multiline
+  # "@stylistic/indent":
+  #   - error
+  #   - 2
+  #   - SwitchCase: 1
+  #     offsetTernaryExpressions: true
+  "@stylistic/jsx-quotes":
+    - warn
+    - prefer-double
+  "@stylistic/key-spacing": warn
+  "@stylistic/keyword-spacing": warn
+  "@stylistic/object-curly-spacing":
+    - warn
+    - always
+  # "@stylistic/operator-linebreak":
+  #   - warn
+  #   - before
+  "@stylistic/quote-props":
+    - warn
+    - consistent-as-needed
+  "@stylistic/quotes":
+    - warn
+    - double
+    - avoidEscape: true
+      allowTemplateLiterals: true
+  "@stylistic/semi":
+    - error
+    - never
+  "@stylistic/space-before-function-paren":
+    - warn
+    - anonymous: never
+      named: never
+      asyncArrow: always
+  "@stylistic/space-in-parens":
+    - warn
+    - never
+  "@stylistic/template-curly-spacing":
+    - warn
+    - never
+
   "@typescript-eslint/ban-ts-comment":
-  - error
-  - ts-ignore: allow-with-description
-    ts-expect-error: allow-with-description
+    - error
+    - ts-ignore: allow-with-description
+      ts-expect-error: allow-with-description
   "@typescript-eslint/explicit-module-boundary-types": 'off'
   "@typescript-eslint/no-empty-function": 'off'
   "@typescript-eslint/no-explicit-any": 'off'
   "@typescript-eslint/no-unused-vars":
-  - error
-  - argsIgnorePattern: "^_"
-    varsIgnorePattern: "^_"
-    caughtErrors: all
-    caughtErrorsIgnorePattern: "^_"
-  "@typescript-eslint/object-curly-spacing":
-  - warn
-  - always
+    - error
+    - argsIgnorePattern: "^_"
+      varsIgnorePattern: "^_"
+      caughtErrors: all
+      caughtErrorsIgnorePattern: "^_"
+
   array-bracket-spacing: warn
   arrow-body-style:
-  - error
-  - as-needed
-  arrow-parens:
-  - warn
-  - as-needed
+    - error
+    - as-needed
   block-scoped-var: warn
-  comma-dangle:
-  - warn
-  - always-multiline
   comma-spacing: warn
-  import/no-cycle: error
-  import/no-duplicates: warn
-  indent:
-  - error
-  - 2
-  - SwitchCase: 1
-    offsetTernaryExpressions: true
-  jsx-quotes:
-  - warn
-  - prefer-double
-  key-spacing: warn
-  keyword-spacing: warn
+  # import/no-cycle: error
+  # import/no-duplicates: warn
   no-cond-assign: 'off'
   no-console:
-  - warn
-  - allow:
     - warn
-    - error
+    - allow:
+      - warn
+      - error
   no-else-return: 'off'
   no-lonely-if: 'off'
   no-multi-spaces:
-  - warn
-  - ignoreEOLComments: true
+    - warn
+    - ignoreEOLComments: true
   no-prototype-builtins: 'off'
   no-spaced-func: warn
   no-unused-vars: 'off'
   no-useless-concat: warn
   no-var: warn
-  object-curly-spacing: 'off'
   prefer-arrow-callback: warn
   prefer-template: 'off'
-  quote-props:
-  - warn
-  - consistent-as-needed
-  quotes:
-  - warn
-  - double
-  - avoidEscape: true
-    allowTemplateLiterals: true
-  react-hooks/exhaustive-deps: 'off'
-  react/no-danger: 'off'
-  semi:
-  - error
-  - never
   simple-import-sort/imports:
-  - warn
-  - groups:
-    - - "^@?\\w"
-    - - "^\\u0000"
-    - - "^"
-    - - "^\\."
-    - - "\\.module\\.(css|scss|less)$"
-      - "\\.(json|svg|png|jpg|jpeg)"
-  space-before-function-paren:
-  - warn
-  - anonymous: never
-    named: never
-    asyncArrow: always
-  space-in-parens:
-  - warn
-  - never
+    - warn
+    - groups:
+      - ["^@?\\w"]
+      - ["^\\u0000"]
+      - ["^"]
+      - ["^\\."]
+      - ["\\.module\\.(css|scss|less)$", "\\.(json|svg|png|jpg|jpeg)"]
   strict: error
-  'svelte/valid-compile': 'off'
-  template-curly-spacing:
-  - warn
-  - never
-  operator-linebreak:
-  - warn
-  - before
+  svelte/valid-compile: 'off'
