@@ -21,9 +21,6 @@
 </div>
 
 <style lang="scss">
-  div {
-
-  }
   ol {
     display: grid;
     align-content: start;
