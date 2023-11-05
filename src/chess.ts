@@ -282,16 +282,11 @@ export const requiresPromotion = ({ from, to }: MoveInput, board: Board) =>
  * return an updated game state if the move is legal.
  */
 export const applyMove = (
+  { board, toMove, history, canCastle, graveyard }: Game,
   { from, to, promotion }: MoveInput,
-  {
-    board,
-    board: { [from]: piece, [to]: capture, ...remainingBoard },
-    toMove,
-    history,
-    canCastle,
-    graveyard,
-  }: Game,
 ): Result<Game, string> => {
+  let { [from]: piece, [to]: capture, ...remainingBoard } = board
+
   if (!piece) {
     return err(`There is no piece on ${from}.`)
   }
@@ -440,3 +435,11 @@ export const applyMove = (
       graveyard: capture ? [...graveyard, capture] : graveyard,
     }))
 }
+
+/** Validate and apply an array of moves to a given game */
+export const applyHistory = (game: Game, history: MoveInput[]): Result<Game> =>
+  history.reduce((result, move) => result.flatMap(game => applyMove(game, move)), ok(game))
+
+/** Re-create the given game up to the previous move. */
+export const revertLastMove = (game: Game): Game =>
+  applyHistory(START_GAME, game.history.slice(0, -1)).unwrap()

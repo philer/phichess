@@ -49,7 +49,7 @@
   {#if showHistory}
     <aside class="history">
       <button class="close" on:click={() => showHistory = false}>✕</button>
-      <History {game} />
+      <History bind:game />
     </aside>
   {/if}
 </div>

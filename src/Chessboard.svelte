@@ -56,7 +56,7 @@
       promotionMove = input
       return
     }
-    applyMove(input, game)
+    applyMove(game, input)
       .map(updatedGame => {
         game = updatedGame
         promotionMove = undefined
