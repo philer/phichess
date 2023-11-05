@@ -1,14 +1,15 @@
 <script lang="ts">
   import PieceIcon from "./PieceIcon.svelte";
-import {
+  import {
     applyMove, type Game,
     type MoveInput,
     requiresPromotion,
     type Square,
-    squares } from "./chess"
+    squares,
+  } from "./chess"
 
   export let game: Game
-  export let flipped: boolean = false
+  export let asWhite: boolean = true
   export let showCoordinates: boolean = true
 
   let selectedSquare: Square | undefined = undefined
@@ -87,8 +88,8 @@ import {
   on:mouseup={draggingFromSquare && handleMouseup}
 />
 
-<div class="board" class:flipped>
-  {#each flipped ? squares : squares.toReversed() as square, idx (`${square}${board[square] || ""}`)}
+<div class="board" class:asWhite>
+  {#each asWhite ? squares.toReversed() : squares as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
     {@const isLight = (idx + ~~(idx / 8)) % 2 > 0}
     <div
@@ -105,10 +106,10 @@ import {
       tabindex="0"
     >
       {#if showCoordinates}
-        {#if square[1] === (flipped ? "8" : "1")}
+        {#if square[1] === (asWhite ? "1" :  "8")}
           <div class="file">{square[0]}</div>
         {/if}
-        {#if square[0] === (flipped ? "h" : "a")}
+        {#if square[0] === (asWhite ? "a" :  "h")}
           <div class="rank">{square[1]}</div>
         {/if}
       {/if}
@@ -145,7 +146,7 @@ import {
 
     box-shadow: 3px 3px 10px #0009, 3px 3px 40px #0009;
 
-  // &.flipped {
+  // &.asWhite {
   //   transform: rotate(90deg);
   //   > .square {
   //     transform: rotate(-90deg);
