@@ -1,39 +1,33 @@
 <script lang="ts">
   import { type Game } from "./chess"
   import Chessboard from "./Chessboard.svelte"
+  import Graveyard from "./Graveyard.svelte";
   import PieceIcon from "./PieceIcon.svelte"
-  import { partition } from "./util"
 
   export let game: Game
 
   let rotate = 0
   let asWhite = true
-
-  $: [whiteGraveyard, blackGraveyard] = partition(([color]) => color === "w", game.graveyard)
 </script>
 
 <div class="perspective" style:transform={`rotate(${rotate}deg)`}>
-  <div class="graveyard">
-    <div>
-      {#each whiteGraveyard as piece, idx (idx + piece)}
-        <PieceIcon {piece} outline />
-      {/each}
-    </div>
-    <div>
-      {#each blackGraveyard as piece, idx (idx + piece)}
-        <PieceIcon {piece} outline />
-      {/each}
-    </div>
+  <div class="above">
+    <Graveyard {game} color={asWhite ? "w" : "b"} />
+  </div>
+  <div class="below">
+    <Graveyard {game} color={asWhite ? "b" : "w"} />
   </div>
 
-  <Chessboard bind:game {asWhite} {rotate} />
+  <div class="left"></div>
 
-  <div class="tools">
+  <div class="right">
     <button on:click={() => rotate += 90}>↶</button>
     <button on:click={() => asWhite = !asWhite}>
       <PieceIcon piece={asWhite ? "b" : "w"} outline />
     </button>
   </div>
+
+  <Chessboard bind:game {asWhite} {rotate} />
 </div>
 
 <style lang="scss">
@@ -44,35 +38,40 @@
 
     width: var(--perspective-size);
     height: var(--perspective-size);
-    padding: var(--frame-size) 0;
 
     transform: rotate(0deg);
     transition: 0.5s transform;
 
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
+    // display: flex;
+    // align-items: stretch;
+    // justify-content: stretch;
 
     background: #0002;
+
+    display: grid;
+    grid-template-rows: .5fr 8fr .5fr;
+    grid-template-columns: .5fr 8fr .5fr;
+    grid-template-areas:
+      ".    above     ."
+      "left board right"
+      ".    below     .";
   }
 
-  .graveyard,
-  .tools,
-  .graveyard > div {
-    width: calc(.5 * var(--square-size));
-    font-size: calc(.4 * var(--square-size));
+  .above { grid-area: above }
+  .below { grid-area: below }
+  .left { grid-area: left }
+  .right { grid-area: right }
 
+  .left, .right, .above, .below {
     display: flex;
-    flex-direction: column;
     align-items: center;
-
-    font-weight: bold;
+    align-items: center;
+  }
+  .left, .right {
+    flex-direction: column;
   }
 
-  .graveyard {
-    justify-content: space-between;
-  }
-  button {
+  .right > button {
     appearance: none;
     background: #0005;
     width: 100%;

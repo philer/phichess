@@ -2,10 +2,10 @@
   import {
     applyMove, type Game,
     type MoveInput,
-    type Piece,
     requiresPromotion,
     type Square,
     squares,
+    type PromotablePiece,
   } from "./chess"
   import PieceIcon from "./PieceIcon.svelte"
   import { clickOutside } from "./svelte-util"
@@ -50,7 +50,7 @@
   /** Current cursor drag position relative to piece's original position */
   let dragPositionOffset: Point = zero
 
-  const makeMove = (from: Square, to: Square, promotion?: Piece) => {
+  const makeMove = (from: Square, to: Square, promotion?: PromotablePiece) => {
     const input: MoveInput = { from, to, promotion }
     if (requiresPromotion(input, board) && !promotion) {
       promotionMove = input
@@ -66,7 +66,7 @@
       .mapError(console.info)
   }
 
-  const promote = (piece: Piece) =>
+  const promote = (piece: PromotablePiece) =>
     makeMove(promotionMove!.from, promotionMove!.to, piece)
 
   const handleSquareClick = (square: Square) => {
@@ -190,6 +190,8 @@
     width: var(--board-size);
     height: var(--board-size);
     font-size: calc(0.9 * var(--square-size));
+
+    grid-area: board;  // place self in the surrounding grid context
 
     display: grid;
     grid-template-rows: repeat(8, 1fr);

@@ -6,13 +6,16 @@ import { isTruthy } from "./util"
 
 export type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"
 export type Rank = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8"
-export type Piece = "K" | "Q" | "R" | "B" | "N"
-export type PieceOrPawn = Piece | ""
+export type Piece = "" | "K" | "Q" | "R" | "B" | "N"
+export type PieceNotPawn = Exclude<Piece, "">
+export type MortalPiece = Exclude<Piece, "K">
+export type PromotablePiece = Exclude<Piece, "" | "K">
 export type Check = "" | "+" | "#"
 export type Color = "w" | "b"
 
 export type Square = `${File}${Rank}`
-export type ColorPiece = `${Color}${""|Piece}`
+export type ColorPiece = `${Color}${Piece}`
+export type MortalColorPiece = `${Color}${MortalPiece}`
 
 export type Board = Readonly<Partial<Record<Square, ColorPiece>>>
 
@@ -26,20 +29,20 @@ export const START_BOARD: Board = Object.freeze({
 export type AlgebraicMove
   = `${Square}${Check}`
   | `${File}x${Square}${Check}`
-  | `${Piece}${""|"x"}${Square}${Check}`
-  | `${Piece}${File}${""|"x"}${Square}${Check}`
+  | `${PieceNotPawn}${""|"x"}${Square}${Check}`
+  | `${PieceNotPawn}${File}${""|"x"}${Square}${Check}`
   | `${"N"|"B"|"R"|"Q"}${Rank}${""|"x"}${Square}${Check}`
   | `${"N"|"B"|"Q"}${Square}${""|"x"}${Square}${Check}`
   | `O-O${Check}`
   | `O-O-O${Check}`
-  | `${File}${1|8}${""|"="}${Piece}${Check}`
-  | `${File}x${File}${1|8}${""|"="}${Piece}${Check}`
+  | `${File}${1|8}${""|"="}${PieceNotPawn}${Check}`
+  | `${File}x${File}${1|8}${""|"="}${PieceNotPawn}${Check}`
 
 /** Data provided by a user that is intended to be applied to a specific game state */
 export type MoveInput = {
   from: Square
   to: Square
-  promotion?: Piece
+  promotion?: PromotablePiece
 }
 /** Validated move details deduced from a specific game state */
 export type Move = MoveInput & {
@@ -59,7 +62,7 @@ export type Game = Readonly<{
     blackShort: boolean
   }>
   history: ReadonlyArray<Move>
-  graveyard: ReadonlyArray<ColorPiece>
+  graveyard: ReadonlyArray<MortalColorPiece>
 }>
 
 export const START_GAME: Game = Object.freeze({
@@ -301,7 +304,7 @@ export const applyMove = (
   }
 
   const opponent = toMove === "w" ? "b" : "w"
-  const pieceName = (piece[1] ?? "") as PieceOrPawn
+  const pieceName = (piece[1] ?? "") as Piece
 
   const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
   const rankDelta = to.charCodeAt(1) - from.charCodeAt(1)
@@ -432,7 +435,7 @@ export const applyMove = (
       toMove: toMove === "w" ? "b": "w",
       history: [...history, { from, to, promotion, algebraic }],
       canCastle,
-      graveyard: capture ? [...graveyard, capture] : graveyard,
+      graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
     }))
 }
 
