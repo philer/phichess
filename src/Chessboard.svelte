@@ -1,5 +1,4 @@
-<script lang="ts">
-  import PieceIcon from "./PieceIcon.svelte";
+<script context="module" lang="ts">
   import {
     applyMove, type Game,
     type MoveInput,
@@ -7,21 +6,49 @@
     type Square,
     squares,
   } from "./chess"
+  import PieceIcon from "./PieceIcon.svelte"
 
+  type Point = Readonly<{ x: number, y: number }>
+  const zero: Point = Object.freeze({ x: 0, y: 0})
+
+  const rot0 = (p: Point): Point => p
+  const rot90 = ({ x, y }: Point): Point => ({ x: -y, y: x })
+  const rot180 = ({ x, y }: Point): Point => ({ x: -x, y: -y })
+  const rot270 = ({ x, y }: Point): Point => ({ x: y, y: -x })
+  const rotateFns: Record<number, (p: Point) => Point> = {
+    0: rot0,
+    90: rot90,
+    180: rot180,
+    270: rot270,
+  }
+  const reverseRotateFns: Record<number, (p: Point) => Point> = {
+    0: rot0,
+    90: rot270,
+    180: rot180,
+    270: rot90,
+  }
+</script>
+
+<script lang="ts">
   export let game: Game
   export let asWhite: boolean = true
+  export let rotate: number = 0
   export let showCoordinates: boolean = true
 
   let selectedSquare: Square | undefined = undefined
   let draggingFromSquare: Square | undefined = undefined
 
+
   /** Origin for relative mouse movement while dragging a piece */
-  let draggingFromPosition: { x: number, y: number } = { x: 0, y: 0 }
+  let draggingFromPosition: Point = zero
 
   /** Current cursor drag position relative to piece's original position */
-  let dragPositionOffset: { x: number, y: number } = { x: 0, y: 0 }
+  let dragPositionOffset: Point = zero
 
   $: ({ board, toMove } = game)
+
+  $: rotateCoordinates = rotateFns[rotate % 360]
+  $: reverseRotateCoordinates = reverseRotateFns[rotate % 360]
 
   const makeMove = (from: Square, to: Square) => {
     const input: MoveInput = { from, to }
@@ -49,17 +76,21 @@
     if (board[square]?.[0] === toMove) {
       draggingFromSquare = square
 
-      const {target, clientX, clientY, offsetX, offsetY} = evt;
-      const squareSize = (target as HTMLElement).offsetHeight;
+      const { target, clientX, clientY, offsetX, offsetY } = evt
+      const squareSize = (target as HTMLElement).offsetHeight
+      const { x, y } = rotateCoordinates({
+        x: offsetX - .5 * squareSize,
+        y: offsetY - .5 * squareSize,
+      })
       draggingFromPosition = {
-        x: clientX - offsetX + .5 * squareSize,
-        y: clientY - offsetY + .5 * squareSize,
+        x: clientX - x,
+        y: clientY - y,
       }
       // update position once immediately to prevent flicker
-      dragPositionOffset = {
+      dragPositionOffset = reverseRotateCoordinates({
         x: clientX - draggingFromPosition.x,
         y: clientY - draggingFromPosition.y,
-      }
+      })
     }
   }
 
@@ -70,17 +101,16 @@
     makeMove(draggingFromSquare, square)
   }
 
-  const handleMousemove = ({clientX, clientY}: MouseEvent) => {
-    requestAnimationFrame(() => dragPositionOffset = {
+  const handleMousemove = ({ clientX, clientY }: MouseEvent) => {
+    requestAnimationFrame(() => dragPositionOffset = reverseRotateCoordinates({
       x: clientX - draggingFromPosition.x,
       y: clientY - draggingFromPosition.y,
-    })
+    }))
   }
 
   const handleMouseup = () => {
     draggingFromSquare = undefined
   }
-
 </script>
 
 <svelte:document
@@ -106,10 +136,10 @@
       tabindex="0"
     >
       {#if showCoordinates}
-        {#if square[1] === (asWhite ? "1" :  "8")}
+        {#if square[1] === (asWhite ? "1" : "8")}
           <div class="file">{square[0]}</div>
         {/if}
-        {#if square[0] === (asWhite ? "a" :  "h")}
+        {#if square[0] === (asWhite ? "a" : "h")}
           <div class="rank">{square[1]}</div>
         {/if}
       {/if}

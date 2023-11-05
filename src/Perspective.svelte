@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Color, type Game } from "./chess"
+  import { type Game } from "./chess"
   import Chessboard from "./Chessboard.svelte"
   import PieceIcon from "./PieceIcon.svelte"
   import { partition } from "./util"
@@ -26,7 +26,7 @@
     </div>
   </div>
 
-  <Chessboard bind:game {asWhite} />
+  <Chessboard bind:game {asWhite} {rotate} />
 
   <div class="tools">
     <button on:click={() => rotate += 90}>↶</button>
