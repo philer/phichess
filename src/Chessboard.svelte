@@ -88,7 +88,7 @@
   on:mouseup={draggingFromSquare && handleMouseup}
 />
 
-<div class="board" class:asWhite>
+<div class="board">
   {#each asWhite ? squares.toReversed() : squares as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
     {@const isLight = (idx + ~~(idx / 8)) % 2 > 0}
@@ -138,20 +138,10 @@
     grid-template-columns: repeat(8, 1fr);
     direction: rtl;  // reverse columns for squares ordered A1, B1, C1, ..., H8
 
-    // transform: rotate(-90deg);
-    // transition: 0.67s transform;
-
     font-family: "Linux Libertine";
     user-select: none;
 
     box-shadow: 3px 3px 10px #0009, 3px 3px 40px #0009;
-
-  // &.asWhite {
-  //   transform: rotate(90deg);
-  //   > .square {
-  //     transform: rotate(-90deg);
-  //   }
-  // }
   }
 
   .square {
@@ -160,9 +150,6 @@
     height: var(--square-size);
 
     overflow: visible;
-
-    // transform: rotate(90deg);
-    // transition: 0.67s transform;
 
     // text-shadow: 1px 1px 5px #000c;
     &.hasPiece {
