@@ -3,10 +3,10 @@ export type PieceTheme =
   | { type: "svg", name: "classic", scale: number }
 
 export type BoardTheme = {
-  whiteBackground: string,
-  blackBackground: string,
-  selectedWhiteBackground: string,
-  selectedBlackBackground: string,
+  lightBackground: string,
+  darkBackground: string,
+  selectedLightBackground: string,
+  selectedDarkBackground: string,
 }
 
 export type Theme = {
@@ -16,24 +16,24 @@ export type Theme = {
 }
 
 export const lichessBoard: BoardTheme = {
-  whiteBackground: "#f0d9b5",
-  blackBackground: "#b58863",
-  selectedWhiteBackground: "#ced26b",
-  selectedBlackBackground: "#aba23a",
+  lightBackground: "#f0d9b5",
+  darkBackground: "#b58863",
+  selectedLightBackground: "#ced26b",
+  selectedDarkBackground: "#aba23a",
 }
 
 export const chessComBoard: BoardTheme = {
-  whiteBackground: "#e9edcc",
-  blackBackground: "#779954",
-  selectedWhiteBackground: "#f4f67e",
-  selectedBlackBackground: "#bbcc43",
+  lightBackground: "#e9edcc",
+  darkBackground: "#779954",
+  selectedLightBackground: "#f4f67e",
+  selectedDarkBackground: "#bbcc43",
 }
 
 export const cyanBoard: BoardTheme = {
-  whiteBackground: "#9ee",
-  blackBackground: "#488",
-  selectedWhiteBackground: "#dda",
-  selectedBlackBackground: "#885",
+  lightBackground: "#9ee",
+  darkBackground: "#488",
+  selectedLightBackground: "#dda",
+  selectedDarkBackground: "#885",
 }
 
 export const fontPieces: PieceTheme = { type: "font" }

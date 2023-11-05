@@ -17,10 +17,10 @@
 
 <Game
   --theme-page-background={theme.pageBackground}
-  --theme-white-square-background={theme.board.whiteBackground}
-  --theme-black-square-background={theme.board.blackBackground}
-  --theme-selected-white-square-background={theme.board.selectedWhiteBackground}
-  --theme-selected-black-square-background={theme.board.selectedBlackBackground}
+  --theme-light-square-background={theme.board.lightBackground}
+  --theme-dark-square-background={theme.board.darkBackground}
+  --theme-selected-light-square-background={theme.board.selectedLightBackground}
+  --theme-selected-dark-square-background={theme.board.selectedDarkBackground}
 />
 
 <style lang="scss">

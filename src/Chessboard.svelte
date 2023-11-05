@@ -90,15 +90,15 @@ import {
 <div class="board" class:flipped>
   {#each flipped ? squares : squares.toReversed() as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
-    {@const isWhite = (idx + ~~(idx / 8)) % 2 > 0}
+    {@const isLight = (idx + ~~(idx / 8)) % 2 > 0}
     <div
       on:click={() => handleSquareClick(square)}
       on:keyup={evt => (evt.key === "Enter" || evt.key === "Space") && handleSquareClick(square)}
       on:mousedown={evt => handleSquareMousedown(evt, square)}
       on:mouseup={() => handleSquareMouseup(square)}
       class="square"
-      class:white={isWhite}
-      class:black={!isWhite}
+      class:light={isLight}
+      class:dark={!isLight}
       class:hasPiece={piece}
       class:selected={selectedSquare === square}
       role="button"
@@ -167,18 +167,18 @@ import {
     &.hasPiece {
       cursor: pointer;
     }
-    &.white {
-      background: var(--theme-white-square-background);
+    &.light {
+      background: var(--theme-light-square-background);
     }
-    &.black {
-      background: var(--theme-black-square-background);
+    &.dark {
+      background: var(--theme-dark-square-background);
     }
     &.selected {
-      &.white {
-        background: var(--theme-selected-white-square-background);
+      &.light {
+        background: var(--theme-selected-light-square-background);
       }
-      &.black {
-        background: var(--theme-selected-black-square-background);
+      &.dark {
+        background: var(--theme-selected-dark-square-background);
       }
     }
     .file,
