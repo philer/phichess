@@ -13,7 +13,12 @@ import {
 
   let selectedSquare: Square | undefined = undefined
   let draggingFromSquare: Square | undefined = undefined
-  let cursorPosition: { x: number, y: number } = { x: -1, y: -1 }
+
+  /** Origin for relative mouse movement while dragging a piece */
+  let draggingFromPosition: { x: number, y: number } = { x: 0, y: 0 }
+
+  /** Current cursor drag position relative to piece's original position */
+  let dragPositionOffset: { x: number, y: number } = { x: 0, y: 0 }
 
   $: ({ board, toMove } = game)
 
@@ -41,9 +46,19 @@ import {
 
   const handleSquareMousedown = (evt: MouseEvent, square: Square) => {
     if (board[square]?.[0] === toMove) {
-      // update position first to prevent flicker
-      cursorPosition = { x: evt.clientX, y: evt.clientY }
       draggingFromSquare = square
+
+      const {target, clientX, clientY, offsetX, offsetY} = evt;
+      const squareSize = (target as HTMLElement).offsetHeight;
+      draggingFromPosition = {
+        x: clientX - offsetX + .5 * squareSize,
+        y: clientY - offsetY + .5 * squareSize,
+      }
+      // update position once immediately to prevent flicker
+      dragPositionOffset = {
+        x: clientX - draggingFromPosition.x,
+        y: clientY - draggingFromPosition.y,
+      }
     }
   }
 
@@ -54,8 +69,11 @@ import {
     makeMove(draggingFromSquare, square)
   }
 
-  const handleMousemove = (evt: MouseEvent) => {
-    requestAnimationFrame(() => cursorPosition = { x: evt.clientX, y: evt.clientY })
+  const handleMousemove = ({clientX, clientY}: MouseEvent) => {
+    requestAnimationFrame(() => dragPositionOffset = {
+      x: clientX - draggingFromPosition.x,
+      y: clientY - draggingFromPosition.y,
+    })
   }
 
   const handleMouseup = () => {
@@ -98,8 +116,8 @@ import {
         <div
           class:piece
           class:dragging={draggingFromSquare === square}
-          style:top={draggingFromSquare === square ? `calc(${cursorPosition.y}px - .5em)` : "0"}
-          style:left={draggingFromSquare === square ? `calc(${cursorPosition.x}px - .5em)` : "0"}
+          style:top={draggingFromSquare === square ? `${dragPositionOffset.y}px` : "0"}
+          style:left={draggingFromSquare === square ? `${dragPositionOffset.x}px` : "0"}
         >
           <PieceIcon {piece} />
         </div>
@@ -189,7 +207,7 @@ import {
     align-items: center;
     &.dragging {
       z-index: 100;
-      position: fixed;
+      position: relative;
     }
   }
 
