@@ -45,7 +45,7 @@
   /** Current cursor drag position relative to piece's original position */
   let dragPositionOffset: Point = zero
 
-  $: ({ board, toMove } = game)
+  $: board = game.board
 
   $: rotateCoordinates = rotateFns[rotate % 360]
   $: reverseRotateCoordinates = reverseRotateFns[rotate % 360]
@@ -65,7 +65,7 @@
   }
 
   const handleSquareClick = (square: Square) => {
-    if (board[square]?.[0] === toMove) {
+    if (board[square]) {
       selectedSquare = square
     } else if (selectedSquare) {
       makeMove(selectedSquare, square)
@@ -73,7 +73,7 @@
   }
 
   const handleSquareMousedown = (evt: MouseEvent, square: Square) => {
-    if (board[square]?.[0] === toMove) {
+    if (board[square]) {
       draggingFromSquare = square
 
       const { target, clientX, clientY, offsetX, offsetY } = evt
@@ -118,7 +118,7 @@
   on:mouseup={draggingFromSquare && handleMouseup}
 />
 
-<div class="board">
+<div class="board" class:dragging={draggingFromSquare}>
   {#each asWhite ? squares.toReversed() : squares as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
     {@const isLight = (idx + ~~(idx / 8)) % 2 > 0}
@@ -173,6 +173,9 @@
 
     box-shadow: 3px 3px 10px #0009, 3px 3px 40px #0009;
   }
+  .dragging {
+    cursor: grabbing;
+  }
 
   .square {
     position: relative;
@@ -183,7 +186,10 @@
 
     // text-shadow: 1px 1px 5px #000c;
     &.hasPiece {
-      cursor: pointer;
+      cursor: grab;
+      .dragging & {
+        cursor: grabbing;
+      }
     }
     &.light {
       background: var(--theme-light-square-background);
