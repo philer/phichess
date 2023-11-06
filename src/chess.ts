@@ -46,10 +46,10 @@ export type MoveInput = {
 }
 /** Validated move details deduced from a specific game state */
 export type Move = MoveInput & {
-  algebraic?: AlgebraicMove
+  algebraic: AlgebraicMove
+  check: boolean
   // piece: ColorPiece
   // capture?: ColorPiece
-  // check: bool
 }
 
 export type Game = Readonly<{
@@ -209,56 +209,55 @@ const PIECE_NAMES = {
 }
 
 /** Generate algebraic notation for a legal move. */
-export const toAlgebraic = ({ from, to, promotion }: MoveInput, board: Board): Result<AlgebraicMove, string> => {
-  // TODO promotion
-  const piece = board[from]
-  if (!piece) {
+export const toAlgebraic = (move: Omit<Move, "algebraic">, board: Board): Result<AlgebraicMove, string> => {
+  const { from, to } = move
+  const colorPiece = board[from]
+  if (!colorPiece) {
     return err(`There is no piece on ${from}.`)
   }
-  const color = piece[0] as Color
-  const pieceName = piece.slice(1) as Piece | ""
+  const color = colorPiece[0] as Color
+  const piece = (colorPiece[1] ?? "") as Piece
+  const check = move.check ? "+" : ""
 
   // castling
   const fileDelta = from.charCodeAt(0) - to.charCodeAt(0)
-  if (pieceName === "K" && Math.abs(fileDelta) === 2) {
-    return ok(fileDelta > 0 ? "O-O" : "O-O-O")
+  if (piece === "K" && Math.abs(fileDelta) === 2) {
+    return ok(`${fileDelta > 0 ? "O-O" : "O-O-O"}${check}` satisfies AlgebraicMove)
   }
 
   const opponentPiece = board[to]
     // en passant
-    ?? (pieceName === "" && from[0] !== to[0] ? to[1] + from[0] : undefined)
-  let takes: "" | "x" = ""
-  const promoted = promotion ? `=${promotion}` : ""
-  if (opponentPiece) {
-    if (opponentPiece[0] === color) {
-      return err(`Can't take your own piece on ${to}.`)
-    }
-    takes = "x"
+    ?? (piece === "" && from[0] !== to[0] ? to[1] + from[0] : undefined)
+  if (opponentPiece?.[0] === color) {
+    return err(`Can't take your own piece on ${to}.`)
   }
-  const candidates = match(pieceName)
-    .with("", () => takes ? pawnCaptureSquares(color, to) : [from])
+
+  const candidates = match(piece)
+    .with("", () => opponentPiece ? pawnCaptureSquares(color, to) : [from])
     .with("N", () => knightSquares(to))
-    .with("B", () => bishopPaths(to).map(path => findOnPath(piece, path, board)))
-    .with("R", () => rookPaths(to).map(path => findOnPath(piece, path, board)))
-    .with("Q", () => queenPaths(to).map(path => findOnPath(piece, path, board)))
+    .with("B", () => bishopPaths(to).map(path => findOnPath(colorPiece, path, board)))
+    .with("R", () => rookPaths(to).map(path => findOnPath(colorPiece, path, board)))
+    .with("Q", () => queenPaths(to).map(path => findOnPath(colorPiece, path, board)))
     .with("K", () => kingSquares(to).concat(castleSquares(to)))
     .exhaustive()
     .filter(isTruthy)
-    .filter(sqr => board[sqr] === piece)
+    .filter(sqr => board[sqr] === colorPiece)
 
   if (candidates.length === 0) {
-    return err(`You have no ${PIECE_NAMES[pieceName]} on ${from}.`)
+    return err(`You have no ${PIECE_NAMES[piece]} on ${from}.`)
   }
-  if (candidates.length === 1 && !(pieceName === "" && takes)) {
-    return ok(`${pieceName}${takes}${to}${promoted}` as AlgebraicMove)
+
+  const suffix = `${opponentPiece ? "x" : ""}${to}${move.promotion ? `=${move.promotion}` : ""}${check}`
+  if (candidates.length === 1 && !(piece === "" && opponentPiece)) {
+    return ok(`${piece}${suffix}` as AlgebraicMove)
   }
   if (candidates.filter(candidate => candidate[0] === from[0]).length === 1) {
-    return ok(`${pieceName}${from[0]}${takes}${to}${promoted}` as AlgebraicMove)
+    return ok(`${piece}${from[0]}${suffix}` as AlgebraicMove)
   }
   if (candidates.filter(candidate => candidate[1] === from[1]).length === 1) {
-    return ok(`${pieceName}${from[1]}${takes}${to}${promoted}` as AlgebraicMove)
+    return ok(`${piece}${from[1]}${suffix}` as AlgebraicMove)
   }
-  return ok(`${pieceName}${from}${takes}${to}${promoted}` as AlgebraicMove)
+  return ok(`${piece}${from}${suffix}` as string as AlgebraicMove)
 }
 
 /**
@@ -354,6 +353,7 @@ export const applyMove = (
         if (from === (toMove === "w" ? "e1" : "e8") && rankDelta === 0) {
           // castling
           for (const square of range(from, to)) {
+            // TODO check target square is empty (no cap!)
             if (board[square]) {
               return err("You can't castle on this side, there is a piece in the way.")
             }
@@ -417,11 +417,13 @@ export const applyMove = (
   if (isInCheck(toMove, newBoard)) {
     return err("You are in check.")
   }
-  return toAlgebraic({ from, to, promotion }, board)
+  const nextToMove = toMove === "w" ? "b": "w"
+  const check = isInCheck(nextToMove, newBoard)
+  return toAlgebraic({ from, to, promotion, check }, board)
     .map(algebraic => ({
       board: newBoard,
-      toMove: toMove === "w" ? "b": "w",
-      history: [...history, { from, to, promotion, algebraic }],
+      toMove: nextToMove,
+      history: [...history, { from, to, promotion, algebraic, check }],
       graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
     }))
 }
