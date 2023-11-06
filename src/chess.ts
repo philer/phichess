@@ -443,6 +443,6 @@ export const applyMove = (
 export const applyHistory = (game: Game, history: MoveInput[]): Result<Game> =>
   history.reduce((result, move) => result.flatMap(game => applyMove(game, move)), ok(game))
 
-/** Re-create the given game up to the previous move. */
-export const revertLastMove = (game: Game): Game =>
-  applyHistory(START_GAME, game.history.slice(0, -1)).unwrap()
+/** Re-create the given game up to a specific move. */
+export const revertToMove = (idx: number, game: Game): Game =>
+  applyHistory(START_GAME, game.history.slice(0, idx)).unwrap()
