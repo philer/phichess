@@ -352,19 +352,16 @@ export const applyMove = (
       if (Math.abs(rankDelta) > 1 || Math.abs(fileDelta) > 1) {
         if (from === (toMove === "w" ? "e1" : "e8") && rankDelta === 0) {
           // castling
-          for (const square of range(from, to)) {
-            // TODO check target square is empty (no cap!)
-            if (board[square]) {
-              return err("You can't castle on this side, there is a piece in the way.")
-            }
-          }
-          if (isInCheck(toMove, board)) {
-            return err("You can't castle while in check.")
-          }
           const rank = from[1] as Rank
           const [kingTo, rookFrom, rookTo]: [Square, Square, Square] = fileDelta > 0
             ? [`g${rank}`, `h${rank}`, `f${rank}`]
             : [`c${rank}`, `a${rank}`, `d${rank}`]
+          if (findBlockedSquare(board, from, rookFrom)) {
+            return err("You can't castle on this side, there is a piece in the way.")
+          }
+          if (isAttacked(opponent, from, board)) {
+            return err("You can't castle while in check.")
+          }
           if (isAttacked(opponent, rookTo, board)) {
             return err("The king can't castle through check.")
             // Target square check will be validated at the end.
