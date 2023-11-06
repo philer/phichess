@@ -55,12 +55,6 @@ export type Move = MoveInput & {
 export type Game = Readonly<{
   board: Board
   toMove: Color
-  canCastle: Readonly<{
-    whiteLong: boolean
-    whiteShort: boolean
-    blackLong: boolean
-    blackShort: boolean
-  }>
   history: ReadonlyArray<Move>
   graveyard: ReadonlyArray<MortalColorPiece>
 }>
@@ -68,12 +62,6 @@ export type Game = Readonly<{
 export const START_GAME: Game = Object.freeze({
   board: START_BOARD,
   toMove: "w",
-  canCastle: Object.freeze({
-    whiteLong: true,
-    whiteShort: true,
-    blackLong: true,
-    blackShort: true,
-  }),
   history: Object.freeze([]),
   graveyard: Object.freeze([]),
 })
@@ -285,7 +273,7 @@ export const requiresPromotion = ({ from, to }: MoveInput, board: Board) =>
  * return an updated game state if the move is legal.
  */
 export const applyMove = (
-  { board, toMove, history, canCastle, graveyard }: Game,
+  { board, toMove, history, graveyard }: Game,
   { from, to, promotion }: MoveInput,
 ): Result<Game, string> => {
   let { [from]: piece, [to]: capture, ...remainingBoard } = board
@@ -379,13 +367,13 @@ export const applyMove = (
             : [`c${rank}`, `a${rank}`, `d${rank}`]
           if (isAttacked(opponent, rookTo, board)) {
             return err("The king can't castle through check.")
+            // Target square check will be validated at the end.
           }
-          // Target square check will be validated at the end.
-          if (toMove === "w"
-            ? !(fileDelta > 0 ? canCastle.whiteShort : canCastle.whiteLong)
-            : !(fileDelta > 0 ? canCastle.blackShort : canCastle.blackLong)
-          ) {
-            return err("You can no longer castle on this side.")
+          if (history.some(mv => mv.from === from)) {
+            return err("You can no longer castle, your king has already moved.")
+          }
+          if (history.some(mv => mv.from === rookFrom)) {
+            return err("You can no longer castle on this side, the rook has already moved.")
           }
           to = kingTo
           // @ts-ignore remainingBoard isn't empty
@@ -434,7 +422,6 @@ export const applyMove = (
       board: newBoard,
       toMove: toMove === "w" ? "b": "w",
       history: [...history, { from, to, promotion, algebraic }],
-      canCastle,
       graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
     }))
 }
