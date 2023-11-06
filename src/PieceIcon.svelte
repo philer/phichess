@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-    import { getContext } from "svelte"
+  import { getContext } from "svelte"
 
   import type { ColorPiece } from "./chess"
   import type { Theme } from "./theme"

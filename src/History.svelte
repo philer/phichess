@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { revertToMove, type Game, type Color, type Move } from "./chess"
+  import { type Game, type Move, revertToMove } from "./chess"
   import { pairs } from "./util"
 
   export let game: Game
@@ -9,7 +9,7 @@
 
   $: {
     if (!isSubGame(game, fullGame)) {
-      fullGame = {...game}
+      fullGame = { ...game }
     }
     movePairs = fullGame.history.length
       ? Array.from(pairs(fullGame.history))
@@ -21,7 +21,7 @@
         && short.history.every(({ from, to, promotion }, idx) =>
             long.history[idx].from === from
             && long.history[idx].to === to
-            && long.history[idx].promotion === promotion
+            && long.history[idx].promotion === promotion,
           )
 
   const gotoMove = (idx: number) => {

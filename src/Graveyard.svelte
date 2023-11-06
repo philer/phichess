@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Color, type Game, type ColorPiece } from "./chess"
+  import { type Color, type ColorPiece, type Game } from "./chess"
   import PieceIcon from "./PieceIcon.svelte"
 
   export let game: Game
@@ -9,7 +9,7 @@
       game.graveyard.reduce(
         (counts, piece) => ({ ...counts, [piece]: counts[piece] + 1 }),
         { w: 0, wN: 0, wB: 0, wR: 0, wQ: 0, b: 0, bN: 0, bB: 0, bR: 0, bQ: 0 },
-      )
+      ),
     ) as [ColorPiece, number][]
 </script>
 

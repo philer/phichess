@@ -4,7 +4,7 @@
   import Game from "./Game.svelte"
   import { classicPieces, lichessBoard, type Theme } from "./theme"
 
-  let theme = setContext<Theme>("theme", {
+  const theme = setContext<Theme>("theme", {
     // pageBackground: "linear-gradient(0deg, rgba(1,33,61,1) 0%, rgba(0,86,103,1) 100%)",
     pageBackground: "#222",
     board: lichessBoard,

@@ -2,7 +2,7 @@
   import { onMount } from "svelte"
 
   import { START_GAME } from "./chess"
-    import History from "./History.svelte"
+  import History from "./History.svelte"
   import Perspective from "./Perspective.svelte"
 
   let game = START_GAME
@@ -15,7 +15,7 @@
     autoflip: boolean,
   }
 
-  let layout: Layout = {
+  const layout: Layout = {
     perspectives: 2,
     opposite: true,
     autoflip: false,

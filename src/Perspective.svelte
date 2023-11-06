@@ -1,7 +1,7 @@
 <script lang="ts">
   import { type Game } from "./chess"
   import Chessboard from "./Chessboard.svelte"
-  import Graveyard from "./Graveyard.svelte";
+  import Graveyard from "./Graveyard.svelte"
   import PieceIcon from "./PieceIcon.svelte"
 
   export let game: Game

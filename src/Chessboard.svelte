@@ -2,10 +2,10 @@
   import {
     applyMove, type Game,
     type MoveInput,
+    type PromotablePiece,
     requiresPromotion,
     type Square,
     squares,
-    type PromotablePiece,
   } from "./chess"
   import PieceIcon from "./PieceIcon.svelte"
   import { clickOutside } from "./svelte-util"
