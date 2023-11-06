@@ -1,22 +1,27 @@
 <script lang="ts">
   import { mdiArrowUpDownBold, mdiFormatRotate90 } from "@mdi/js"
+  import type { Readable } from "svelte/store"
 
-  import { type Game } from "./chess"
+  import { type Color, type Game } from "./chess"
   import Chessboard from "./Chessboard.svelte"
+  import Clock from "./Clock.svelte"
   import Graveyard from "./Graveyard.svelte"
   import Icon from "./Icon.svelte"
 
   export let game: Game
   export let asWhite = true
   export let rotate = 0
+  export let clock: Readable<Record<Color, number>>
 </script>
 
 <div class="perspective" style:transform={`rotate(${rotate}deg)`}>
   <div class="above">
     <Graveyard {game} color={asWhite ? "w" : "b"} />
+    <Clock seconds={$clock[asWhite ? "b" : "w"]} />
   </div>
   <div class="below">
     <Graveyard {game} color={asWhite ? "b" : "w"} />
+    <Clock seconds={$clock[asWhite ? "w" : "b"]} />
   </div>
 
   <div class="left"></div>
@@ -66,6 +71,7 @@
   .left, .right, .above, .below {
     display: flex;
     align-items: center;
+    justify-content: space-between;
   }
   .left, .right {
     flex-direction: column;
