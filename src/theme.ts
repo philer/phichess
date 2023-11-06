@@ -1,6 +1,6 @@
 export type PieceTheme =
-  | { type: "font" }
-  | { type: "svg", name: "classic", scale: number }
+  | { type: "font", name: string, scale: number }
+  | { type: "svg", name: string, scale: number }
 
 export type BoardTheme = {
   lightBackground: string,
@@ -36,6 +36,6 @@ export const cyanBoard: BoardTheme = {
   selectedDarkBackground: "#885",
 }
 
-export const fontPieces: PieceTheme = { type: "font" }
+export const fontPieces: PieceTheme = { type: "font", name: "serif", scale: 1.1 }
 
-export const classicPieces: PieceTheme = { type: "svg", name: "classic", scale: .9 }
+export const classicPieces: PieceTheme = { type: "svg", name: "classic", scale: 1 }

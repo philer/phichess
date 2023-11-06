@@ -21,9 +21,12 @@
 </script>
 
 {#if pieces.type === "font"}
-  <span class={piece[0]} class:outline>
-    {PIECE_TO_UTF8[piece.slice(1)]}
-  </span>
+  <span
+    class={piece[0]}
+    class:outline
+    style:font-family={pieces.name}
+    style:font-size={`${pieces.scale}em`}
+  >{PIECE_TO_UTF8[piece.slice(1)]}</span>
 {:else}
   <img
     src={`/pieces/${pieces.name}/${piece}.svg`}
@@ -38,11 +41,13 @@
   span {
     font-family: "Linux Libertine";
 
-    &:global(.w) { color: white }
-    &:global(.b) { color: #111 }
-    &.outline {
-      &:global(.w) { -webkit-text-stroke: .012em black }
-      &:global(.b) { -webkit-text-stroke: .012em white }
+    &:global(.w) {
+      color: white;
+      -webkit-text-stroke: .012em black;
+    }
+    &:global(.b) {
+      color: #111;
+      -webkit-text-stroke: .012em white;
     }
   }
 
