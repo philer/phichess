@@ -40,10 +40,23 @@
 </script>
 
 <div class="game">
-  <div bind:this={layoutContainer} class="layout" style:flex-flow={flowDirection} style:--perspective-size={`${perspectiveSize}px`}>
+  <div
+    bind:this={layoutContainer}
+    class="layout"
+    style:flex-flow={flowDirection}
+    style:--perspective-size={`${perspectiveSize}px`}
+  >
     {#each { length: layout.perspectives } as _, idx (idx)}
       <Perspective bind:game />
     {/each}
+    {#if game.history.at(-1)?.mate}
+      <div class="modal">
+        <div class="checkmate">
+          <h3>Checkmate!</h3>
+          {game.toMove === "w" ? "Black" : "White"} wins.
+        </div>
+      </div>
+    {/if}
   </div>
 
   {#if showHistory}
@@ -52,6 +65,7 @@
       <History bind:game />
     </aside>
   {/if}
+
 </div>
 
 <style lang="scss">
@@ -63,6 +77,7 @@
     justify-content: stretch;
   }
   .layout {
+    position: relative;
     width: 100%;
     height: 100%;
     flex: 100% 1 1;
@@ -91,5 +106,24 @@
     &:hover, &:active, &:focus {
       opacity: 1;
     }
+  }
+
+  .modal {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    > div {
+      background: #333;
+      border-radius: 3px;
+      box-shadow: 3px 3px 10px #0008;
+    }
+  }
+  .checkmate {
+    h3 {
+      margin-bottom: 1em;
+    }
+    padding: 1em 2em;
   }
 </style>
