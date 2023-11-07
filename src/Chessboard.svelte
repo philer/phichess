@@ -205,7 +205,7 @@
     font-family: "Linux Libertine";
     user-select: none;
 
-    box-shadow: 3px 3px 10px #0009, 3px 3px 40px #0009;
+    box-shadow: 3px 3px 10px #0006, 3px 3px 40px #0006;
   }
   .dragging {
     cursor: grabbing;

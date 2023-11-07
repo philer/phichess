@@ -5,9 +5,8 @@
   import PieceIcon from "./PieceIcon.svelte"
 
   export let game: Game
-
-  let rotate = 0
-  let asWhite = true
+  export let asWhite = true
+  export let rotate = 0
 </script>
 
 <div class="perspective" style:transform={`rotate(${rotate}deg)`}>
@@ -21,10 +20,16 @@
   <div class="left"></div>
 
   <div class="right">
-    <button on:click={() => rotate += 90}>↶</button>
-    <button on:click={() => asWhite = !asWhite}>
-      <PieceIcon piece={asWhite ? "b" : "w"} outline />
-    </button>
+    <div class="tools">
+      <!-- ↶ ⤶ ↵ ↱↲ ⤹⤸ ◇ 🙾 -->
+      <button on:click={() => rotate += 90}>
+          <div style:transform="rotate(90deg)">↱↲</div>
+      </button>
+      <button on:click={() => asWhite = !asWhite}>
+        ⬍
+        <!-- <PieceIcon piece={asWhite ? "b" : "w"} outline /> -->
+      </button>
+    </div>
   </div>
 
   <Chessboard bind:game {asWhite} {rotate} />
@@ -42,19 +47,15 @@
     transform: rotate(0deg);
     transition: 0.5s transform;
 
-    // display: flex;
-    // align-items: stretch;
-    // justify-content: stretch;
-
-    background: #0002;
-
     display: grid;
-    grid-template-rows: .5fr 8fr .5fr;
-    grid-template-columns: .5fr 8fr .5fr;
+    grid-template-rows: var(--frame-size) var(--board-size) var(--frame-size);
+    grid-template-columns: var(--frame-size) var(--board-size) var(--frame-size);
     grid-template-areas:
       ".    above     ."
       "left board right"
       ".    below     .";
+
+    background: #fff2;
   }
 
   .above { grid-area: above }
@@ -65,16 +66,25 @@
   .left, .right, .above, .below {
     display: flex;
     align-items: center;
-    align-items: center;
   }
   .left, .right {
     flex-direction: column;
   }
 
-  .right > button {
-    appearance: none;
-    background: #0005;
-    width: 100%;
-    aspect-ratio: .5;
+  .tools {
+    display: flex;
+    flex-direction: column;
+    box-shadow: 1px 1px 7px #0008;
+    > button {
+      font-size: calc(.3333 * var(--square-size));
+      height: var(--square-size);
+      aspect-ratio: .5;
+      background: #fff2;
+      box-shadow: inset .7em .7em 1em -.5em #fff6;
+      transition: .3s background;
+      &:hover, &:active, &:focus {
+        background: #fff5;
+      }
+    }
   }
 </style>

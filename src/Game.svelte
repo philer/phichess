@@ -7,19 +7,14 @@
 
   let game = START_GAME
 
-  let showHistory = true
+  let showSidebar = false
 
-  type Layout = {
-    perspectives: 1 | 2,
-    opposite: boolean,
-    autoflip: boolean,
-  }
+  type Layout = { asWhite: boolean, autoflip?: boolean }[]
 
-  const layout: Layout = {
-    perspectives: 2,
-    opposite: true,
-    autoflip: false,
-  }
+  const layout: Layout = [
+    { asWhite: true },
+    { asWhite: false },
+  ]
 
   let layoutContainer: HTMLDivElement
   let flowDirection: "row" | "column" = "row"
@@ -46,9 +41,10 @@
     style:flex-flow={flowDirection}
     style:--perspective-size={`${perspectiveSize}px`}
   >
-    {#each { length: layout.perspectives } as _, idx (idx)}
-      <Perspective bind:game />
+    {#each layout as { asWhite }, idx (idx)}
+      <Perspective bind:game bind:asWhite />
     {/each}
+
     {#if game.history.at(-1)?.mate}
       <div class="modal">
         <div class="checkmate">
@@ -59,11 +55,13 @@
     {/if}
   </div>
 
-  {#if showHistory}
-    <aside class="history">
-      <button class="close" on:click={() => showHistory = false}>✕</button>
+  {#if showSidebar}
+    <aside class="sidebar">
+      <button class="close" on:click={() => showSidebar = false}>»</button>
       <History bind:game />
     </aside>
+  {:else}
+    <button class="showSidebar" on:click={() => showSidebar = true}>«</button>
   {/if}
 
 </div>
@@ -88,24 +86,33 @@
     overflow: hidden;
   }
 
-  .history {
-    position: relative;
+  button {
+    font-family: sans-serif;
+    transition: .3s background, .3s box-shadow;
+    background: #333;
+    box-shadow: 1px 1px 3px #0005;
+    &:hover, &:focus, &:active {
+      background: #666;
+      box-shadow: 1px 1px 5px #0008;
+    }
+  }
+
+  .sidebar {
     width: 12em;
     height: 100%;
-    // margin: 0 1em;
+    display: flex;
+    flex-direction: column;
     background: #0003;
+    box-shadow: 1px 1px 3px #0008;
+    .close {
+      height: 2em;
+    }
   }
-  .close {
-    padding: .25em;
-    font-family: sans-serif;
+  .showSidebar {
     position: absolute;
     inset: 0 0 auto auto;
-
-    opacity: .5;
-    transition: .2s opacity;
-    &:hover, &:active, &:focus {
-      opacity: 1;
-    }
+    width: 2em;
+    height: 2em;
   }
 
   .modal {

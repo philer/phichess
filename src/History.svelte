@@ -40,12 +40,14 @@
         <span class="moveNumber">{idx + 1}.</span>
         <button
           on:click={() => gotoMove(idx * 2 + 1)}
+          class:current={idx * 2 + 1 === game.history.length}
           class:ghost={idx * 2 + 1 > game.history.length}
         >
           {whiteMove?.algebraic ?? ""}
         </button>
         <button
           on:click={() => gotoMove(idx * 2 + 2)}
+          class:current={idx * 2 + 2 === game.history.length}
           class:ghost={idx * 2 + 2 > game.history.length}
         >
           {blackMove?.algebraic ?? ""}
@@ -61,20 +63,26 @@
     display: grid;
     align-content: start;
     grid-template-columns: min-content 1fr 1fr;
-    gap: 0.5em 1em;
+    // gap: 0.5em 1em;
 
-    padding: 1em 1em .5em;
+    // padding: 1em 1em .5em;
+    background: #fff1;
   }
   li {
     display: contents;
   }
   span, button {
+    padding: .25em .5em;
     text-align: left;
   }
   .moveNumber {
     text-align: right;
     font-weight: bold;
     opacity: .5;
+    background: #fff2;
+  }
+  .current {
+    background: #fff2;
   }
   .ghost {
     opacity: .5;
