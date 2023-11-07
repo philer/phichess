@@ -24,6 +24,8 @@ export abstract class Result<T = unknown, E = unknown> implements Promise<T> {
 
   abstract flatMapError<Y = E>(fn: (value: E) => Result<T, Y>): Result<T, Y>
 
+  abstract isOk(): boolean
+
   abstract unwrap(): T
 
   abstract withDefault(value: T): T
@@ -74,6 +76,10 @@ export class Ok<T = unknown, E = unknown> extends Result<T, E> {
     return new Ok(this._value)
   }
 
+  isOk(): true {
+    return true
+  }
+
   unwrap(): T {
     return this._value
   }
@@ -109,6 +115,10 @@ export class Err<T = unknown, E = unknown> extends Result<T, E> {
 
   flatMapError<Y = E>(fn: (value: E) => Result<T, Y>): Result<T, Y> {
     return fn(this._value)
+  }
+
+  isOk(): false {
+    return false
   }
 
   unwrap(): T {

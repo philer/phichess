@@ -38,19 +38,14 @@ export type AlgebraicMove
   | `${File}${1|8}${""|"="}${PieceNotPawn}${Check}`
   | `${File}x${File}${1|8}${""|"="}${PieceNotPawn}${Check}`
 
-/** Data provided by a user that is intended to be applied to a specific game state */
-export type MoveInput = {
+export type Move = Readonly<{
   from: Square
   to: Square
   promotion?: PromotablePiece
-}
-/** Validated move details deduced from a specific game state */
-export type Move = MoveInput & {
-  algebraic: AlgebraicMove
-  check: boolean
-  // piece: ColorPiece
-  // capture?: ColorPiece
-}
+  check?: boolean
+  mate?: boolean
+  algebraic?: AlgebraicMove
+}>
 
 export type Game = Readonly<{
   board: Board
@@ -199,6 +194,95 @@ export const isInCheck = (color: Color, board: Board) =>
   )
 
 
+const getAttackedSquaresOnRays = function*(toMove: Color, board: Board, rays: Iterable<Square>[]) {
+  for (const path of rays) {
+    for (const square of path) {
+      if (board[square]?.[0] === toMove) {
+        break
+      }
+      yield square
+    }
+  }
+}
+
+const withPromotions = (toMove: Color, { from, to }: Move) =>
+  to[1] === (toMove === "w" ? "8" : "1")
+    ? Array.from("QNRB", promotion => ({ from, to, promotion }))
+    : [{ from, to }]
+
+const generateMoves = function*(toMove: Color, board: Board) {
+  for (const [from, piece] of Object.entries(board) as [Square, ColorPiece][]) {
+    if (piece[0] === toMove) {
+      switch (piece.slice(1)) {
+        case "": {
+          const forwards = toMove === "w" ? 1 : -1
+          let to: Square | undefined
+          for (const fileDelta of [1, -1]) {
+            to = shift(fileDelta, forwards, from)
+            if (to && board[to] && board[to]![0] !== toMove) {
+              yield * withPromotions(toMove, { from, to })
+            }
+          }
+          to = shift(0, forwards, from)!
+          if (!board[to]) {
+            yield * withPromotions(toMove, { from, to })
+          }
+          if (from[1] === (toMove === "w" ? "2" : "7")) {
+            to = shift(0, 2 * forwards, from)!
+            if (!board[to]) {
+              yield { from, to }
+            }
+          }
+          break
+        }
+        case "N":
+          yield * knightSquares(from)
+            .filter(to => board[to]?.[0] !== toMove)
+            .map(to => ({ from, to }))
+          break
+        case "K":
+          yield * kingSquares(from)
+            .filter(to => board[to]?.[0] !== toMove)
+            .map(to => ({ from, to }))
+          break
+        case "B":
+          for (const to of getAttackedSquaresOnRays(toMove, board, bishopPaths(from))) {
+            yield { from, to }
+          }
+          break
+        case "R":
+          for (const to of getAttackedSquaresOnRays(toMove, board, rookPaths(from))) {
+            yield { from, to }
+          }
+          break
+        case "Q":
+          for (const to of getAttackedSquaresOnRays(toMove, board, queenPaths(from))) {
+            yield { from, to }
+          }
+          break
+      }
+    }
+  }
+}
+
+export const generateLegalMoves = function*(game: Game): Iterable<Move> {
+  for (const move of generateMoves(game.toMove, game.board)) {
+    const result = _applyMove(game, move)
+    if (result.isOk()) {
+      yield result.unwrap().history.at(-1)!
+    }
+  }
+}
+
+export const hasLegalMoves = (game: Game) => {
+  for (const move of generateMoves(game.toMove, game.board)) {
+    if (_applyMove(game, move).isOk()) {
+      return true
+    }
+  }
+  return false
+}
+
 const PIECE_NAMES = {
   "K": "king",
   "Q": "queen",
@@ -209,7 +293,7 @@ const PIECE_NAMES = {
 }
 
 /** Generate algebraic notation for a legal move. */
-export const toAlgebraic = (move: Omit<Move, "algebraic">, board: Board): Result<AlgebraicMove, string> => {
+export const toAlgebraic = (move: Move, board: Board): Result<AlgebraicMove, string> => {
   const { from, to } = move
   const colorPiece = board[from]
   if (!colorPiece) {
@@ -217,7 +301,7 @@ export const toAlgebraic = (move: Omit<Move, "algebraic">, board: Board): Result
   }
   const color = colorPiece[0] as Color
   const piece = (colorPiece[1] ?? "") as Piece
-  const check = move.check ? "+" : ""
+  const check = move.mate ? "#" : move.check ? "+" : ""
 
   // castling
   const fileDelta = from.charCodeAt(0) - to.charCodeAt(0)
@@ -264,16 +348,17 @@ export const toAlgebraic = (move: Omit<Move, "algebraic">, board: Board): Result
  * Does the given move require specifying a promoted piece,
  * i.e. does a pawn reach the end of the board from its player's perspective?
  * */
-export const requiresPromotion = ({ from, to }: MoveInput, board: Board) =>
+export const requiresPromotion = ({ from, to }: Move, board: Board) =>
   board[from]?.length === 1 && to[1] === (board[from] === "w" ? "8": "1")
 
 /**
  * Validate a move given as user input against the current game state and
  * return an updated game state if the move is legal.
+ * The updated game's history contains the unaltered input move.
  */
-export const applyMove = (
+const _applyMove = (
   { board, toMove, history, graveyard }: Game,
-  { from, to, promotion }: MoveInput,
+  { from, to, promotion }: Move,
 ): Result<Game, string> => {
   let { [from]: piece, [to]: capture, ...remainingBoard } = board
 
@@ -410,23 +495,38 @@ export const applyMove = (
       break
     }
   }
-  const newBoard = { ...remainingBoard, [to]: piece }
+  const newBoard: Board = { ...remainingBoard, [to]: piece }
   if (isInCheck(toMove, newBoard)) {
     return err("You are in check.")
   }
-  const nextToMove = toMove === "w" ? "b": "w"
-  const check = isInCheck(nextToMove, newBoard)
-  return toAlgebraic({ from, to, promotion, check }, board)
-    .map(algebraic => ({
-      board: newBoard,
-      toMove: nextToMove,
-      history: [...history, { from, to, promotion, algebraic, check }],
-      graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
-    }))
+  return ok({
+    board: newBoard,
+    toMove: opponent,
+    history: [...history, { from, to, promotion }],
+    graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
+  })
 }
 
+/**
+ * Validate a move given as user input against the current game state and
+ * return an updated game state if the move is legal.
+ * The updated game's history contains added details for the new move.
+ */
+export const applyMove = (game: Game, move: Move): Result<Game, string> =>
+  _applyMove(game, move)
+    .map(newGame => {
+      const check = isInCheck(newGame.toMove, newGame.board)
+      const mate = !hasLegalMoves(newGame)
+      const algebraic = toAlgebraic({ ...move, check, mate }, game.board).unwrap()
+      return {
+        ...newGame,
+        history: [...game.history, { ...move, check, mate, algebraic }],
+      }
+    })
+
+
 /** Validate and apply an array of moves to a given game */
-export const applyHistory = (game: Game, history: MoveInput[]): Result<Game> =>
+export const applyHistory = (game: Game, history: Move[]): Result<Game> =>
   history.reduce((result, move) => result.flatMap(game => applyMove(game, move)), ok(game))
 
 /** Re-create the given game up to a specific move. */

@@ -1,7 +1,8 @@
 <script context="module" lang="ts">
   import {
-    applyMove, type Game,
-    type MoveInput,
+    applyMove,
+    type Game,
+    type Move,
     type PromotablePiece,
     requiresPromotion,
     type Square,
@@ -42,7 +43,7 @@
   $: rotateCoordinates = rotateFns[rotate % 360]
   $: reverseRotateCoordinates = reverseRotateFns[rotate % 360]
 
-  let promotionMove: MoveInput | undefined
+  let promotionMove: Move | undefined
   let selectedSquare: Square | undefined
   let draggingFromSquare: Square | undefined
   /** Origin for relative mouse movement while dragging a piece */
@@ -51,7 +52,7 @@
   let dragPositionOffset: Point = zero
 
   const makeMove = (from: Square, to: Square, promotion?: PromotablePiece) => {
-    const input: MoveInput = { from, to, promotion }
+    const input: Move = { from, to, promotion }
     if (requiresPromotion(input, board) && !promotion) {
       promotionMove = input
       return
