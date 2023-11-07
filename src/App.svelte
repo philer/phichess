@@ -22,6 +22,10 @@
   style:--theme-dark-square-background={theme.board.darkBackground}
   style:--theme-selected-light-square-background={theme.board.selectedLightBackground}
   style:--theme-selected-dark-square-background={theme.board.selectedDarkBackground}
+  style:--theme-last-move-light-square-background={theme.board.lastMoveLightBackground}
+  style:--theme-last-move-dark-square-background={theme.board.lastMoveDarkBackground}
+  style:--theme-check-light-square-background={theme.board.checkLightBackground}
+  style:--theme-check-dark-square-background={theme.board.checkDarkBackground}
 >
   <Game />
 </div>

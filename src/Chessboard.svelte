@@ -39,6 +39,7 @@
   export let showCoordinates: boolean = true
 
   $: ({ board, toMove } = game)
+  $: lastMove = game.history.at(-1)
 
   $: rotateCoordinates = rotateFns[rotate % 360]
   $: reverseRotateCoordinates = reverseRotateFns[rotate % 360]
@@ -145,6 +146,8 @@
       class:dark={!isLight}
       class:hasPiece={piece}
       class:selected={selectedSquare === square}
+      class:lastMove={square === lastMove?.from || square === lastMove?.to}
+      class:check={lastMove?.check && piece === `${toMove}K`}
       role="button"
       tabindex="0"
     >
@@ -222,19 +225,19 @@
         cursor: grabbing;
       }
     }
-    &.light {
-      background: var(--theme-light-square-background);
+    &.light { background: var(--theme-light-square-background) }
+    &.dark { background: var(--theme-dark-square-background) }
+    &.check {
+      &.light { background: var(--theme-check-light-square-background) }
+      &.dark { background: var(--theme-check-dark-square-background) }
     }
-    &.dark {
-      background: var(--theme-dark-square-background);
+    &.lastMove {
+      &.light { background: var(--theme-last-move-light-square-background) }
+      &.dark { background: var(--theme-last-move-dark-square-background) }
     }
     &.selected {
-      &.light {
-        background: var(--theme-selected-light-square-background);
-      }
-      &.dark {
-        background: var(--theme-selected-dark-square-background);
-      }
+      &.light { background: var(--theme-selected-light-square-background) }
+      &.dark { background: var(--theme-selected-dark-square-background) }
     }
     .file,
     .rank {

@@ -11,9 +11,10 @@ or on a monitor while sitting next to each other.
 To do
 -----
 
-* [ ] detect checkmate
-* [ ] piece symbols in algebraic notation
-* [ ] highlight check
-* [ ] highlight last move
+* [x] detect checkmate
+* [ ] detect stalemate
 * [ ] proper layout
 * [ ] config menu
+* [ ] piece symbols in algebraic notation
+* [x] highlight last move
+* [x] highlight check
