@@ -304,7 +304,7 @@ export const toAlgebraic = (move: Move, board: Board): Result<AlgebraicMove, str
   const check = move.mate ? "#" : move.check ? "+" : ""
 
   // castling
-  const fileDelta = from.charCodeAt(0) - to.charCodeAt(0)
+  const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
   if (piece === "K" && Math.abs(fileDelta) === 2) {
     return ok(`${fileDelta > 0 ? "O-O" : "O-O-O"}${check}` satisfies AlgebraicMove)
   }
