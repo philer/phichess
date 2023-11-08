@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { mdiChevronDoubleLeft, mdiChevronDoubleRight } from "@mdi/js"
   import { onMount } from "svelte"
 
   import { START_GAME } from "./chess"
   import History from "./History.svelte"
+  import Icon from "./Icon.svelte"
   import Perspective from "./Perspective.svelte"
 
   let game = START_GAME
@@ -57,11 +59,11 @@
 
   {#if showSidebar}
     <aside class="sidebar">
-      <button class="close" on:click={() => showSidebar = false}>»</button>
+      <button class="close" on:click={() => showSidebar = false}><Icon path={mdiChevronDoubleRight} /></button>
       <History bind:game />
     </aside>
   {:else}
-    <button class="showSidebar" on:click={() => showSidebar = true}>«</button>
+    <button class="showSidebar" on:click={() => showSidebar = true}><Icon path={mdiChevronDoubleLeft} /></button>
   {/if}
 
 </div>
