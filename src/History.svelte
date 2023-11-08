@@ -1,6 +1,9 @@
 <script lang="ts">
-  import Algebraic from "./Algebraic.svelte"
+  import { mdiUndo } from "@mdi/js"
+
+import Algebraic from "./Algebraic.svelte"
   import { type Game, type Move, revertToMove } from "./chess"
+  import Icon from "./Icon.svelte"
   import { pairs } from "./util"
 
   export let game: Game
@@ -56,7 +59,14 @@
       </li>
     {/each}
   </ol>
-  <button on:click={undoLastMove} disabled={!game.history.length}>Undo</button>
+  <button
+    on:click={undoLastMove}
+    disabled={!game.history.length}
+    class="undo"
+    title="Undo last move"
+  >
+    <Icon path={mdiUndo} />
+  </button>
 </div>
 
 <style lang="scss">
@@ -71,13 +81,13 @@
   }
   li {
     display: contents;
-  }
-  span, button {
-    padding: .25em .5em;
-    text-align: left;
-    white-space: nowrap;
-    // display: flex;
-    // align-items: center;
+    span, button {
+      padding: .25em .5em;
+      text-align: left;
+      white-space: nowrap;
+      // display: flex;
+      // align-items: center;
+    }
   }
   .moveNumber {
     text-align: right;
@@ -91,8 +101,18 @@
   .ghost {
     opacity: .5;
   }
-  button:disabled {
-    opacity: .3;
-    cursor: default;
+  button.undo {
+    line-height: 2em;
+    width: 100%;
+    background: #333;
+    transition: .3s background;
+    &:not(:disabled):hover {
+      background: #555;
+    }
+    &:disabled {
+      opacity: .3;
+      cursor: default;
+    }
   }
+
 </style>
