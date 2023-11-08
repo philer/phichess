@@ -23,6 +23,11 @@
 
 <style lang="scss">
   svg {
-    vertical-align: -.1em;
+    vertical-align: var(--icon-vertical-align, -.1em);
+  }
+  path {
+    paint-order: stroke;
+    stroke-width: 2pt;
+    stroke: var(--icon-stroke, none);
   }
 </style>

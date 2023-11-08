@@ -10,7 +10,6 @@
     board: lichessBoard,
     // board: chessComBoard,
     // board: cyanBoard,
-    // pieces: fontPieces,
     pieces: classicPieces,
   })
 </script>

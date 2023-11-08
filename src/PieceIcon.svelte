@@ -1,62 +1,33 @@
-<script context="module" lang="ts">
-  import { getContext } from "svelte"
-
-  import type { ColorPiece } from "./chess"
-  import type { Theme } from "./theme"
-
-  const PIECE_TO_UTF8: Record<string, string> = {
-    "K": "♚", //"♔",
-    "Q": "♛", //"♕",
-    "R": "♜", //"♖",
-    "B": "♝", //"♗",
-    "N": "♞", //"♘",
-    "": "♟", //"♙",
-  }
-</script>
-
 <script lang="ts">
-  export let piece: ColorPiece
-  export let outline: boolean = false
-  const { pieces } = getContext<Theme>("theme")
+  import {
+    mdiChessBishop,
+    mdiChessKing,
+    mdiChessKnight,
+    mdiChessPawn,
+    mdiChessQueen,
+    mdiChessRook,
+  } from "@mdi/js"
+
+  import Icon from "./Icon.svelte"
+
+  export let piece: string
+  export let size: string = "1em"
+  export let flip: "horizontal" | "vertical" | undefined = undefined
+  export let rotate: number = 0
 </script>
 
-{#if pieces.type === "font"}
-  <span
-    class={piece[0]}
-    class:outline
-    style:font-family={pieces.name}
-    style:font-size={`${pieces.scale}em`}
-  >{PIECE_TO_UTF8[piece.slice(1)]}</span>
+{#if piece === ""}
+  <Icon path={mdiChessPawn} {size} {flip} {rotate} />
+{:else if piece === "N"}
+  <Icon path={mdiChessKnight} {size} {flip} {rotate} />
+{:else if piece === "B"}
+  <Icon path={mdiChessBishop} {size} {flip} {rotate} />
+{:else if piece === "R"}
+  <Icon path={mdiChessRook} {size} {flip} {rotate} />
+{:else if piece === "Q"}
+  <Icon path={mdiChessQueen} {size} {flip} {rotate} />
+{:else if piece === "K"}
+  <Icon path={mdiChessKing} {size} {flip} {rotate} />
 {:else}
-  <img
-    src={`/pieces/${pieces.name}/${piece}.svg`}
-    alt={piece}
-    class={piece[0]}
-    class:outline
-    style:font-size={`${pieces.scale}em`}
-  />
+  {piece}
 {/if}
-
-<style lang="scss">
-  span {
-    font-family: "Linux Libertine";
-
-    &:global(.w) {
-      color: white;
-      -webkit-text-stroke: .012em black;
-    }
-    &:global(.b) {
-      color: #111;
-      -webkit-text-stroke: .012em white;
-    }
-  }
-
-  img {
-    height: 1em;
-
-    &.outline {
-      &:global(.w) { filter: drop-shadow(0 0 1px black); }
-      &:global(.b) { filter: drop-shadow(0 0 1px white); }
-    }
-  }
-</style>

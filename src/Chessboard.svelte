@@ -8,8 +8,8 @@
     type Square,
     squares,
   } from "./chess"
-  import PieceIcon from "./PieceIcon.svelte"
   import { clickOutside } from "./svelte-util"
+  import SvgPiece from "./SvgPiece.svelte"
 
   type Point = Readonly<{ x: number, y: number }>
   const zero: Point = Object.freeze({ x: 0, y: 0 })
@@ -166,7 +166,7 @@
           style:top={draggingFromSquare === square ? `${dragPositionOffset.y}px` : "0"}
           style:left={draggingFromSquare === square ? `${dragPositionOffset.x}px` : "0"}
         >
-          <PieceIcon {piece} />
+          <SvgPiece {piece} />
         </div>
       {/if}
     </div>
@@ -179,10 +179,10 @@
       class="promotion"
       style:--promotion-file-offset={fileOffset}
     >
-      <button on:click={() => promote("Q")}><PieceIcon piece={`${toMove}Q`}/></button>
-      <button on:click={() => promote("N")}><PieceIcon piece={`${toMove}N`}/></button>
-      <button on:click={() => promote("R")}><PieceIcon piece={`${toMove}R`}/></button>
-      <button on:click={() => promote("B")}><PieceIcon piece={`${toMove}B`}/></button>
+      <button on:click={() => promote("Q")}><SvgPiece piece={`${toMove}Q`}/></button>
+      <button on:click={() => promote("N")}><SvgPiece piece={`${toMove}N`}/></button>
+      <button on:click={() => promote("R")}><SvgPiece piece={`${toMove}R`}/></button>
+      <button on:click={() => promote("B")}><SvgPiece piece={`${toMove}B`}/></button>
       <button on:click={() => promotionMove = undefined} class="close">✕</button>
     </div>
   {/if}

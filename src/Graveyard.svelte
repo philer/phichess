@@ -13,13 +13,13 @@
     ) as [ColorPiece, number][]
 </script>
 
-<div class="graveyard">
+<div class={`graveyard ${color}`}>
   {#each graveCounts as [piece, count]}
     {#if piece[0] === color && count}
       <div>
         {#each { length: count } as _, idx (idx)}
           <div>
-            <PieceIcon {piece} outline />
+            <PieceIcon piece={piece.slice(1)} />
           </div>
         {/each}
       </div>
@@ -28,14 +28,25 @@
 </div>
 
 <style lang="scss">
-  div {
-    display: flex;
-    align-items: center;
-  }
   .graveyard {
     gap: .667em;
-    > div > div {
-      width: .33em;
+    display: flex;
+    align-items: center;
+    > div {
+      > div {
+        display: inline-block;
+        width: .33em;
+        overflow: visible;
+        --icon-vertical-align: middle;
+      }
+    }
+    &:global(.w) {
+      color: #ddd;
+      --icon-stroke: #333;
+    }
+    &:global(.b) {
+      color: #111;
+      --icon-stroke: #777;
     }
   }
 </style>
