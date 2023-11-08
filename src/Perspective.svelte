@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { mdiArrowUpDownBold, mdiFormatRotate90 } from "@mdi/js"
+
   import { type Game } from "./chess"
   import Chessboard from "./Chessboard.svelte"
   import Graveyard from "./Graveyard.svelte"
-  import PieceIcon from "./PieceIcon.svelte"
+  import Icon from "./Icon.svelte"
 
   export let game: Game
   export let asWhite = true
@@ -21,13 +23,11 @@
 
   <div class="right">
     <div class="tools">
-      <!-- ↶ ⤶ ↵ ↱↲ ⤹⤸ ◇ 🙾 -->
       <button on:click={() => rotate += 90}>
-          <div style:transform="rotate(90deg)">↱↲</div>
+        <Icon path={mdiFormatRotate90} flip="vertical" />
       </button>
       <button on:click={() => asWhite = !asWhite}>
-        ⬍
-        <!-- <PieceIcon piece={asWhite ? "b" : "w"} outline /> -->
+        <Icon path={mdiArrowUpDownBold} />
       </button>
     </div>
   </div>
@@ -79,6 +79,11 @@
       font-size: calc(.3333 * var(--square-size));
       height: var(--square-size);
       aspect-ratio: .5;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
       background: #fff2;
       box-shadow: inset .7em .7em 1em -.5em #fff6;
       transition: .3s background;

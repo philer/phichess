@@ -15,6 +15,6 @@ To do
 * [ ] detect stalemate
 * [ ] proper layout
 * [ ] config menu
-* [ ] piece symbols in algebraic notation
+* [x] piece symbols in algebraic notation
 * [x] highlight last move
 * [x] highlight check

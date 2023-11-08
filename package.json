@@ -15,6 +15,7 @@
     "pre-commit": "yarn lint && yarn typecheck"
   },
   "devDependencies": {
+    "@mdi/js": "^7.3.67",
     "@stylistic/eslint-plugin": "^1.0.0",
     "@sveltejs/vite-plugin-svelte": "2.4.6",
     "@tsconfig/svelte": "^5.0.0",

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Algebraic from "./Algebraic.svelte"
   import { type Game, type Move, revertToMove } from "./chess"
   import { pairs } from "./util"
 
@@ -43,14 +44,14 @@
           class:current={idx * 2 + 1 === game.history.length}
           class:ghost={idx * 2 + 1 > game.history.length}
         >
-          {whiteMove?.algebraic ?? ""}
+          <Algebraic move={whiteMove} />
         </button>
         <button
           on:click={() => gotoMove(idx * 2 + 2)}
           class:current={idx * 2 + 2 === game.history.length}
           class:ghost={idx * 2 + 2 > game.history.length}
         >
-          {blackMove?.algebraic ?? ""}
+          <Algebraic move={blackMove} />
         </button>
       </li>
     {/each}
@@ -74,6 +75,9 @@
   span, button {
     padding: .25em .5em;
     text-align: left;
+    white-space: nowrap;
+    // display: flex;
+    // align-items: center;
   }
   .moveNumber {
     text-align: right;
