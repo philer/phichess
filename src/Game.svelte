@@ -7,13 +7,13 @@
 
   let game = START_GAME
 
-  let showSidebar = false
+  let showSidebar = true
 
   type Layout = { asWhite: boolean, autoflip?: boolean }[]
 
   const layout: Layout = [
     { asWhite: true },
-    { asWhite: false },
+    // { asWhite: false },
   ]
 
   let layoutContainer: HTMLDivElement
@@ -25,8 +25,8 @@
       const { inlineSize: width, blockSize: height } = entry.contentBoxSize[0]
       flowDirection = width > height ? "row" : "column"
       perspectiveSize = flowDirection === "row"
-        ? Math.min(height, width / 2)
-        : Math.min(width, height / 2)
+        ? Math.min(height, width / layout.length)
+        : Math.min(width, height / layout.length)
     })
     resizeObserver.observe(layoutContainer)
     return () => resizeObserver.unobserve(layoutContainer)
