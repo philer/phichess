@@ -1,18 +1,32 @@
 <script context="module" lang="ts">
   import {
+    mdiClockTimeEight,
     mdiClockTimeEightOutline,
+    mdiClockTimeEleven,
     mdiClockTimeElevenOutline,
+    mdiClockTimeFive,
     mdiClockTimeFiveOutline,
+    mdiClockTimeFour,
     mdiClockTimeFourOutline,
+    mdiClockTimeNine,
     mdiClockTimeNineOutline,
+    mdiClockTimeOne,
     mdiClockTimeOneOutline,
+    mdiClockTimeSeven,
     mdiClockTimeSevenOutline,
+    mdiClockTimeSix,
     mdiClockTimeSixOutline,
+    mdiClockTimeTen,
     mdiClockTimeTenOutline,
+    mdiClockTimeThree,
     mdiClockTimeThreeOutline,
+    mdiClockTimeTwelve,
     mdiClockTimeTwelveOutline,
+    mdiClockTimeTwo,
     mdiClockTimeTwoOutline,
     mdiPause,
+    mdiSkull,
+    mdiTrophyVariant,
   } from "@mdi/js"
   import { getContext, setContext } from "svelte"
   import { type Readable, readonly, writable } from "svelte/store"
@@ -105,6 +119,20 @@
     mdiClockTimeElevenOutline,
     mdiClockTimeTwelveOutline,
   ].reverse()
+  const urgentClockIcons = [
+    mdiClockTimeOne,
+    mdiClockTimeTwo,
+    mdiClockTimeThree,
+    mdiClockTimeFour,
+    mdiClockTimeFive,
+    mdiClockTimeSix,
+    mdiClockTimeSeven,
+    mdiClockTimeEight,
+    mdiClockTimeNine,
+    mdiClockTimeTen,
+    mdiClockTimeEleven,
+    mdiClockTimeTwelve,
+  ].reverse()
 </script>
 
 <script lang="ts">
@@ -112,23 +140,33 @@
   export let forColor: Color
   const clock = getContext<Readable<ClockState>>("clock")
   $: seconds = $clock.remaining[forColor]
+  $: opponentSeconds = $clock.remaining[forColor === "w" ? "b" : "w"]
   $: running = $clock.running && $clock.toMove === forColor
 </script>
 
 <div class="clock" class:running>
   {#if running}
-    <Icon path={clockIcons[Math.floor(seconds % 12)]} />
+    {#if seconds <= 0}
+      <Icon path={mdiSkull} />
+    {:else if seconds < 10}
+      <Icon path={urgentClockIcons[Math.floor(seconds % 12)]} />
+    {:else}
+      <Icon path={clockIcons[Math.floor(seconds % 12)]} />
+    {/if}
   {:else}
-    <Icon path={mdiPause} />
+    {#if opponentSeconds <= 0}
+      <Icon path={mdiTrophyVariant} />
+    {:else}
+      <Icon path={mdiPause} />
+    {/if}
   {/if}
-  <span>
   {#if seconds < 10}
     {seconds.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
   {:else if seconds < 3600}
     {Math.floor(seconds / 60)}:{doubleDigit(seconds % 60)}
   {:else}
     {Math.floor(seconds / 3600)}:${doubleDigit(seconds % 3600 / 60)}:{doubleDigit(seconds % 60)}
-  {/if}</span>
+  {/if}
 </div>
 
 <style lang="scss">
