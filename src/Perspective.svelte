@@ -1,8 +1,7 @@
 <script lang="ts">
   import { mdiArrowUpDownBold, mdiFormatRotate90 } from "@mdi/js"
-  import type { Readable } from "svelte/store"
 
-  import { type Color, type Game } from "./chess"
+  import { type Game } from "./chess"
   import Chessboard from "./Chessboard.svelte"
   import Clock from "./Clock.svelte"
   import Graveyard from "./Graveyard.svelte"
@@ -11,17 +10,16 @@
   export let game: Game
   export let asWhite = true
   export let rotate = 0
-  export let clock: Readable<Record<Color, number>>
 </script>
 
 <div class="perspective" style:transform={`rotate(${rotate}deg)`}>
   <div class="above">
     <Graveyard {game} color={asWhite ? "w" : "b"} />
-    <Clock seconds={$clock[asWhite ? "b" : "w"]} />
+    <Clock forColor={asWhite ? "b" : "w"} />
   </div>
   <div class="below">
     <Graveyard {game} color={asWhite ? "b" : "w"} />
-    <Clock seconds={$clock[asWhite ? "w" : "b"]} />
+    <Clock forColor={asWhite ? "w" : "b"} />
   </div>
 
   <div class="left"></div>
@@ -48,6 +46,7 @@
 
     width: var(--perspective-size);
     height: var(--perspective-size);
+    font-size: max(10px, calc(.02 * var(--perspective-size)));
 
     transform: rotate(0deg);
     transition: 0.5s transform;
@@ -82,7 +81,7 @@
     flex-direction: column;
     box-shadow: 1px 1px 7px #0008;
     > button {
-      font-size: calc(.3333 * var(--square-size));
+      font-size: 1.75em;
       height: var(--square-size);
       aspect-ratio: .5;
 

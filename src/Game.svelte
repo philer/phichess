@@ -1,74 +1,25 @@
 <script lang="ts">
   import { mdiChevronDoubleLeft, mdiChevronDoubleRight } from "@mdi/js"
   import { onMount } from "svelte"
-  import { derived, writable } from "svelte/store"
 
-  import { type Color, START_GAME } from "./chess"
+  import { START_GAME } from "./chess"
+  import { makeClock } from "./Clock.svelte"
   import History from "./History.svelte"
   import Icon from "./Icon.svelte"
   import Perspective from "./Perspective.svelte"
 
   let game = START_GAME
+
   const secondsPerSide: number = 5 * 60
   const increment: number = 5
-
-  type ClockState = Readonly<{
-    running: boolean
-    toMove: Color
-    lastUpdatedAt: number
-    remaining: Record<Color, number>
-  }>
-
-  const initialClockState: ClockState = {
-    running: false,
-    toMove: "w",
-    lastUpdatedAt: 0,
-    remaining: { w: secondsPerSide, b: secondsPerSide },
-  }
-
-  const clockState = writable(initialClockState)
-  const clock = derived(clockState, state => state.remaining)
-
-
-  let frameRequestId: number = 0
-  const tick = (now: number) => clockState.update(({ remaining, lastUpdatedAt, ...state }) => {
-    if (!state.running) return { remaining, lastUpdatedAt, ...state }
-    const remainder = Math.max(0, remaining[state.toMove] - (now - lastUpdatedAt) / 1000)
-    if (remainder > 0) {
-      frameRequestId = requestAnimationFrame(tick)
-    }
-    return { ...state, lastUpdatedAt: now, remaining: { ...remaining, [state.toMove]: remainder } }
-  })
-
+  $: clock = makeClock(secondsPerSide, increment)
   $: {
     if (game.history.length === 0) {
-      clockState.set(initialClockState)
-      if (frameRequestId) {
-        cancelAnimationFrame(frameRequestId)
-        frameRequestId = 0
-      }
-    } else if (game.toMove !== $clockState.toMove) {
-      clockState.update(({ running, remaining, toMove, lastUpdatedAt, ...state }) => {
-        const now = performance.now()
-        return {
-          ...state,
-          running: true,
-          toMove: game.toMove,
-          lastUpdatedAt: now,
-          remaining: running
-            ? {
-              ...remaining,
-              [toMove]: Math.max(0, remaining[toMove] - (now - lastUpdatedAt) / 1000 + increment),
-            }
-            : remaining,
-        }
-      })
-      if (!frameRequestId) {
-        frameRequestId = requestAnimationFrame(tick)
-      }
+      clock.stop()
+    } else {
+      clock.update(game.toMove)
     }
   }
-
 
   let showSidebar = true
 
@@ -105,7 +56,7 @@
     style:--perspective-size={`${perspectiveSize}px`}
   >
     {#each layout as { asWhite }, idx (idx)}
-      <Perspective bind:game bind:asWhite {clock} />
+      <Perspective bind:game bind:asWhite />
     {/each}
 
     {#if game.history.at(-1)?.mate}

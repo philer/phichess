@@ -29,6 +29,7 @@
 
 <style lang="scss">
   .graveyard {
+    font-size: 1.25em;
     gap: .667em;
     display: flex;
     align-items: center;
