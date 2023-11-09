@@ -1,3 +1,12 @@
+/* noto-sans-regular - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/noto-sans-v32-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -18,7 +27,7 @@ html, body {
   padding: 0;
   background: #222;
   color: #ddd;
-  font-family: "Source Sans Pro", Helvetica, sans-serif;
+  font-family: 'Noto Sans', Helvetica, sans-serif;
   font-size: 16pt;
   text-align: center;
   transition: none;
