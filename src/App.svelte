@@ -1,17 +1,16 @@
 <script lang="ts">
-  import { setContext } from "svelte"
+  import { mdiClose, mdiCog } from "@mdi/js"
 
+  import { START_GAME } from "./chess"
   import Game from "./Game.svelte"
-  import { classicPieces, lichessBoard, type Theme } from "./theme"
+  import Icon from "./Icon.svelte"
+  import { settings } from "./settings"
+  import Settings from "./Settings.svelte"
 
-  const theme = setContext<Theme>("theme", {
-    // pageBackground: "linear-gradient(0deg, rgba(1,33,61,1) 0%, rgba(0,86,103,1) 100%)",
-    pageBackground: "#222",
-    board: lichessBoard,
-    // board: chessComBoard,
-    // board: cyanBoard,
-    pieces: classicPieces,
-  })
+  const { theme } = $settings
+  let showSettings = false
+
+  let game = START_GAME
 </script>
 
 <div
@@ -26,12 +25,37 @@
   style:--theme-check-light-square-background={theme.board.checkLightBackground}
   style:--theme-check-dark-square-background={theme.board.checkDarkBackground}
 >
-  <Game />
+  <header>
+    <h1>Kind of OTB Chess</h1>
+    <button on:click={() => showSettings = !showSettings} title="Settings">
+      <Icon path={showSettings ? mdiClose : mdiCog} />
+    </button>
+  </header>
+
+  {#if showSettings}
+    <Settings />
+  {:else}
+    <Game bind:game />
+  {/if}
+
 </div>
 
 <style>
   div {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+  }
+  header {
+    flex: 2em 0 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1em;
+    background: #111;
+  }
+  h1 {
+    font-size: 1.2em;
   }
 </style>

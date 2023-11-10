@@ -1,14 +1,11 @@
-<script context="module" lang="ts">
-  import { getContext } from "svelte"
-
-  import type { ColorPiece } from "./chess"
-  import type { Theme } from "./theme"
-</script>
-
 <script lang="ts">
+  import type { ColorPiece } from "./chess"
+  import { settings } from "./settings"
+
   export let piece: ColorPiece
   export let glow: boolean = false
-  const { pieces } = getContext<Theme>("theme")
+
+  const { pieces } = $settings.theme
 </script>
 
 <img

@@ -2,7 +2,7 @@
   import { isTruthy } from "./util"
 
   export let path: string
-  export let size: string = "1em"
+  export let size: string | undefined = undefined
   export let flip: "horizontal" | "vertical" | undefined = undefined
   export let rotate: number = 0
 </script>
@@ -23,6 +23,8 @@
 
 <style lang="scss">
   svg {
+    width: var(--icon-size);
+    height: var(--icon-size);
     vertical-align: var(--icon-vertical-align, -.1em);
   }
   path {

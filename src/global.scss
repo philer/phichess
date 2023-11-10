@@ -31,6 +31,8 @@ html, body {
   font-size: 16pt;
   text-align: center;
   transition: none;
+
+  --icon-size: 1em;
 }
 
 button, input {
@@ -45,6 +47,10 @@ button, input {
 }
 button {
   cursor: pointer;
+}
+label {
+  cursor: pointer;
+  user-select: none;
 }
 
 #app {

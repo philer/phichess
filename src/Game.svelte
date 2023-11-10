@@ -2,13 +2,14 @@
   import { mdiChevronDoubleLeft, mdiChevronDoubleRight } from "@mdi/js"
   import { onMount } from "svelte"
 
-  import { START_GAME } from "./chess"
+  import { type Game } from "./chess"
   import { makeClock } from "./Clock.svelte"
   import History from "./History.svelte"
   import Icon from "./Icon.svelte"
   import Perspective from "./Perspective.svelte"
+  import { settings } from "./settings"
 
-  let game = START_GAME
+  export let game: Game
 
   const secondsPerSide: number = 5 * 60
   const increment: number = 5
@@ -21,15 +22,6 @@
     }
   }
 
-  let showSidebar = true
-
-  type Layout = { asWhite: boolean, autoflip?: boolean }[]
-
-  const layout: Layout = [
-    { asWhite: true },
-    // { asWhite: false },
-  ]
-
   let layoutContainer: HTMLDivElement
   let flowDirection: "row" | "column" = "row"
   let perspectiveSize: number = 100
@@ -39,8 +31,8 @@
       const { inlineSize: width, blockSize: height } = entry.contentBoxSize[0]
       flowDirection = width > height ? "row" : "column"
       perspectiveSize = flowDirection === "row"
-        ? Math.min(height, width / layout.length)
-        : Math.min(width, height / layout.length)
+        ? Math.min(height, width / $settings.layout.length)
+        : Math.min(width, height / $settings.layout.length)
     })
     resizeObserver.observe(layoutContainer)
     return () => resizeObserver.unobserve(layoutContainer)
@@ -55,7 +47,7 @@
     style:flex-flow={flowDirection}
     style:--perspective-size={`${perspectiveSize}px`}
   >
-    {#each layout as { asWhite }, idx (idx)}
+    {#each $settings.layout as { asWhite }, idx (idx)}
       <Perspective bind:game bind:asWhite />
     {/each}
 
@@ -69,13 +61,13 @@
     {/if}
   </div>
 
-  {#if showSidebar}
+  {#if $settings.showHistory}
     <aside class="sidebar">
-      <button class="close" on:click={() => showSidebar = false}><Icon path={mdiChevronDoubleRight} /></button>
+      <button class="close" on:click={() => $settings.showHistory = false}><Icon path={mdiChevronDoubleRight} /></button>
       <History bind:game />
     </aside>
   {:else}
-    <button class="showSidebar" on:click={() => showSidebar = true}><Icon path={mdiChevronDoubleLeft} /></button>
+    <button class="showHistory" on:click={() => $settings.showHistory = true}><Icon path={mdiChevronDoubleLeft} /></button>
   {/if}
 
 </div>
@@ -122,7 +114,7 @@
       height: 2em;
     }
   }
-  .showSidebar {
+  .showHistory {
     position: absolute;
     inset: 0 0 auto auto;
     width: 2em;

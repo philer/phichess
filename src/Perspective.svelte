@@ -6,6 +6,7 @@
   import Clock from "./Clock.svelte"
   import Graveyard from "./Graveyard.svelte"
   import Icon from "./Icon.svelte"
+  import { settings } from "./settings"
 
   export let game: Game
   export let asWhite = true
@@ -14,11 +15,15 @@
 
 <div class="perspective" style:transform={`rotate(${rotate}deg)`}>
   <div class="above">
-    <Graveyard {game} color={asWhite ? "w" : "b"} />
+    {#if $settings.showGraveyards}
+      <Graveyard {game} color={asWhite ? "w" : "b"} />
+    {/if}
     <Clock forColor={asWhite ? "b" : "w"} />
   </div>
   <div class="below">
-    <Graveyard {game} color={asWhite ? "b" : "w"} />
+    {#if $settings.showGraveyards}
+      <Graveyard {game} color={asWhite ? "b" : "w"} />
+    {/if}
     <Clock forColor={asWhite ? "w" : "b"} />
   </div>
 
