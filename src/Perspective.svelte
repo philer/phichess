@@ -18,13 +18,17 @@
     {#if $settings.showGraveyards}
       <Graveyard {game} color={asWhite ? "w" : "b"} />
     {/if}
-    <Clock forColor={asWhite ? "b" : "w"} />
+    {#if $settings.useTimeControl}
+      <Clock forColor={asWhite ? "b" : "w"} />
+    {/if}
   </div>
   <div class="below">
     {#if $settings.showGraveyards}
       <Graveyard {game} color={asWhite ? "b" : "w"} />
     {/if}
-    <Clock forColor={asWhite ? "w" : "b"} />
+    {#if $settings.useTimeControl}
+      <Clock forColor={asWhite ? "w" : "b"} />
+    {/if}
   </div>
 
   <div class="left"></div>

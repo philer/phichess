@@ -11,13 +11,13 @@
 
   export let game: Game
 
-  const secondsPerSide: number = 5 * 60
-  const increment: number = 5
-  $: clock = makeClock(secondsPerSide, increment)
+  $: clock = $settings.useTimeControl
+    ? makeClock($settings.clock.secondsPerSide, $settings.clock.increment)
+    : makeClock(Infinity, 0)
   $: {
     if (game.history.length === 0) {
       clock.stop()
-    } else {
+    } else if ($settings.useTimeControl) {
       clock.update(game.toMove)
     }
   }

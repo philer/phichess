@@ -11,6 +11,11 @@
   let showSettings = false
 
   let game = START_GAME
+
+  const newGame = () => {
+    game = START_GAME
+    showSettings = false
+  }
 </script>
 
 <div
@@ -31,7 +36,7 @@
 
     <div style:flex-grow="1" />
 
-    <button on:click={() => game = START_GAME} class="new-game-button">New Game</button>
+    <button on:click={newGame} class="new-game-button">New Game</button>
 
     <button
       title="Settings"

@@ -24,6 +24,7 @@
     mdiClockTimeTwelveOutline,
     mdiClockTimeTwo,
     mdiClockTimeTwoOutline,
+    mdiInfinity,
     mdiPause,
     mdiSkull,
     mdiTrophyVariant,
@@ -160,7 +161,9 @@
       <Icon path={mdiPause} />
     {/if}
   {/if}
-  {#if seconds < 10}
+  {#if seconds === Infinity}
+    <Icon path={mdiInfinity} />
+  {:else if seconds < 10}
     {seconds.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
   {:else if seconds < 3600}
     {Math.floor(seconds / 60)}:{doubleDigit(seconds % 60)}
