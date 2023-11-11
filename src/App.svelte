@@ -14,6 +14,7 @@
 </script>
 
 <div
+  class="app"
   style:background={theme.pageBackground}
   style:--theme-page-background={theme.pageBackground}
   style:--theme-light-square-background={theme.board.lightBackground}
@@ -27,7 +28,16 @@
 >
   <header>
     <h1>Kind of OTB Chess</h1>
-    <button on:click={() => showSettings = !showSettings} title="Settings">
+
+    <div style:flex-grow="1" />
+
+    <button on:click={() => game = START_GAME} class="new-game-button">New Game</button>
+
+    <button
+      title="Settings"
+      on:click={() => showSettings = !showSettings}
+      class="settings-button"
+    >
       <Icon path={showSettings ? mdiClose : mdiCog} />
     </button>
   </header>
@@ -41,7 +51,7 @@
 </div>
 
 <style>
-  div {
+  .app {
     width: 100%;
     height: 100%;
     display: flex;
@@ -51,11 +61,24 @@
   header {
     flex: 2em 0 0;
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    gap: 2em;
     padding: 0 1em;
     background: #111;
+    white-space: nowrap;
   }
   h1 {
     font-size: 1.2em;
+  }
+  .new-game-button {
+    padding: 0 .5em;
+    font-size: .85em;
+    font-weight: bold;
+    line-height: 1.5em;
+    background: #6c5;
+    color: #050;
+    border: 1px solid #050;
+    border-radius: .25em;
+    text-shadow: none;
   }
 </style>
