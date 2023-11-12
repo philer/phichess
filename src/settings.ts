@@ -39,23 +39,6 @@ export type Settings = {
   // minimal: boolean
 }
 
-export const clockPresets: ReadonlyArray<ClockSettings> = [
-  { secondsPerSide: 30 * 60, increment: 10 },
-  { secondsPerSide: 30 * 60, increment: 0 },
-  { secondsPerSide: 10 * 60, increment: 10 },
-  { secondsPerSide: 10 * 60, increment: 0 },
-  { secondsPerSide: 5 * 60, increment: 3 },
-  { secondsPerSide: 5 * 60, increment: 1 },
-  { secondsPerSide: 5 * 60, increment: 0 },
-  { secondsPerSide: 3 * 60, increment: 2 },
-  { secondsPerSide: 3 * 60, increment: 1 },
-  { secondsPerSide: 3 * 60, increment: 0 },
-  { secondsPerSide: 2 * 60, increment: 1 },
-  { secondsPerSide: 2 * 60, increment: 0 },
-  { secondsPerSide: 1 * 60, increment: 1 },
-  { secondsPerSide: 1 * 60, increment: 0 },
-]
-
 export const boardThemePresets: ReadonlyArray<BoardTheme> = [
   { // lichess
     lightBackground: "#f0d9b5",
