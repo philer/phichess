@@ -34,26 +34,26 @@
 
   import type { Color } from "./chess"
   import Icon from "./Icon.svelte"
+  import type { ClockSettings } from "./settings"
 
   export type ClockState = Readonly<{
-    running: boolean
-    toMove: Color
     lastUpdatedAt: number
+    toMove: Color
     remaining: Record<Color, number>
   }>
 
   export type ClockControls = Readonly<{
+    /** Reset the clock */
+    reset: (settings: ClockSettings) => void
     /** Hit the clock after making a move */
     update: (toMove: Color) => void
-    /** Reset the clock */
-    stop: () => void
   }>
 
-  export const makeClock = (secondsPerSide: number, increment: number): ClockControls => {
+  export const makeClock = ({ secondsPerSide, increment }: ClockSettings): ClockControls => {
+    let inc = increment
     const initialClockState: ClockState = {
-      running: false,
-      toMove: "w",
       lastUpdatedAt: 0,
+      toMove: "w",
       remaining: { w: secondsPerSide, b: secondsPerSide },
     }
 
@@ -62,47 +62,49 @@
 
     let frameRequestId: number = 0
 
-    const tick = (now: number) => store.update(({ remaining, lastUpdatedAt, ...state }) => {
-      if (!state.running) return { remaining, lastUpdatedAt, ...state }
-      const remainder = Math.max(0, remaining[state.toMove] - (now - lastUpdatedAt) / 1000)
+    const tick = (now: number) => store.update(({ lastUpdatedAt, toMove, remaining }) => {
+      if (!lastUpdatedAt) return { lastUpdatedAt, toMove, remaining }
+      const remainder = Math.max(0, remaining[toMove] - (now - lastUpdatedAt) / 1000)
       if (remainder > 0) {
         frameRequestId = requestAnimationFrame(tick)
       }
-      return { ...state, lastUpdatedAt: now, remaining: { ...remaining, [state.toMove]: remainder } }
+      return { lastUpdatedAt: now, toMove, remaining: { ...remaining, [toMove]: remainder } }
     })
 
-    const stop = () => {
-      store.set(initialClockState)
+    const reset = ({ secondsPerSide, increment }: ClockSettings) => {
+      inc = increment
+      store.set({
+        lastUpdatedAt: 0,
+        toMove: "w",
+        remaining: { w: secondsPerSide, b: secondsPerSide },
+      })
       if (frameRequestId) {
         cancelAnimationFrame(frameRequestId)
         frameRequestId = 0
       }
     }
-    const update = (toMove: Color) => {
-      store.update(({ running, remaining, lastUpdatedAt, ...state }) => {
-        if (toMove !== state.toMove) {
+    const update = (nowToMove: Color) => {
+      store.update(({ lastUpdatedAt, toMove, remaining }) => {
+        if (nowToMove !== toMove) {
           if (!frameRequestId) {
             frameRequestId = requestAnimationFrame(tick)
           }
           const now = performance.now()
           return {
-            ...state,
-            running: true,
-            toMove: toMove,
             lastUpdatedAt: now,
-            remaining: running
-              ? {
-                ...remaining,
-                [toMove]: Math.max(0, remaining[toMove] - (now - lastUpdatedAt) / 1000 + increment),
-              }
-              : remaining,
+            toMove: nowToMove,
+            remaining: {
+              ...remaining,
+              [toMove]:
+                Math.max(0, remaining[toMove] - (now - (lastUpdatedAt || now)) / 1000 + inc),
+            },
           }
         } else {
-          return { running, remaining, lastUpdatedAt, ...state }
+          return { lastUpdatedAt, toMove, remaining }
         }
       })
     }
-    return { update, stop }
+    return { update, reset }
   }
 
   const doubleDigit = (x: number) => Math.floor(x).toString().padStart(2, "0")
@@ -137,12 +139,13 @@
 </script>
 
 <script lang="ts">
-
   export let forColor: Color
+
   const clock = getContext<Readable<ClockState>>("clock")
+
   $: seconds = $clock.remaining[forColor]
   $: opponentSeconds = $clock.remaining[forColor === "w" ? "b" : "w"]
-  $: running = $clock.running && $clock.toMove === forColor
+  $: running = $clock.lastUpdatedAt > 0 && $clock.toMove === forColor
 </script>
 
 <div class="clock" class:running>

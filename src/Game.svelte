@@ -11,12 +11,10 @@
 
   export let game: Game
 
-  $: clock = $settings.useTimeControl
-    ? makeClock($settings.clock.secondsPerSide, $settings.clock.increment)
-    : makeClock(Infinity, 0)
+  const clock = makeClock($settings.clock)
   $: {
     if (game.history.length === 0) {
-      clock.stop()
+      clock.reset($settings.clock)
     } else if ($settings.useTimeControl) {
       clock.update(game.toMove)
     }
