@@ -1,6 +1,10 @@
 import { writable } from "svelte/store"
 
-export type LayoutPerspective = { asWhite: boolean, autoflip?: boolean }
+export type LayoutPerspective = {
+  asWhite: boolean,
+  rotate: 0 | 90 | 180 | 270,
+  autoflip?: boolean
+}
 
 export type ClockSettings = {  // TODO "TimeFormat"?
   secondsPerSide: number
@@ -79,7 +83,7 @@ export const settings = writable<Settings>({
   useTimeControl: false,
   clock: { secondsPerSide: 5 * 60, increment: 3 },
   layout: [
-    { asWhite: true },
+    { asWhite: true, rotate: 0 },
     // { asWhite: false },
   ],
   theme: {

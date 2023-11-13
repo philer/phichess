@@ -1,6 +1,27 @@
 <script lang="ts">
+  import { mdiCheckerboard, mdiRadioboxBlank, mdiRadioboxMarked } from "@mdi/js"
+
   import Checkbox from "./Checkbox.svelte"
+  import Icon from "./Icon.svelte"
   import { settings } from "./settings"
+
+  let layout: string = $settings.layout.length === 1 ? "single" : "double"
+  let landscape: boolean = window.innerWidth > window.innerHeight
+
+  const handleResize = () => {
+    landscape = window.innerWidth > window.innerHeight
+  }
+
+  $: {
+    if (layout === "single" && $settings.layout.length !== 1) {
+      $settings.layout = [{ asWhite: true, rotate: 0 }]
+    } else if (layout === "double" && $settings.layout.length !== 2) {
+      $settings.layout = [
+        { asWhite: true, rotate: 0 },
+        { asWhite: false, rotate: 0 },
+      ]
+    }
+  }
 
 
   let hours = Math.floor($settings.clock.secondsPerSide / 3600)
@@ -38,13 +59,45 @@
   }
 </script>
 
+<svelte:window on:resize={handleResize} />
+
 <form>
+  <!-- layout -->
+  <fieldset>
+    <legend>Layout</legend>
+    <div class={`layout-list ${landscape ? "landscape" : "portrait"}`}>
+      <label>
+        <input type="radio" value="single" bind:group={layout} />
+        <span>
+          <Icon path={layout === "single" ? mdiRadioboxMarked : mdiRadioboxBlank} />
+          Single
+        </span>
+        <div class="layout-preview">
+          <Icon path={mdiCheckerboard} />
+        </div>
+      </label>
+      <label>
+        <input type="radio" value="double" bind:group={layout} />
+        <span>
+          <Icon path={layout === "double" ? mdiRadioboxMarked : mdiRadioboxBlank} />
+          Double
+        </span>
+        <div class="layout-preview">
+          <Icon path={mdiCheckerboard} />
+          <Icon path={mdiCheckerboard} />
+        </div>
+      </label>
+    </div>
+  </fieldset>
+
+  <!-- view options -->
   <fieldset>
     <Checkbox bind:checked={$settings.showCoordinates}>Show coordinates</Checkbox>
     <Checkbox bind:checked={$settings.showHistory}>Show history</Checkbox>
     <Checkbox bind:checked={$settings.showGraveyards}>Show graveyards</Checkbox>
   </fieldset>
 
+  <!-- time control -->
   <fieldset>
     <Checkbox bind:checked={$settings.useTimeControl}>Use time control</Checkbox>
     <label class="time-presets">
@@ -113,7 +166,6 @@
     </fieldset>
   </fieldset>
 
-  <!-- TODO layout -->
   <!-- TODO theme -->
 </form>
 
@@ -134,28 +186,73 @@
   }
   fieldset {
     padding: 1em;
-    border-bottom: 1px dotted #fff6;
 
     &:last-child {
       border-bottom: 0 solid transparent;
     }
 
-    background: #fff1;
-    border-bottom: 0 solid transparent;
-    border-left: 3px solid #fff3;
-  }
-  input[type="number"], select {
-    line-height: inherit;
-    font-size: inherit;
+    background: #333;
+    border-left: .15em solid #555;
   }
   select, input[type="number"] {
+    font-size: inherit;
+    line-height: inherit;
     padding: .25em;
-    border-radius: 3px;
-    background: #333;
+    border-radius: .15em;
+    background: #444;
     color: inherit;
-    border: 1px solid #fff3;
+    border: 1px solid #666;
     box-shadow: 1px 1px 3px #0003;
   }
+  input[type="number"] {
+    width: 5em;
+    padding: .1em .3em;
+    text-align: right;
+  }
+  :disabled {
+    opacity: .5;
+  }
+
+  .layout-list {
+    display: flex;
+    justify-content: stretch;
+    > label {
+      flex: 50% 1 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      > span {
+        display: flex;
+        align-items: center;
+        gap: .5em;
+      }
+    }
+  }
+  .layout-preview {
+    .landscape & {
+      width: 10em;
+      aspect-ratio: 16/9;
+    }
+    .portrait & {
+      height: 10em;
+      aspect-ratio: 1/2;
+    }
+    box-sizing: content-box;
+    margin-top: .5em;
+    --icon-size: 5em;
+
+    border: .15em solid currentColor;
+    border-bottom-width: 1em;
+    border-radius: .3em;
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+
+    color: #ccc;
+  }
+
   .time-presets {
     display: flex;
     align-items: center;
@@ -169,13 +266,5 @@
       display: flex;
       flex-direction: column;
     }
-  }
-  input[type="number"] {
-    width: 5em;
-    padding: .1em .3em;
-    text-align: right;
-  }
-  :disabled {
-    opacity: .5;
   }
 </style>

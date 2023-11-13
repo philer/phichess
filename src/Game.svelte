@@ -45,8 +45,8 @@
     style:flex-flow={flowDirection}
     style:--perspective-size={`${perspectiveSize}px`}
   >
-    {#each $settings.layout as { asWhite }, idx (idx)}
-      <Perspective bind:game bind:asWhite />
+    {#each $settings.layout as { asWhite, rotate }, idx (idx)}
+      <Perspective bind:game bind:asWhite bind:rotate />
     {/each}
 
     {#if game.history.at(-1)?.mate}
