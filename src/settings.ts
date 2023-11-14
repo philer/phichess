@@ -78,6 +78,17 @@ export const boardThemes: ReadonlyArray<BoardTheme> = [
     checkLightBackground: "#daa",
     checkDarkBackground: "#855",
   },
+  {
+    _name: "grey",
+    lightBackground: "#ccc",
+    darkBackground: "#666",
+    selectedLightBackground: "#bbb",
+    selectedDarkBackground: "#777",
+    lastMoveLightBackground: "#bbb",
+    lastMoveDarkBackground: "#777",
+    checkLightBackground: "#ccc",
+    checkDarkBackground: "#666",
+  },
 ] as const
 
 export const settings = writable<Settings>({
