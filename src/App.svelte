@@ -7,7 +7,6 @@
   import { settings } from "./settings"
   import Settings from "./Settings.svelte"
 
-  const { theme } = $settings
   let showSettings = false
 
   let game = START_GAME
@@ -16,6 +15,8 @@
     game = START_GAME
     showSettings = false
   }
+
+  $: theme = $settings.theme
 </script>
 
 <div

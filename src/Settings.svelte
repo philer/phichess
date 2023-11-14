@@ -2,12 +2,14 @@
   import Checkbox from "./Checkbox.svelte"
   import LayoutSettings from "./LayoutSettings.svelte"
   import { settings } from "./settings"
+  import ThemeSettings from "./ThemeSettings.svelte"
   import TimeControlSettings from "./TimeControlSettings.svelte"
 
 </script>
 
 <form>
   <h2>Settings</h2>
+
   <!-- layout -->
   <fieldset>
     <legend>Layout</legend>
@@ -23,7 +25,11 @@
     <TimeControlSettings />
   </fieldset>
 
-  <!-- TODO theme -->
+  <!-- theme -->
+  <fieldset>
+    <ThemeSettings />
+  </fieldset>
+
 </form>
 
 

@@ -14,6 +14,7 @@ export type ClockSettings = {  // TODO "TimeFormat"?
 export type PieceTheme = { name: string, scale: number }
 
 export type BoardTheme = {
+  _name: string,
   lightBackground: string,
   darkBackground: string,
   selectedLightBackground: string,
@@ -43,8 +44,9 @@ export type Settings = {
   // minimal: boolean
 }
 
-export const boardThemePresets: ReadonlyArray<BoardTheme> = [
-  { // lichess
+export const boardThemes: ReadonlyArray<BoardTheme> = [
+  {
+    _name: "lichess",
     lightBackground: "#f0d9b5",
     darkBackground: "#b58863",
     selectedLightBackground: "#819669",
@@ -54,7 +56,8 @@ export const boardThemePresets: ReadonlyArray<BoardTheme> = [
     checkLightBackground: "#ffa9a5",
     checkDarkBackground: "#d56853",
   },
-  { // chess.com
+  {
+    _name: "chessCom",
     lightBackground: "#e9edcc",
     darkBackground: "#779954",
     selectedLightBackground: "#f4f67e",
@@ -64,7 +67,8 @@ export const boardThemePresets: ReadonlyArray<BoardTheme> = [
     checkLightBackground: "#e9edcc",
     checkDarkBackground: "#779954",
   },
-  { // cyan
+  {
+    _name: "cyan",
     lightBackground: "#9ee",
     darkBackground: "#488",
     selectedLightBackground: "#dda",
@@ -74,7 +78,7 @@ export const boardThemePresets: ReadonlyArray<BoardTheme> = [
     checkLightBackground: "#daa",
     checkDarkBackground: "#855",
   },
-]
+] as const
 
 export const settings = writable<Settings>({
   showCoordinates: true,
@@ -88,7 +92,7 @@ export const settings = writable<Settings>({
   ],
   theme: {
     pageBackground: "#222",
-    board: boardThemePresets[0],
+    board: boardThemes[0],
     pieces: { name: "classic", scale: 1 },
   },
 })
