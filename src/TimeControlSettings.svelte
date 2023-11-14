@@ -38,7 +38,9 @@
 </script>
 
 
-<Checkbox bind:checked={$settings.useTimeControl}>Use time control</Checkbox>
+<legend>Time control</legend>
+
+<Checkbox bind:checked={$settings.useTimeControl}>Enable time control</Checkbox>
 
 <label class="time-presets">
   Preset:

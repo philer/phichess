@@ -1,26 +1,51 @@
 <script lang="ts">
-  import { mdiChessPawn, mdiRadioboxBlank, mdiRadioboxMarked } from "@mdi/js"
+  import { match } from "ts-pattern"
 
-  import ChessboardIcon from "./ChessboardIcon.svelte"
-  import Icon from "./Icon.svelte"
-  import { settings } from "./settings"
+  import LayoutSettingsOption from "./LayoutSettingsOption.svelte"
+  import { type LayoutPerspective, settings } from "./settings"
 
-  let layout: string = $settings.layout.length === 1 ? "single" : "double"
-  let landscape: boolean = window.innerWidth > window.innerHeight
+  type LayoutName =
+    | "single"
+    | "side-by-side"
+    | "opposite"
+    | "custom"
 
-  const handleResize = () => {
-    landscape = window.innerWidth > window.innerHeight
-  }
+  const single = [{ asWhite: true, rotate: 0 }] as const
+
+  const sideBySide = [
+    { asWhite: false, rotate: 0 },
+    { asWhite: true, rotate: 0 },
+  ] as const
+
+  const opposite = [
+    { asWhite: false, rotate: 180 },
+    { asWhite: true, rotate: 0 },
+  ] as const
+
+
+  let layoutName: LayoutName = match($settings.layout)
+      .with(single, () => "single" as const)
+      .with(sideBySide, () => "side-by-side" as const)
+      .with(opposite, () => "opposite" as const)
+      .otherwise(() => "custom" as const)
+
+  const custom = layoutName === "custom" && $settings.layout
 
   $: {
-    if (layout === "single" && $settings.layout.length !== 1) {
-      $settings.layout = [{ asWhite: true, rotate: 0 }]
-    } else if (layout === "double" && $settings.layout.length !== 2) {
-      $settings.layout = [
-        { asWhite: true, rotate: 0 },
-        { asWhite: false, rotate: 0 },
-      ]
-    }
+    settings.update($settings => ({
+      ...$settings,
+      layout: match(layoutName)
+        .with("single", () => single as unknown as LayoutPerspective[])
+        .with("side-by-side", () => sideBySide as unknown as LayoutPerspective[])
+        .with("opposite", () => opposite as unknown as LayoutPerspective[])
+        .with("custom", () => custom as unknown as LayoutPerspective[])
+        .exhaustive(),
+    }))
+  }
+
+  let landscape: boolean = window.innerWidth > window.innerHeight
+  const handleResize = () => {
+    landscape = window.innerWidth > window.innerHeight
   }
 </script>
 
@@ -28,101 +53,48 @@
 <svelte:window on:resize={handleResize} />
 
 <div class={`layout-list ${landscape ? "landscape" : "portrait"}`}>
-  <label>
-    <input type="radio" value="single" bind:group={layout} />
-    <span>
-      <Icon path={layout === "single" ? mdiRadioboxMarked : mdiRadioboxBlank} />
-      Single
-    </span>
-    <div class="layout-preview">
-      <span class="board">
-        <ChessboardIcon />
-        <Icon path={mdiChessPawn} />
-      </span>
-    </div>
-  </label>
+  <LayoutSettingsOption
+    label="Single"
+    value="single"
+    layout={single}
+    bind:group={layoutName}
+    {landscape}
+  />
 
-  <label>
-    <input type="radio" value="double" bind:group={layout} />
-    <span>
-      <Icon path={layout === "double" ? mdiRadioboxMarked : mdiRadioboxBlank} />
-      Double
-    </span>
-    <div class="layout-preview">
-      <span class="board black">
-        <ChessboardIcon />
-        <Icon path={mdiChessPawn} />
-      </span>
-      <span class="board">
-        <ChessboardIcon />
-        <Icon path={mdiChessPawn} />
-      </span>
-    </div>
-  </label>
+  <LayoutSettingsOption
+    label="Side by side"
+    value="side-by-side"
+    layout={sideBySide}
+    bind:group={layoutName}
+    {landscape}
+  />
+
+  <LayoutSettingsOption
+    label="Opposite"
+    value="opposite"
+    layout={opposite}
+    bind:group={layoutName}
+    {landscape}
+  />
+
+  {#if custom}
+    <LayoutSettingsOption
+      label="Custom"
+      value="custom"
+      layout={custom}
+      bind:group={layoutName}
+      {landscape}
+    />
+  {/if}
+
 </div>
 
 
 <style lang="scss">
   .layout-list {
     display: flex;
-    justify-content: stretch;
-    > label {
-      flex: 50% 1 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      > span {
-        display: flex;
-        align-items: center;
-        gap: .5em;
-      }
-    }
-  }
-  .layout-preview {
-    .landscape & {
-      width: 10em;
-      aspect-ratio: 16/9;
-    }
-    .portrait & {
-      height: 10em;
-      aspect-ratio: 1/2;
-    }
-    box-sizing: content-box;
-    margin-top: .5em;
-    --icon-size: 4em;
-
-    border: .15em solid currentColor;
-    border-bottom-width: 1em;
-    border-radius: .3em;
-
-    display: flex;
+    justify-content: center;
     flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
-
-    --fg: #ccc;
-    --bg: #333;
-    color: var(--fg);
-    .board {
-      position: relative;
-      width: var(--icon-size);
-      height: var(--icon-size);
-      border: .2em solid currentColor;
-      > :global(svg) {
-        position: absolute;
-        inset: 0;
-        &:nth-child(2) {
-          --icon-stroke: var(--bg);
-          --icon-stroke-width: 2pt;
-          --icon-size: 3.5em;
-          inset: .05em;
-        }
-      }
-      &.black > :global(svg):nth-child(2) {
-        color: var(--bg);
-        --icon-stroke: var(--fg);
-      }
-    }
+    gap: 2em 2em;
   }
-
 </style>
