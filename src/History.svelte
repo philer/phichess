@@ -1,8 +1,9 @@
 <script lang="ts">
   import { mdiUndo } from "@mdi/js"
+  import { match } from "ts-pattern"
 
 import Algebraic from "./Algebraic.svelte"
-  import { type Game, type Move, revertToMove } from "./chess"
+  import { applyMove, type Game, type Move, revertToMove } from "./chess"
   import Icon from "./Icon.svelte"
   import { pairs } from "./util"
 
@@ -35,7 +36,23 @@ import Algebraic from "./Algebraic.svelte"
   const undoLastMove = () => {
     game = revertToMove(-1, game)
   }
+
+  const redoLastMove = () => {
+    if (fullGame.history.length > game.history.length) {
+      applyMove(game, fullGame.history[game.history.length])
+        .map(newGame => game = newGame)
+        .mapError(console.error)
+    }
+  }
+
+  const handleGlobalKeydown = (evt: KeyboardEvent) =>
+    match(evt.key)
+      .with("ArrowLeft", undoLastMove)
+      .with("ArrowRight", redoLastMove)
 </script>
+
+
+<svelte:document on:keydown={handleGlobalKeydown} />
 
 <div>
   <ol>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { mdiClose, mdiCog } from "@mdi/js"
+  import { match } from "ts-pattern"
 
   import { START_GAME } from "./chess"
   import Game from "./Game.svelte"
@@ -17,7 +18,14 @@
   }
 
   $: theme = $settings.theme
+
+  const handleGlobalKeydown = (evt: KeyboardEvent) =>
+    match(evt.key)
+      .with("Escape", () => { showSettings = false })
 </script>
+
+
+<svelte:document on:keydown={handleGlobalKeydown} />
 
 <div
   class="app"
@@ -53,8 +61,8 @@
   {:else}
     <Game bind:game />
   {/if}
-
 </div>
+
 
 <style>
   .app {
