@@ -14,7 +14,7 @@
   style:transform={
     [
       flip ? flip === "horizontal" ? "scale(-1, 1)" : "scale(1, -1)" : false,
-      rotate ? `rotate(${rotate})` : false,
+      rotate ? `rotate(${rotate}deg)` : false,
     ]
       .filter(isTruthy)
       .join(" ")
