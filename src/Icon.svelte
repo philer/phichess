@@ -29,7 +29,7 @@
   }
   path {
     paint-order: stroke;
-    stroke-width: 2pt;
+    stroke-width: var(--icon-stroke-width, 2pt);
     stroke: var(--icon-stroke, none);
   }
 </style>

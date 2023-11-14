@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { mdiCheckerboard, mdiRadioboxBlank, mdiRadioboxMarked } from "@mdi/js"
+  import { mdiChessPawn, mdiRadioboxBlank, mdiRadioboxMarked } from "@mdi/js"
 
+  import ChessboardIcon from "./ChessboardIcon.svelte"
   import Icon from "./Icon.svelte"
   import { settings } from "./settings"
 
@@ -34,9 +35,13 @@
       Single
     </span>
     <div class="layout-preview">
-      <Icon path={mdiCheckerboard} />
+      <span class="board">
+        <ChessboardIcon />
+        <Icon path={mdiChessPawn} />
+      </span>
     </div>
   </label>
+
   <label>
     <input type="radio" value="double" bind:group={layout} />
     <span>
@@ -44,8 +49,14 @@
       Double
     </span>
     <div class="layout-preview">
-      <Icon path={mdiCheckerboard} />
-      <Icon path={mdiCheckerboard} />
+      <span class="board black">
+        <ChessboardIcon />
+        <Icon path={mdiChessPawn} />
+      </span>
+      <span class="board">
+        <ChessboardIcon />
+        <Icon path={mdiChessPawn} />
+      </span>
     </div>
   </label>
 </div>
@@ -78,7 +89,7 @@
     }
     box-sizing: content-box;
     margin-top: .5em;
-    --icon-size: 5em;
+    --icon-size: 4em;
 
     border: .15em solid currentColor;
     border-bottom-width: 1em;
@@ -89,7 +100,29 @@
     justify-content: space-around;
     align-items: center;
 
-    color: #ccc;
+    --fg: #ccc;
+    --bg: #333;
+    color: var(--fg);
+    .board {
+      position: relative;
+      width: var(--icon-size);
+      height: var(--icon-size);
+      border: .2em solid currentColor;
+      > :global(svg) {
+        position: absolute;
+        inset: 0;
+        &:nth-child(2) {
+          --icon-stroke: var(--bg);
+          --icon-stroke-width: 2pt;
+          --icon-size: 3.5em;
+          inset: .05em;
+        }
+      }
+      &.black > :global(svg):nth-child(2) {
+        color: var(--bg);
+        --icon-stroke: var(--fg);
+      }
+    }
   }
 
 </style>
