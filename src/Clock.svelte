@@ -47,6 +47,8 @@
     reset: (settings: ClockSettings) => void
     /** Hit the clock after making a move */
     update: (toMove: Color) => void
+    /** Halt the clock in its current state */
+    stop: () => void
     /** Store of remaining player times */
     remaining: Readable<Record<Color, number>>
   }>
@@ -73,6 +75,13 @@
       return { lastUpdatedAt: now, toMove, remaining: { ...remaining, [toMove]: remainder } }
     })
 
+    const stop = () => {
+      if (frameRequestId) {
+        cancelAnimationFrame(frameRequestId)
+        frameRequestId = 0
+      }
+    }
+
     const reset = ({ secondsPerSide, increment }: ClockSettings) => {
       inc = increment
       store.set({
@@ -80,11 +89,9 @@
         toMove: "w",
         remaining: { w: secondsPerSide, b: secondsPerSide },
       })
-      if (frameRequestId) {
-        cancelAnimationFrame(frameRequestId)
-        frameRequestId = 0
-      }
+      stop()
     }
+
     const update = (nowToMove: Color) => {
       store.update(({ lastUpdatedAt, toMove, remaining }) => {
         if (nowToMove !== toMove) {
@@ -106,7 +113,7 @@
         }
       })
     }
-    return { update, reset, remaining: derived(store, clock => clock.remaining) }
+    return { update, stop, reset, remaining: derived(store, clock => clock.remaining) }
   }
 
   const doubleDigit = (x: number) => Math.floor(x).toString().padStart(2, "0")

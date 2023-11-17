@@ -20,7 +20,11 @@
       clock.reset($settings.clock)
       gameOverClosed = false
     } else if ($settings.useTimeControl) {
-      clock.update(game.toMove)
+      if (game.outcome) {
+        clock.stop()
+      } else {
+        clock.update(game.toMove)
+      }
     }
     if ($remaining[game.toMove] <= 0) {
       game = { ...game, outcome: game.toMove, termination: "time" }
