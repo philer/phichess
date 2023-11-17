@@ -98,8 +98,9 @@ export const settings = writable<Settings>({
   useTimeControl: false,
   clock: { secondsPerSide: 5 * 60, increment: 3 },
   layout: [
+    // Assume that any touchscreen is a mobile device placed in between players
+    { asWhite: false, rotate: navigator.maxTouchPoints > 0 ? 180 : 0 },
     { asWhite: true, rotate: 0 },
-    // { asWhite: false },
   ],
   theme: {
     pageBackground: "#222",
