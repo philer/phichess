@@ -1,7 +1,7 @@
 import { match } from "ts-pattern"
 
 import { err, ok, type Result } from "./result"
-import { isTruthy } from "./util"
+import { isTruthy, pairs } from "./util"
 
 
 export type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"
@@ -544,3 +544,57 @@ export const applyHistory = (game: Game, history: Move[]): Result<Game> =>
 /** Re-create the given game up to a specific move. */
 export const revertToMove = (idx: number, game: Game): Game =>
   applyHistory(START_GAME, game.history.slice(0, idx)).unwrap()
+
+
+export const toPGN = (game: Game): string => {
+  const date = new Date().toISOString().slice(0, 10).replaceAll("-", ".")
+  const result = match(game.outcome)
+        .with("w", () => "1-0")
+        .with("b", () => "0-1")
+        .with("draw", () => "1/2-1/2")
+        .with(undefined, () => "*")
+        .exhaustive()
+  const termination = game.outcome
+    ? (
+      match(game.outcome)
+        .with("w", () => "White wins")
+        .with("b", () => "Black wins")
+        .with("draw", () => "Draw")
+        .exhaustive()
+      + " "
+      + match(game.termination)
+          .with("checkmate", () => "by checkmate.")
+          .with("time", () => "on time.")
+          .with("stalemate", () => " by stalemate")
+          .with("repetition", () => " by threefold repetition")
+          .with("fifty-moves", () => " by fifty moves rule")
+          .with("agreement", () => " by agreement")
+          .with(undefined, () => "")
+          .exhaustive()
+      )
+    : "unterminated"
+  const moves = Array.from(
+    pairs(game.history.map(move => move.algebraic)),
+    (movePair, idx) => `${idx + 1}. ${movePair.join(" ")}`,
+  )
+  if (game.outcome) {
+    moves.push(result)
+  }
+  return [
+    `[Event "Live Chess"]`,
+    `[Site "${window.location.href}"]`,
+    `[Date "${date}"]`,
+    `[Round "?"]`,
+    `[White "?"]`,
+    `[Black "?"]`,
+    `[Result "${result}"]`,
+    `[Termination "${termination}"]`,
+    // `[TimeControl "120+1"]`,
+    // `[Time HH:MM:SS]`,
+    // `[EndTime "3:38:57 PST"]`,
+    // `[FEN "?"]`,
+    "",
+    moves.join(" "),
+    "",
+  ].join("\n")
+}

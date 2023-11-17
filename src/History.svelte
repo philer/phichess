@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { mdiUndo } from "@mdi/js"
+  import { mdiDownload, mdiUndo } from "@mdi/js"
   import { match } from "ts-pattern"
 
 import Algebraic from "./Algebraic.svelte"
-  import { applyMove, type Game, type Move, revertToMove } from "./chess"
+  import { applyMove, type Game, type Move, revertToMove, toPGN } from "./chess"
   import Icon from "./Icon.svelte"
-  import { pairs } from "./util"
+  import { pairs, saveTextAs } from "./util"
 
   export let game: Game
 
@@ -49,6 +49,12 @@ import Algebraic from "./Algebraic.svelte"
     match(evt.key)
       .with("ArrowLeft", undoLastMove)
       .with("ArrowRight", redoLastMove)
+
+  const download = () =>
+    saveTextAs(
+      toPGN(game),
+      `${location.hostname}_${new Date().toISOString().slice(0, 10)}.pgn`,
+    )
 </script>
 
 
@@ -79,10 +85,18 @@ import Algebraic from "./Algebraic.svelte"
   <button
     on:click={undoLastMove}
     disabled={!game.history.length}
-    class="undo"
+    class="tools-button"
     title="Undo last move"
   >
     <Icon path={mdiUndo} />
+  </button>
+  <button
+    on:click={download}
+    disabled={!game.history.length}
+    class="tools-button"
+    title="Download PGN"
+  >
+    <Icon path={mdiDownload} />
   </button>
 </div>
 
@@ -117,7 +131,7 @@ import Algebraic from "./Algebraic.svelte"
   .ghost
     opacity: .5
 
-  button.undo
+  button.tools-button
     line-height: 2em
     width: 100%
     background: #333
