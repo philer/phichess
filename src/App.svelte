@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiClose, mdiCog } from "@mdi/js"
+  import { mdiChevronDoubleLeft, mdiChevronDoubleRight, mdiClose, mdiCog, mdiRestart } from "@mdi/js"
   import { match } from "ts-pattern"
 
   import { START_GAME } from "./chess"
@@ -11,11 +11,6 @@
   let showSettings = false
 
   let game = START_GAME
-
-  const newGame = () => {
-    game = START_GAME
-    showSettings = false
-  }
 
   $: theme = $settings.theme
 
@@ -43,16 +38,30 @@
   <header>
     <h1>Kind of OTB Chess</h1>
 
-    <div style:flex-grow="1" />
-
-    <button on:click={newGame} class="new-game-button">New Game</button>
+    {#if game.history.length > 0}
+      <button
+        on:click={() => game = START_GAME}
+        title="New game"
+        class="icon-button"
+      >
+        <Icon path={mdiRestart} />
+      </button>
+    {/if}
 
     <button
-      title="Settings"
       on:click={() => showSettings = !showSettings}
-      class="settings-button"
+      title="Settings"
+      class="icon-button"
     >
       <Icon path={showSettings ? mdiClose : mdiCog} />
+    </button>
+
+    <button
+      on:click={() => $settings.showHistory = !$settings.showHistory}
+      title={$settings.showHistory ? "Hide history" : "Show history"}
+      class="icon-button"
+    >
+      <Icon path={$settings.showHistory ? mdiChevronDoubleRight : mdiChevronDoubleLeft} />
     </button>
   </header>
 
@@ -75,17 +84,24 @@
     justify-content: stretch
 
   header
-    flex: 2em 0 0
+    --header-height: 2em
+    flex: var(--header-height) 0 0
     display: flex
     align-items: center
-    gap: 2em
-    padding: 0 1em
     background: #111
     white-space: nowrap
+    > button.icon-button
+      width: var(--header-height)
+      height: var(--header-height)
 
   h1
     font-size: 1.2em
+    flex: min-content 1 1
+    text-align: left
+    overflow: hidden
+    text-overflow: ellipsis
 
   .new-game-button
-    @include common.start-button
+    @include common.button
+    margin-right: 1em
 </style>

@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { mdiChevronDoubleLeft, mdiChevronDoubleRight } from "@mdi/js"
   import { onMount } from "svelte"
+  import { slide } from "svelte/transition"
   import { match } from "ts-pattern"
 
   import { type Game, START_GAME } from "./chess"
   import { makeClock } from "./Clock.svelte"
   import History from "./History.svelte"
-  import Icon from "./Icon.svelte"
   import Modal from "./Modal.svelte"
   import Perspective from "./Perspective.svelte"
   import { settings } from "./settings"
@@ -104,16 +103,9 @@
   </div>
 
   {#if $settings.showHistory}
-    <aside class="sidebar">
-      <button class="hideHistory" on:click={() => $settings.showHistory = false}>
-        <Icon path={mdiChevronDoubleRight} />
-      </button>
+    <aside class="sidebar" transition:slide={{ duration: 200, axis: "x" }}>
       <History bind:game />
     </aside>
-  {:else}
-    <button class="showHistory" on:click={() => $settings.showHistory = true}>
-      <Icon path={mdiChevronDoubleLeft} />
-    </button>
   {/if}
 
 </div>
@@ -142,21 +134,6 @@
     align-items: center
     justify-content: space-around
     overflow: hidden
-
-  button.showHistory, button.hideHistory
-    font-family: sans-serif
-    background: #333
-    box-shadow: 1px 1px 3px #0005
-    &:hover, &:focus, &:active
-      background: #666
-      box-shadow: 1px 1px 5px #0008
-  button.showHistory
-    position: absolute
-    inset: 0 0 auto auto
-    width: 2em
-    height: 2em
-  button.hideHistory
-    height: 2em
 
   .sidebar
     width: 12em
