@@ -21,15 +21,14 @@
   }
 ><path fill="currentColor" d={path} /></svg>
 
-<style lang="scss">
-  svg {
-    width: var(--icon-size);
-    height: var(--icon-size);
-    vertical-align: var(--icon-vertical-align, -.1em);
-  }
-  path {
-    paint-order: stroke;
-    stroke-width: var(--icon-stroke-width, 2pt);
-    stroke: var(--icon-stroke, none);
-  }
+<style lang="sass">
+  svg
+    width: var(--icon-size)
+    height: var(--icon-size)
+    vertical-align: var(--icon-vertical-align, -.1em)
+
+  path
+    paint-order: stroke
+    stroke-width: var(--icon-stroke-width, 2pt)
+    stroke: var(--icon-stroke, none)
 </style>

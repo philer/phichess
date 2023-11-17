@@ -111,16 +111,14 @@
 </div>
 
 
-<style lang="scss">
-  .layout-list {
-    // display: flex;
-    // justify-content: center;
-    // flex-wrap: wrap;
-
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2em 2em;
-    width: max-content;
-    margin: auto;
-  }
+<style lang="sass">
+  .layout-list
+    // display: flex
+    // justify-content: center
+    // flex-wrap: wrap
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: 2em 2em
+    width: max-content
+    margin: auto
 </style>

@@ -16,12 +16,14 @@
   style:font-size={`${pieces.scale}em`}
 />
 
-<style lang="scss">
-  img {
-    height: 1em;
-    &.glow {
-      &:global(.w) { filter: drop-shadow(0 0 1px black); }
-      &:global(.b) { filter: drop-shadow(0 0 1px white); }
-    }
-  }
+<style lang="sass">
+  img
+    height: 1em
+    &.glow
+      &:global(.w)
+        filter: drop-shadow(0 0 1px black)
+      &:global(.b)
+        filter: drop-shadow(0 0 1px white)
+
+
 </style>

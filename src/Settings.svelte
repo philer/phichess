@@ -33,48 +33,44 @@
 </form>
 
 
-<style lang="scss">
-  h2 {
-    font-size: 1.3em;
-    margin: 0 auto;
-    width: 100%;
-    max-width: calc(40em / 1.3);
-  }
-  form, form :global(fieldset) {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1em;
-  }
-  form {
-    height: 100%;
-    padding: 1em;
-    overflow: auto;
+<style lang="sass">
+  h2
+    font-size: 1.3em
+    margin: 0 auto
+    width: 100%
+    max-width: calc(40em / 1.3)
 
-    text-align: left;
-    --icon-size: 1.5em;
+  form, form :global(fieldset)
+    display: flex
+    flex-direction: column
+    align-items: stretch
+    gap: 1em
 
-    :global(fieldset) {
-      > :global(legend) {
-        display: contents;
-        font-weight: bold;
-        font-size: 1.1em;
-      }
-      padding: 1em;
-      margin: 0 auto;
-      width: 100%;
-      max-width: 40em;
+  form
+    height: 100%
+    padding: 1em
+    overflow: auto
 
-      &:last-child {
-        border-bottom: 0 solid transparent;
-      }
+    text-align: left
+    --icon-size: 1.5em
 
-      background: #333;
-      border-left: .15em solid #555;
-      > :global(fieldset) {
-        background: #3a3a3a;
-        border-left: .15em solid #5c5c5c;
-      }
-    }
-  }
+    :global(fieldset)
+      > :global(legend)
+        display: contents
+        font-weight: bold
+        font-size: 1.1em
+
+      padding: 1em
+      margin: 0 auto
+      width: 100%
+      max-width: 40em
+
+      &:last-child
+        border-bottom: 0 solid transparent
+
+      background: #333
+      border-left: .15em solid #555
+      > :global(fieldset)
+        background: #3a3a3a
+        border-left: .15em solid #5c5c5c
 </style>

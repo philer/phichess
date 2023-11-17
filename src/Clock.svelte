@@ -157,6 +157,7 @@
   $: running = $clock.lastUpdatedAt > 0 && $clock.toMove === forColor
 </script>
 
+
 <div class="clock" class:running>
   {#if running}
     {#if seconds <= 0}
@@ -184,21 +185,20 @@
   {/if}
 </div>
 
-<style lang="scss">
-  .clock {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .33em;
-    padding: .2em .33em;
 
-    font-weight: bold;
-    background: #0008;
-    border: 1px solid #fff4;
-    border-radius: 3px;
-    color: #fffa;
-    &.running {
-      color: white;
-    }
-  }
+<style lang="sass">
+  .clock
+    display: flex
+    align-items: center
+    justify-content: center
+    gap: .33em
+    padding: .2em .33em
+
+    font-weight: bold
+    background: #0008
+    border: 1px solid #fff4
+    border-radius: 3px
+    color: #fffa
+    &.running
+      color: white
 </style>

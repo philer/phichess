@@ -13,13 +13,12 @@
 </label>
 
 
-<style lang="scss">
-  label {
-    display: flex;
-    gap: .5em;
-  }
-  input[type="checkbox"] {
-    position: fixed;
-    inset: -999px -999px auto auto;
-  }
+<style lang="sass">
+  label
+    display: flex
+    gap: .5em
+
+  input[type="checkbox"]
+    position: fixed
+    inset: -999px -999px auto auto
 </style>

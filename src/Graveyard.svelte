@@ -13,6 +13,7 @@
     ) as [ColorPiece, number][]
 </script>
 
+
 <div class={`graveyard ${color}`}>
   {#each graveCounts as [piece, count]}
     {#if piece[0] === color && count}
@@ -27,27 +28,25 @@
   {/each}
 </div>
 
-<style lang="scss">
-  .graveyard {
-    font-size: 1.25em;
-    gap: .667em;
-    display: flex;
-    align-items: center;
-    > div {
-      > div {
-        display: inline-block;
-        width: .33em;
-        overflow: visible;
-        --icon-vertical-align: middle;
-      }
-    }
-    &:global(.w) {
-      color: #ddd;
-      --icon-stroke: #333;
-    }
-    &:global(.b) {
-      color: #111;
-      --icon-stroke: #777;
-    }
-  }
+
+<style lang="sass">
+  .graveyard
+    font-size: 1.25em
+    gap: .667em
+    display: flex
+    align-items: center
+    > div
+      > div
+        display: inline-block
+        width: .33em
+        overflow: visible
+        --icon-vertical-align: middle
+
+    &:global(.w)
+      color: #ddd
+      --icon-stroke: #333
+
+    &:global(.b)
+      color: #111
+      --icon-stroke: #777
 </style>

@@ -30,34 +30,30 @@
 </div>
 
 
-<style lang="scss">
-  .theme-list {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 2em 2em;
-  }
-  .board {
-    width: 6em;
-    height: 6em;
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    grid-template-columns: 1fr 1fr;
-    > div {
-      &:nth-of-type(1), &:nth-of-type(4) {
-        background-color: var(--theme-light-square-background);
-      }
-      &:nth-of-type(2), &:nth-of-type(3) {
-        background-color: var(--theme-dark-square-background);
-      }
-    }
-  }
-  label {
-    display: flex;
-    padding: .4em;
-    border: .2em solid transparent;
-  }
-  .selected {
-    border-color: currentColor;
-  }
+<style lang="sass">
+  .theme-list
+    display: flex
+    justify-content: center
+    flex-wrap: wrap
+    gap: 2em 2em
+
+  .board
+    width: 6em
+    height: 6em
+    display: grid
+    grid-template-rows: 1fr 1fr
+    grid-template-columns: 1fr 1fr
+    > div
+      &:nth-of-type(1), &:nth-of-type(4)
+        background-color: var(--theme-light-square-background)
+      &:nth-of-type(2), &:nth-of-type(3)
+        background-color: var(--theme-dark-square-background)
+
+  label
+    display: flex
+    padding: .4em
+    border: .2em solid transparent
+
+  .selected
+    border-color: currentColor
 </style>

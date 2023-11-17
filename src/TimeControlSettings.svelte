@@ -108,38 +108,35 @@
 </fieldset>
 
 
-<style lang="scss">
-  select, input[type="number"] {
-    font-size: inherit;
-    line-height: inherit;
-    padding: .25em;
-    border-radius: .15em;
-    background: #444;
-    color: inherit;
-    border: 1px solid #666;
-    box-shadow: 1px 1px 3px #0003;
-  }
-  input[type="number"] {
-    width: 5em;
-    padding: .1em .3em;
-    text-align: right;
-  }
-  :disabled {
-    opacity: .5;
-  }
+<style lang="sass">
+  select, input[type="number"]
+    font-size: inherit
+    line-height: inherit
+    padding: .25em
+    border-radius: .15em
+    background: #444
+    color: inherit
+    border: 1px solid #666
+    box-shadow: 1px 1px 3px #0003
 
-  .time-presets {
-    display: flex;
-    align-items: center;
-    gap: .5em;
-  }
-  .time-per-side {
-    display: flex;
-    align-items: end;
-    gap: .25em;
-    > label {
-      display: flex;
-      flex-direction: column;
-    }
-  }
+  input[type="number"]
+    width: 5em
+    padding: .1em .3em
+    text-align: right
+
+  :disabled
+    opacity: .5
+
+  .time-presets
+    display: flex
+    align-items: center
+    gap: .5em
+
+  .time-per-side
+    display: flex
+    align-items: end
+    gap: .25em
+    > label
+      display: flex
+      flex-direction: column
 </style>

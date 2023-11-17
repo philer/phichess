@@ -37,67 +37,61 @@
 </label>
 
 
-<style lang="scss">
-  label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    > span {
-      display: flex;
-      align-items: center;
-      gap: .5em;
-    }
-  }
-  .layout-preview {
-    &.landscape {
-      width: 10em;
-      aspect-ratio: 16/9;
-    }
-    &.portrait {
-      height: 10em;
-      aspect-ratio: 1/2;
-    }
-    box-sizing: content-box;
-    margin-top: .5em;
-    --icon-size: 4em;
+<style lang="sass">
+  label
+    display: flex
+    flex-direction: column
+    align-items: center
+    > span
+      display: flex
+      align-items: center
+      gap: .5em
 
-    border: .15em solid currentColor;
-    border-bottom-width: 1em;
-    border-radius: .3em;
+  .layout-preview
+    &.landscape
+      width: 10em
+      aspect-ratio: 16/9
 
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
+    &.portrait
+      height: 10em
+      aspect-ratio: 1/2
 
-    --fg: #ccc;
-    --bg: #333;
-    color: var(--fg);
-    .board {
-      position: relative;
-      width: var(--icon-size);
-      height: var(--icon-size);
-      border: .2em solid currentColor;
-      > :global(svg), span {
-        position: absolute;
-        inset: 0;
-        &:nth-child(2) {
-          --icon-stroke: var(--bg);
-          --icon-stroke-width: 2pt;
-          --icon-size: 3.5em;
-          inset: .05em;
-        }
-      }
-      > span {
-        display: flex;
-        flex-direction: column-reverse;
-      }
+    box-sizing: content-box
+    margin-top: .5em
+    --icon-size: 4em
+
+    border: .15em solid currentColor
+    border-bottom-width: 1em
+    border-radius: .3em
+
+    display: flex
+    flex-wrap: wrap
+    justify-content: space-around
+    align-items: center
+
+    --fg: #ccc
+    --bg: #333
+    color: var(--fg)
+    .board
+      position: relative
+      width: var(--icon-size)
+      height: var(--icon-size)
+      border: .2em solid currentColor
+      > :global(svg), span
+        position: absolute
+        inset: 0
+        &:nth-child(2)
+          --icon-stroke: var(--bg)
+          --icon-stroke-width: 2pt
+          --icon-size: 3.5em
+          inset: .05em
+
+      > span
+        display: flex
+        flex-direction: column-reverse
+
       &.black > :global(svg):nth-child(2),
-      & > span > :global(svg):nth-child(2) {
-        color: var(--bg);
-        --icon-stroke: var(--fg);
-      }
-    }
-  }
-
+      & > span > :global(svg):nth-child(2)
+        color: var(--bg)
+        --icon-stroke: var(--fg)
 </style>

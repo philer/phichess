@@ -66,8 +66,6 @@
 
 <style lang="sass">
   @use "common"
-  .new-game-button
-    @include common.start-button
 
   .app
     width: 100%
@@ -88,4 +86,6 @@
   h1
     font-size: 1.2em
 
+  .new-game-button
+    @include common.start-button
 </style>

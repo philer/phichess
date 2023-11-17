@@ -86,50 +86,46 @@ import Algebraic from "./Algebraic.svelte"
   </button>
 </div>
 
-<style lang="scss">
-  ol {
-    display: grid;
-    align-content: start;
-    grid-template-columns: min-content 1fr 1fr;
-    // gap: 0.5em 1em;
+<style lang="sass">
+  ol
+    display: grid
+    align-content: start
+    grid-template-columns: min-content 1fr 1fr
+    // gap: 0.5em 1em
 
-    // padding: 1em 1em .5em;
-    background: #fff1;
-  }
-  li {
-    display: contents;
-    span, button {
-      padding: .25em .5em;
-      text-align: left;
-      white-space: nowrap;
-      // display: flex;
-      // align-items: center;
-    }
-  }
-  .moveNumber {
-    text-align: right;
-    font-weight: bold;
-    opacity: .5;
-    background: #fff2;
-  }
-  .current {
-    background: #fff2;
-  }
-  .ghost {
-    opacity: .5;
-  }
-  button.undo {
-    line-height: 2em;
-    width: 100%;
-    background: #333;
-    transition: .3s background;
-    &:not(:disabled):hover {
-      background: #555;
-    }
-    &:disabled {
-      opacity: .3;
-      cursor: default;
-    }
-  }
+    // padding: 1em 1em .5em
+    background: #fff1
 
+  li
+    display: contents
+    span, button
+      padding: .25em .5em
+      text-align: left
+      white-space: nowrap
+      // display: flex
+      // align-items: center
+
+  .moveNumber
+    text-align: right
+    font-weight: bold
+    opacity: .5
+    background: #fff2
+
+  .current
+    background: #fff2
+
+  .ghost
+    opacity: .5
+
+  button.undo
+    line-height: 2em
+    width: 100%
+    background: #333
+    transition: .3s background
+    &:not(:disabled):hover
+      background: #555
+
+    &:disabled
+      opacity: .3
+      cursor: default
 </style>

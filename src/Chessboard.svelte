@@ -191,130 +191,125 @@
   {/if}
 </div>
 
-<style lang="scss">
-  .board {
-    position: relative;
-    width: var(--board-size);
-    height: var(--board-size);
-    font-size: calc(0.9 * var(--square-size));
+<style lang="sass">
+  .board
+    position: relative
+    width: var(--board-size)
+    height: var(--board-size)
+    font-size: calc(0.9 * var(--square-size))
 
-    grid-area: board;  // place self in the surrounding grid context
+    grid-area: board  // place self in the surrounding grid context
 
-    display: grid;
-    grid-template-rows: repeat(8, 1fr);
-    grid-template-columns: repeat(8, 1fr);
-    direction: rtl;  // reverse columns for squares ordered A1, B1, C1, ..., H8
+    display: grid
+    grid-template-rows: repeat(8, 1fr)
+    grid-template-columns: repeat(8, 1fr)
+    direction: rtl  // reverse columns for squares ordered A1, B1, C1, ..., H8
 
-    font-family: "Linux Libertine";
-    user-select: none;
+    font-family: "Linux Libertine"
+    user-select: none
 
-    box-shadow: 3px 3px 10px #0006, 3px 3px 40px #0006;
-  }
-  .flipOpponentPieces {
-    &.asWhite :global(.b), &:not(.asWhite) :global(.w) {
+    box-shadow: 3px 3px 10px #0006, 3px 3px 40px #0006
+
+  .flipOpponentPieces
+    &.asWhite :global(.b), &:not(.asWhite) :global(.w)
       transform: rotate(90deg)
-    }
-  }
-  .dragging {
-    cursor: grabbing;
-  }
 
-  .square {
-    position: relative;
-    width: var(--square-size);
-    height: var(--square-size);
+  .dragging
+    cursor: grabbing
 
-    overflow: visible;
+  .square
+    position: relative
+    width: var(--square-size)
+    height: var(--square-size)
 
-    // text-shadow: 1px 1px 5px #000c;
-    &.hasPiece {
-      cursor: grab;
-      .dragging & {
-        cursor: grabbing;
-      }
-    }
-    &.light { background: var(--theme-light-square-background) }
-    &.dark { background: var(--theme-dark-square-background) }
-    &.check {
-      &.light { background: var(--theme-check-light-square-background) }
-      &.dark { background: var(--theme-check-dark-square-background) }
-    }
-    &.lastMove {
-      &.light { background: var(--theme-last-move-light-square-background) }
-      &.dark { background: var(--theme-last-move-dark-square-background) }
-    }
-    &.selected {
-      &.light { background: var(--theme-selected-light-square-background) }
-      &.dark { background: var(--theme-selected-dark-square-background) }
-    }
+    overflow: visible
+
+    // text-shadow: 1px 1px 5px #000c
+    &.hasPiece
+      cursor: grab
+      .dragging &
+        cursor: grabbing
+
+
+    &.light
+      background: var(--theme-light-square-background)
+    &.dark
+      background: var(--theme-dark-square-background)
+    &.check
+      &.light
+        background: var(--theme-check-light-square-background)
+      &.dark
+        background: var(--theme-check-dark-square-background)
+    &.lastMove
+      &.light
+        background: var(--theme-last-move-light-square-background)
+      &.dark
+        background: var(--theme-last-move-dark-square-background)
+    &.selected
+      &.light
+        background: var(--theme-selected-light-square-background)
+      &.dark
+        background: var(--theme-selected-dark-square-background)
+
     .file,
-    .rank {
-      position: absolute;
-      font-size: max(1vmin, .1em);
-      line-height: 1.5em;
-      height: 1.5em;
-      font-family: sans-serif;
-      font-weight: bold;
-    }
-    .rank {
-      inset: 0.5em auto auto 0.5em;
-    }
-    .file {
-      inset: auto 0.5em 0.5em auto;
-    }
-  }
+    .rank
+      position: absolute
+      font-size: max(1vmin, .1em)
+      line-height: 1.5em
+      height: 1.5em
+      font-family: sans-serif
+      font-weight: bold
 
-  .piece {
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    &.dragging {
-      z-index: 100;
-      position: relative;
-    }
-  }
+    .rank
+      inset: 0.5em auto auto 0.5em
 
-  .promotion {
-    position: absolute;
-    display: flex;
-    justify-content: stretch;
+    .file
+      inset: auto 0.5em 0.5em auto
 
-    top: 0;
-    flex-direction: column;
+  .piece
+    width: 100%
+    height: 100%
+    pointer-events: none
+    display: flex
+    justify-content: center
+    align-items: center
+    &.dragging
+      z-index: 100
+      position: relative
+
+  .promotion
+    position: absolute
+    display: flex
+    justify-content: stretch
+
+    box-shadow: 1px 1px .1em #0008
+
+    top: 0
+    flex-direction: column
     .asWhite.blackToMove &,
-    .asBlack.whiteToMove & {
-      top: auto;
-      bottom: 0;
-      flex-direction: column-reverse;
-    }
+    .asBlack.whiteToMove &
+      top: auto
+      bottom: 0
+      flex-direction: column-reverse
 
-    left: calc(var(--promotion-file-offset) * var(--square-size));
-    .asBlack & {
-      left: calc((7 - var(--promotion-file-offset)) * var(--square-size));
-    }
 
-    background: #000c;
-    .blackToMove & {
-      background: #fffc;
-      color: black;
-    }
+    left: calc(var(--promotion-file-offset) * var(--square-size))
+    .asBlack &
+      left: calc((7 - var(--promotion-file-offset)) * var(--square-size))
 
-    box-shadow: 1px 1px .1em #0008;
 
-    > button {
-      height: var(--square-size);
-      width: var(--square-size);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      &.close {
-        height: calc(.5 * var(--square-size));
-        font-size: .33em;
-      }
-    }
-  }
+    background: #000c
+    .blackToMove &
+      background: #fffc
+      color: black
 
+    > button
+      height: var(--square-size)
+      width: var(--square-size)
+      display: flex
+      justify-content: center
+      align-items: center
+      &.close
+        height: calc(.5 * var(--square-size))
+        font-size: .33em
 </style>
