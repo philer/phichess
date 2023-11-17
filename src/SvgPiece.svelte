@@ -9,7 +9,7 @@
 </script>
 
 <img
-  src={`/pieces/${pieces.name}/${piece}.svg`}
+  src={`pieces/${pieces.name}/${piece}.svg`}
   alt={piece}
   class={piece[0]}
   class:glow
