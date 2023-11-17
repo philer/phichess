@@ -8,7 +8,18 @@
   import { settings } from "./settings"
   import Settings from "./Settings.svelte"
 
-  let showSettings = false
+  let isSettingsOpen = location.hash === "#settings"
+  const handleHashChange = (_evt: HashChangeEvent) => {
+    isSettingsOpen = location.hash === "#settings"
+  }
+  const openSettings = () => {
+    window.location.hash = "settings"
+  }
+  const closeSettings = () => {
+    if (isSettingsOpen) {
+      window.location.hash = ""
+    }
+  }
 
   let game = START_GAME
 
@@ -16,10 +27,10 @@
 
   const handleGlobalKeydown = (evt: KeyboardEvent) =>
     match(evt.key)
-      .with("Escape", () => { showSettings = false })
+      .with("Escape", closeSettings)
 </script>
 
-
+<svelte:window on:hashchange={handleHashChange} />
 <svelte:document on:keydown={handleGlobalKeydown} />
 
 <div
@@ -38,7 +49,7 @@
   <header>
     <h1>Kind of OTB Chess</h1>
 
-    {#if !showSettings && game.history.length > 0}
+    {#if !isSettingsOpen && game.history.length > 0}
       <button
         on:click={() => game = START_GAME}
         title="New game"
@@ -49,14 +60,14 @@
     {/if}
 
     <button
-      on:click={() => showSettings = !showSettings}
+      on:click={isSettingsOpen ? closeSettings : openSettings}
       title="Settings"
       class="icon-button"
     >
-      <Icon path={showSettings ? mdiClose : mdiCog} />
+      <Icon path={isSettingsOpen ? mdiClose : mdiCog} />
     </button>
 
-    {#if !showSettings}
+    {#if !isSettingsOpen}
       <button
         on:click={() => $settings.showHistory = !$settings.showHistory}
         title={$settings.showHistory ? "Hide history" : "Show history"}
@@ -67,7 +78,7 @@
     {/if}
   </header>
 
-  {#if showSettings}
+  {#if isSettingsOpen}
     <Settings />
   {:else}
     <Game bind:game />
