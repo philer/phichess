@@ -64,35 +64,28 @@
 </div>
 
 
-<style>
-  .app {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: stretch;
-  }
-  header {
-    flex: 2em 0 0;
-    display: flex;
-    align-items: center;
-    gap: 2em;
-    padding: 0 1em;
-    background: #111;
-    white-space: nowrap;
-  }
-  h1 {
-    font-size: 1.2em;
-  }
-  .new-game-button {
-    padding: 0 .5em;
-    font-size: .85em;
-    font-weight: bold;
-    line-height: 1.5em;
-    background: #6c5;
-    color: #050;
-    border: 1px solid #050;
-    border-radius: .25em;
-    text-shadow: none;
-  }
+<style lang="sass">
+  @use "common"
+  .new-game-button
+    @include common.new-game-button
+
+  .app
+    width: 100%
+    height: 100%
+    display: flex
+    flex-direction: column
+    justify-content: stretch
+
+  header
+    flex: 2em 0 0
+    display: flex
+    align-items: center
+    gap: 2em
+    padding: 0 1em
+    background: #111
+    white-space: nowrap
+
+  h1
+    font-size: 1.2em
+
 </style>

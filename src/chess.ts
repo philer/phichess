@@ -47,11 +47,21 @@ export type Move = Readonly<{
   algebraic?: AlgebraicMove
 }>
 
+export type Termination =
+  | "checkmate"
+  | "time"
+  | "stalemate"
+  | "repetition"
+  | "fifty-moves"
+  | "agreement"
+
 export type Game = Readonly<{
   board: Board
   toMove: Color
   history: ReadonlyArray<Move>
   graveyard: ReadonlyArray<MortalColorPiece>
+  outcome?: Color | "draw"
+  termination?: Termination
 }>
 
 export const START_GAME: Game = Object.freeze({
@@ -62,12 +72,9 @@ export const START_GAME: Game = Object.freeze({
 })
 
 
-export const squares: readonly Square[]
-  = Array.from("12345678").flatMap(
-    rank => Array.from("abcdefgh",
-      file => `${file}${rank}` as Square,
-    ),
-  )
+export const squares: readonly Square[] =
+  Array.from("12345678")
+    .flatMap(rank => Array.from("abcdefgh", file => `${file}${rank}` as Square))
 
 
 const shift = (fileDelta: number, rankDelta: number, square: Square): Square | undefined => {
@@ -516,11 +523,16 @@ export const applyMove = (game: Game, move: Move): Result<Game, string> =>
   _applyMove(game, move)
     .map(newGame => {
       const check = isInCheck(newGame.toMove, newGame.board)
-      const mate = !hasLegalMoves(newGame)
+      const hasMoves = hasLegalMoves(newGame)
+      const mate = check && !hasMoves
+      const stalemate = !check && !hasMoves
+      // TODO check threefold & 50 moves
       const algebraic = toAlgebraic({ ...move, check, mate }, game.board).unwrap()
       return {
         ...newGame,
         history: [...game.history, { ...move, check, mate, algebraic }],
+        outcome: mate ? game.toMove : stalemate ? "draw" : undefined,
+        termination: mate ? "checkmate" : stalemate ? "stalemate" : undefined,
       }
     })
 

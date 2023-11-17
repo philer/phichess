@@ -44,6 +44,7 @@ button, input {
   font-size: inherit;
   font-family: inherit;
   pointer-events: auto;
+  transition: .3s background, .3s box-shadow
 }
 button {
   cursor: pointer;
