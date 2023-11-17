@@ -3,7 +3,7 @@ import { writable } from "svelte/store"
 export type LayoutPerspective = {
   asWhite: boolean,
   rotate: 0 | 90 | 180 | 270,
-  autoflip?: boolean
+  flipOpponentPieces: boolean,
 }
 
 export type ClockSettings = {  // TODO "TimeFormat"?
@@ -99,8 +99,16 @@ export const settings = writable<Settings>({
   clock: { secondsPerSide: 5 * 60, increment: 3 },
   layout: [
     // Assume that any touchscreen is a mobile device placed in between players
-    { asWhite: false, rotate: navigator.maxTouchPoints > 0 ? 180 : 0 },
-    { asWhite: true, rotate: 0 },
+    {
+      asWhite: false,
+      rotate: navigator.maxTouchPoints > 0 ? 180 : 0,
+      flipOpponentPieces: false,
+    },
+    {
+      asWhite: true,
+      rotate: 0, flipOpponentPieces: false,
+      flipOpponentPieces: false,
+    },
   ],
   theme: {
     pageBackground: "#222",

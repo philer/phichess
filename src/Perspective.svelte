@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiArrowUpDownBold, mdiFormatRotate90 } from "@mdi/js"
+  import { mdiArrowUpDownBold, mdiChessPawn, mdiFormatRotate90 } from "@mdi/js"
 
   import { type Game } from "./chess"
   import Chessboard from "./Chessboard.svelte"
@@ -11,6 +11,7 @@
   export let game: Game
   export let asWhite = true
   export let rotate = 0
+  export let flipOpponentPieces = false
 </script>
 
 <div class="perspective" style:transform={`rotate(${rotate}deg)`}>
@@ -41,10 +42,13 @@
       <button on:click={() => asWhite = !asWhite}>
         <Icon path={mdiArrowUpDownBold} />
       </button>
+      <button on:click={() => flipOpponentPieces = !flipOpponentPieces}>
+        <Icon path={mdiChessPawn} flip={flipOpponentPieces ? undefined : "vertical"} />
+      </button>
     </div>
   </div>
 
-  <Chessboard bind:game {asWhite} {rotate} />
+  <Chessboard bind:game {asWhite} {rotate} {flipOpponentPieces} />
 </div>
 
 <style lang="scss">

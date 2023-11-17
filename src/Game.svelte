@@ -61,8 +61,8 @@
     style:flex-flow={flowDirection}
     style:--perspective-size={`${perspectiveSize}px`}
   >
-    {#each $settings.layout as { asWhite, rotate }, idx (idx)}
-      <Perspective bind:game bind:asWhite bind:rotate />
+    {#each $settings.layout as { asWhite, rotate, flipOpponentPieces }, idx (idx)}
+      <Perspective bind:game bind:asWhite bind:rotate bind:flipOpponentPieces />
     {/each}
 
     {#if game.outcome && !gameOverClosed}

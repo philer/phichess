@@ -20,10 +20,17 @@
     {label}
   </span>
   <div class={`layout-preview ${landscape ? "landscape" : "portrait"}`}>
-    {#each layout as { asWhite, rotate }}
+    {#each layout as { asWhite, rotate, flipOpponentPieces }}
       <span class={`board ${asWhite ? "white" : "black"}`}>
         <ChessboardIcon />
-        <Icon path={mdiChessPawn} {rotate} />
+        {#if flipOpponentPieces}
+          <span style:transform={`rotate(${rotate}deg)`}>
+            <Icon path={mdiChessPawn} />
+            <Icon path={mdiChessPawn} rotate={180} />
+          </span>
+        {:else}
+          <Icon path={mdiChessPawn} {rotate} />
+        {/if}
       </span>
     {/each}
   </div>
@@ -71,7 +78,7 @@
       width: var(--icon-size);
       height: var(--icon-size);
       border: .2em solid currentColor;
-      > :global(svg) {
+      > :global(svg), span {
         position: absolute;
         inset: 0;
         &:nth-child(2) {
@@ -81,7 +88,12 @@
           inset: .05em;
         }
       }
-      &.black > :global(svg):nth-child(2) {
+      > span {
+        display: flex;
+        flex-direction: column-reverse;
+      }
+      &.black > :global(svg):nth-child(2),
+      & > span > :global(svg):nth-child(2) {
         color: var(--bg);
         --icon-stroke: var(--fg);
       }

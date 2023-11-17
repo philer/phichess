@@ -36,6 +36,7 @@
   export let game: Game
   export let asWhite: boolean = true
   export let rotate: number = 0
+  export let flipOpponentPieces: boolean = false
   export let showCoordinates: boolean = true
 
   $: ({ board, toMove } = game)
@@ -128,6 +129,7 @@
 <div
   class="board"
   class:asWhite
+  class:flipOpponentPieces
   class:asBlack={!asWhite}
   class:whiteToMove={toMove === "w"}
   class:blackToMove={toMove === "b"}
@@ -161,6 +163,7 @@
       {/if}
       {#if piece && square !== promotionMove?.from}
         <div
+          class={piece[0]}
           class:piece
           class:dragging={draggingFromSquare === square}
           style:top={draggingFromSquare === square ? `${dragPositionOffset.y}px` : "0"}
@@ -206,6 +209,11 @@
     user-select: none;
 
     box-shadow: 3px 3px 10px #0006, 3px 3px 40px #0006;
+  }
+  .flipOpponentPieces {
+    &.asWhite :global(.b), &:not(.asWhite) :global(.w) {
+      transform: rotate(90deg)
+    }
   }
   .dragging {
     cursor: grabbing;

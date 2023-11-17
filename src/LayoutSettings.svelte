@@ -6,25 +6,37 @@
 
   type LayoutName =
     | "single"
+    | "singleOpposite"
     | "side-by-side"
     | "opposite"
     | "custom"
 
-  const single = [{ asWhite: true, rotate: 0 }] as const
+  const single = [{
+    asWhite: true,
+    rotate: 0,
+    flipOpponentPieces: false,
+  }] as const
+
+  const singleOpposite = [{
+    asWhite: true,
+    rotate: 0,
+    flipOpponentPieces: true,
+  }] as const
 
   const sideBySide = [
-    { asWhite: false, rotate: 0 },
-    { asWhite: true, rotate: 0 },
+    { asWhite: false, rotate: 0, flipOpponentPieces: false },
+    { asWhite: true, rotate: 0, flipOpponentPieces: false },
   ] as const
 
   const opposite = [
-    { asWhite: false, rotate: 180 },
-    { asWhite: true, rotate: 0 },
+    { asWhite: false, rotate: 180, flipOpponentPieces: false },
+    { asWhite: true, rotate: 0, flipOpponentPieces: false },
   ] as const
 
 
   let layoutName: LayoutName = match($settings.layout)
       .with(single, () => "single" as const)
+      .with(singleOpposite, () => "singleOpposite" as const)
       .with(sideBySide, () => "side-by-side" as const)
       .with(opposite, () => "opposite" as const)
       .otherwise(() => "custom" as const)
@@ -36,6 +48,7 @@
       ...$settings,
       layout: match(layoutName)
         .with("single", () => single as unknown as LayoutPerspective[])
+        .with("singleOpposite", () => singleOpposite as unknown as LayoutPerspective[])
         .with("side-by-side", () => sideBySide as unknown as LayoutPerspective[])
         .with("opposite", () => opposite as unknown as LayoutPerspective[])
         .with("custom", () => custom as unknown as LayoutPerspective[])
@@ -57,6 +70,14 @@
     label="Single"
     value="single"
     layout={single}
+    bind:group={layoutName}
+    {landscape}
+  />
+
+  <LayoutSettingsOption
+    label="Single opposite"
+    value="singleOpposite"
+    layout={singleOpposite}
     bind:group={layoutName}
     {landscape}
   />
@@ -92,9 +113,14 @@
 
 <style lang="scss">
   .layout-list {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+    // display: flex;
+    // justify-content: center;
+    // flex-wrap: wrap;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 2em 2em;
+    width: max-content;
+    margin: auto;
   }
 </style>
