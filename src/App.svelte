@@ -102,8 +102,4 @@
     text-align: left
     overflow: hidden
     text-overflow: ellipsis
-
-  .new-game-button
-    @include common.button
-    margin-right: 1em
 </style>
