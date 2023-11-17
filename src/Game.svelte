@@ -14,13 +14,16 @@
   export let game: Game
   let gameOverClosed = false
 
-  const clock = makeClock($settings.clock)
+  const {remaining, ...clock} = makeClock($settings.clock)
   $: {
     if (game.history.length === 0) {
       clock.reset($settings.clock)
       gameOverClosed = false
     } else if ($settings.useTimeControl) {
       clock.update(game.toMove)
+    }
+    if ($remaining[game.toMove] <= 0) {
+      game = { ...game, outcome: game.toMove, termination: "time" }
     }
   }
 
@@ -79,7 +82,7 @@
             }
             {match(game.termination)
                 .with("checkmate", () => "by checkmate.")
-                .with("time", () => "by time.")
+                .with("time", () => "on time.")
                 .with("stalemate", () => " by stalemate")
                 .with("repetition", () => " by threefold repetition")
                 .with("fifty-moves", () => " by fifty moves rule")

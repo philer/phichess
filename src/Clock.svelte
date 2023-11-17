@@ -26,11 +26,11 @@
     mdiClockTimeTwoOutline,
     mdiInfinity,
     mdiPause,
-    mdiSkull,
+    mdiFlag,
     mdiTrophyVariant,
   } from "@mdi/js"
   import { getContext, setContext } from "svelte"
-  import { type Readable, readonly, writable } from "svelte/store"
+  import { type Readable, readonly, writable, derived } from "svelte/store"
 
   import type { Color } from "./chess"
   import Icon from "./Icon.svelte"
@@ -47,6 +47,8 @@
     reset: (settings: ClockSettings) => void
     /** Hit the clock after making a move */
     update: (toMove: Color) => void
+    /** Store of remaining player times */
+    remaining: Readable<Record<Color, number>>
   }>
 
   export const makeClock = ({ secondsPerSide, increment }: ClockSettings): ClockControls => {
@@ -104,7 +106,7 @@
         }
       })
     }
-    return { update, reset }
+    return { update, reset, remaining: derived(store, clock => clock.remaining) }
   }
 
   const doubleDigit = (x: number) => Math.floor(x).toString().padStart(2, "0")
@@ -151,7 +153,7 @@
 <div class="clock" class:running>
   {#if running}
     {#if seconds <= 0}
-      <Icon path={mdiSkull} />
+      <Icon path={mdiFlag} />
     {:else if seconds < 10}
       <Icon path={urgentClockIcons[Math.floor(seconds % 12)]} />
     {:else}
