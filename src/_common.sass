@@ -1,14 +1,21 @@
-@mixin new-game-button
+@mixin button
   padding: 0 .5em
   font-size: .85em
   font-weight: bold
   line-height: 1.5em
-  border: 1px solid #050
+  border: 1px solid #555
   border-radius: .25em
-  background: #6c5
-  color: #050
+  background: #999
+  color: #222
   box-shadow: 1px 1px 3px #0008
   text-shadow: none
+  &:hover, &:active, &:focus
+    background: #bbb
 
+@mixin start-button
+  @include button
+  color: #040
+  border-color: #050
+  background: #6c5
   &:hover, &:active, &:focus
     background: #8d6

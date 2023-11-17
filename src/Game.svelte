@@ -1,21 +1,32 @@
 <script lang="ts">
-  import { mdiChevronDoubleLeft, mdiChevronDoubleRight, mdiClose } from "@mdi/js"
+  import { mdiChevronDoubleLeft, mdiChevronDoubleRight } from "@mdi/js"
   import { onMount } from "svelte"
-  import { fade, scale } from "svelte/transition"
   import { match } from "ts-pattern"
 
   import { type Game, START_GAME } from "./chess"
   import { makeClock } from "./Clock.svelte"
   import History from "./History.svelte"
   import Icon from "./Icon.svelte"
+  import Modal from "./Modal.svelte"
   import Perspective from "./Perspective.svelte"
   import { settings } from "./settings"
 
   export let game: Game
-  let isGameOverClosed = false
-  const closeGameOver = () => {
-    if (game.outcome) {
-      isGameOverClosed = true
+
+  /** Show the game over modal */
+  let openOutcome = false
+  /**
+   * Game over modal was closed by user and should not be shown again
+   * until a new game has been started.
+   */
+  let outcomeClosed = false
+  $: {
+    if (game.history.length === 0) {
+      openOutcome = false
+      outcomeClosed = false
+    }
+    if (game.outcome && !outcomeClosed) {
+      openOutcome = true
     }
   }
 
@@ -23,16 +34,15 @@
   $: {
     if (game.history.length === 0) {
       clock.reset($settings.clock)
-      isGameOverClosed = false
     } else if ($settings.useTimeControl) {
       if (game.outcome) {
         clock.stop()
       } else {
         clock.update(game.toMove)
       }
-    }
-    if ($remaining[game.toMove] <= 0) {
-      game = { ...game, outcome: game.toMove, termination: "time" }
+      if ($remaining[game.toMove] <= 0) {
+        game = { ...game, outcome: game.toMove, termination: "time" }
+      }
     }
   }
 
@@ -52,21 +62,8 @@
     return () => resizeObserver.unobserve(layoutContainer)
   })
 
-  const handleModalBackdropClick = (evt: MouseEvent) => {
-    if (evt.target === evt.currentTarget) {
-      closeGameOver()
-    }
-  }
-
-  const handleGlobalKeydown = (evt: KeyboardEvent) => {
-    if (evt.key === "Escape") {
-      closeGameOver()
-    }
-  }
 </script>
 
-
-<svelte:document on:keydown={handleGlobalKeydown} />
 
 <div class="game">
   <div
@@ -79,43 +76,31 @@
       <Perspective bind:game bind:asWhite bind:rotate bind:flipOpponentPieces />
     {/each}
 
-    {#if game.outcome && !isGameOverClosed}
-      <div
-        class="modal"
-        on:click={handleModalBackdropClick}
-        transition:fade={{ duration: 200 }}
-      >
-        <div class="game-over" transition:scale={{ duration: 200, start: .8 }}>
-          <button class="close" on:click={() => isGameOverClosed = true}>
-            <Icon path={mdiClose} />
-          </button>
-          <h3>Game over!</h3>
-          <p>
-            {match(game.outcome)
-                .with("w", () => "White wins")
-                .with("b", () => "Black wins")
-                .with("draw", () => "Draw")
-                .exhaustive()
-            }
-            {match(game.termination)
-                .with("checkmate", () => "by checkmate.")
-                .with("time", () => "on time.")
-                .with("stalemate", () => " by stalemate")
-                .with("repetition", () => " by threefold repetition")
-                .with("fifty-moves", () => " by fifty moves rule")
-                .with("agreement", () => " by agreement")
-                .with(undefined, () => "")
-                .exhaustive()
-            }
-          </p>
-          <p>
-            <button class="new-game-button" on:click={() => game = START_GAME}>
-              New game
-            </button>
-          </p>
-        </div>
-      </div>
-    {/if}
+    <Modal bind:open={openOutcome} on:close={() => outcomeClosed = true}>
+      <svelte:fragment slot="title">Game over!</svelte:fragment>
+      <p slot="content">
+        {match(game.outcome)
+            .with("w", () => "White wins")
+            .with("b", () => "Black wins")
+            .with("draw", () => "Draw")
+            .with(undefined, () => "???")
+            .exhaustive()
+        }
+        {match(game.termination)
+            .with("checkmate", () => "by checkmate.")
+            .with("time", () => "on time.")
+            .with("stalemate", () => " by stalemate")
+            .with("repetition", () => " by threefold repetition")
+            .with("fifty-moves", () => " by fifty moves rule")
+            .with("agreement", () => " by agreement")
+            .with(undefined, () => "")
+            .exhaustive()
+        }
+      </p>
+      <button slot="actions" class="new-game-button" on:click={() => game = START_GAME}>
+        New game
+      </button>
+    </Modal>
   </div>
 
   {#if $settings.showHistory}
@@ -137,8 +122,7 @@
 <style lang="sass">
   @use "common"
   .new-game-button
-    @include common.new-game-button
-    padding: .5em 1em
+    @include common.start-button
 
   .game
     position: relative
@@ -181,34 +165,4 @@
     flex-direction: column
     background: #0003
     box-shadow: 1px 1px 3px #0008
-
-  .modal
-    position: absolute
-    inset: 0
-    display: flex
-    justify-content: center
-    align-items: center
-    background: #1115
-    backdrop-filter: blur(3px)
-    > div
-      position: relative
-      background: #333
-      border-radius: 3px
-      box-shadow: 3px 3px 10px #0008
-      > button.close
-        position: absolute
-        inset: 0 0 auto auto
-        width: 2.4em
-        height: 2.4em
-
-  .game-over
-    h3
-      font-size: 1.2em
-      line-height: 2em
-      padding: 0 2em
-      background: #555
-    p
-      padding: 0em 2em
-      margin: 1em 0
-
 </style>

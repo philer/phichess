@@ -67,7 +67,7 @@
 <style lang="sass">
   @use "common"
   .new-game-button
-    @include common.new-game-button
+    @include common.start-button
 
   .app
     width: 100%
