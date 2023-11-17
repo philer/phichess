@@ -93,7 +93,7 @@ export const boardThemes: ReadonlyArray<BoardTheme> = [
 
 export const settings = writable<Settings>({
   showCoordinates: true,
-  showHistory: true,
+  showHistory: false,
   showGraveyards: true,
   useTimeControl: false,
   clock: { secondsPerSide: 5 * 60, increment: 3 },
