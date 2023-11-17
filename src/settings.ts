@@ -106,7 +106,7 @@ export const settings = writable<Settings>({
     },
     {
       asWhite: true,
-      rotate: 0, flipOpponentPieces: false,
+      rotate: 0,
       flipOpponentPieces: false,
     },
   ],
