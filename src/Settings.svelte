@@ -38,7 +38,7 @@
     font-size: 1.3em
     margin: 0 auto
     width: 100%
-    max-width: calc(40em / 1.3)
+    width: max-content
 
   form, form :global(fieldset)
     display: flex
@@ -47,30 +47,33 @@
     gap: 1em
 
   form
+    font-size: .9em
     height: 100%
-    padding: 1em
-    overflow: auto
+    width: 100%
+    padding: 1em .5em
+    overflow-y: auto
 
     text-align: left
     --icon-size: 1.5em
 
-    :global(fieldset)
+    > :global(fieldset)
+      width: min(40em, 95vw)
+      margin: 0 auto
+      padding: .5em 1em
+
+      background: #333
+      border-left: .15em solid #555
+      > :global(fieldset)
+        padding: .5em 1em
+        background: #3a3a3a
+        border-left: .15em solid #5c5c5c
+
       > :global(legend)
         display: contents
         font-weight: bold
         font-size: 1.1em
 
-      padding: 1em
-      margin: 0 auto
-      width: 100%
-      max-width: 40em
-
       &:last-child
         border-bottom: 0 solid transparent
 
-      background: #333
-      border-left: .15em solid #555
-      > :global(fieldset)
-        background: #3a3a3a
-        border-left: .15em solid #5c5c5c
 </style>

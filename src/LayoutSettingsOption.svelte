@@ -39,6 +39,7 @@
 
 <style lang="sass">
   label
+    flex: 25% 1 1
     display: flex
     flex-direction: column
     align-items: center
@@ -46,6 +47,7 @@
       display: flex
       align-items: center
       gap: .5em
+      white-space: nowrap
 
   .layout-preview
     &.landscape

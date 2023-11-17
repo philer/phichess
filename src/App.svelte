@@ -38,7 +38,7 @@
   <header>
     <h1>Kind of OTB Chess</h1>
 
-    {#if game.history.length > 0}
+    {#if !showSettings && game.history.length > 0}
       <button
         on:click={() => game = START_GAME}
         title="New game"
@@ -56,13 +56,15 @@
       <Icon path={showSettings ? mdiClose : mdiCog} />
     </button>
 
-    <button
-      on:click={() => $settings.showHistory = !$settings.showHistory}
-      title={$settings.showHistory ? "Hide history" : "Show history"}
-      class="icon-button"
-    >
-      <Icon path={$settings.showHistory ? mdiChevronDoubleRight : mdiChevronDoubleLeft} />
-    </button>
+    {#if !showSettings}
+      <button
+        on:click={() => $settings.showHistory = !$settings.showHistory}
+        title={$settings.showHistory ? "Hide history" : "Show history"}
+        class="icon-button"
+      >
+        <Icon path={$settings.showHistory ? mdiChevronDoubleRight : mdiChevronDoubleLeft} />
+      </button>
+    {/if}
   </header>
 
   {#if showSettings}

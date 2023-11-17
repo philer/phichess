@@ -42,69 +42,62 @@
 
 <Checkbox bind:checked={$settings.useTimeControl}>Enable time control</Checkbox>
 
-<label class="time-presets">
-  Preset:
-  <select
-    value={timePreset}
-    on:change={evt => setTimePreset(evt.currentTarget.value)}
-    disabled={!$settings.useTimeControl}
-  >
-    <option value="Custom">Custom</option>
-    {#each Object.entries(timePresetOptions) as [label, options] (label)}
-      <optgroup label="Bullet">
-        {#each options as option (option)}
-          <option>{option}</option>
-        {/each}
-      </optgroup>
-    {/each}
-  </select>
-   (minutes | increment)
-</label>
-
 <fieldset disabled={!$settings.useTimeControl}>
-  <legend>Time per side (hours : minutes : seconds)</legend>
+  <label>
+    Preset:
+    <select
+      value={timePreset}
+      on:change={evt => setTimePreset(evt.currentTarget.value)}
+      disabled={!$settings.useTimeControl}
+    >
+      <option value="Custom">Custom</option>
+      {#each Object.entries(timePresetOptions) as [label, options] (label)}
+        <optgroup label="Bullet">
+          {#each options as option (option)}
+            <option>{option}</option>
+          {/each}
+        </optgroup>
+      {/each}
+    </select>
+    <small>(Minutes | Increment)</small>
+  </label>
+
   <div class="time-per-side">
-    <label>
-      Hours
+    <legend>Time per side:</legend>
+    <div>
       <input
         type="number"
         min="0"
         step="1"
         bind:value={hours}
       />
-    </label>
-    :
-    <label>
-      Minutes
+      :
       <input
         type="number"
         min="0"
         step="1"
         bind:value={minutes}
       />
-    </label>
-    :
-    <label>
-      Seconds
+      :
       <input
         type="number"
         min="0"
         step="1"
         bind:value={seconds}
       />
-    </label>
+    </div>
+    <small>(Hours : Minutes : Seconds)</small>
   </div>
-</fieldset>
-<fieldset disabled={!$settings.useTimeControl}>
+
   <label>
     Increment:
     <input
       type="number"
       bind:value={$settings.clock.increment}
     />
-    seconds
+    Seconds
+    <small>(Time added to a player's clock when they have made a move)</small>
   </label>
-  <small>Time added to a player's clock when they have made a move.</small>
 </fieldset>
 
 
@@ -120,23 +113,20 @@
     box-shadow: 1px 1px 3px #0003
 
   input[type="number"]
-    width: 5em
+    width: 4em
     padding: .1em .3em
     text-align: right
 
   :disabled
     opacity: .5
 
-  .time-presets
-    display: flex
-    align-items: center
-    gap: .5em
-
   .time-per-side
-    display: flex
-    align-items: end
-    gap: .25em
-    > label
-      display: flex
-      flex-direction: column
+    > legend
+      display: inline-block
+    > div
+      display: inline-block
+
+  small
+    display: block
+    opacity: .75
 </style>
