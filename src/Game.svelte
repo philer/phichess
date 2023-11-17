@@ -12,13 +12,18 @@
   import { settings } from "./settings"
 
   export let game: Game
-  let gameOverClosed = false
+  let isGameOverClosed = false
+  const closeGameOver = () => {
+    if (game.outcome) {
+      isGameOverClosed = true
+    }
+  }
 
   const { remaining, ...clock } = makeClock($settings.clock)
   $: {
     if (game.history.length === 0) {
       clock.reset($settings.clock)
-      gameOverClosed = false
+      isGameOverClosed = false
     } else if ($settings.useTimeControl) {
       if (game.outcome) {
         clock.stop()
@@ -49,10 +54,19 @@
 
   const handleModalBackdropClick = (evt: MouseEvent) => {
     if (evt.target === evt.currentTarget) {
-      gameOverClosed = true
+      closeGameOver()
+    }
+  }
+
+  const handleGlobalKeydown = (evt: KeyboardEvent) => {
+    if (evt.key === "Escape") {
+      closeGameOver()
     }
   }
 </script>
+
+
+<svelte:document on:keydown={handleGlobalKeydown} />
 
 <div class="game">
   <div
@@ -65,14 +79,14 @@
       <Perspective bind:game bind:asWhite bind:rotate bind:flipOpponentPieces />
     {/each}
 
-    {#if game.outcome && !gameOverClosed}
+    {#if game.outcome && !isGameOverClosed}
       <div
         class="modal"
         on:click={handleModalBackdropClick}
         transition:fade={{ duration: 200 }}
       >
         <div class="game-over" transition:scale={{ duration: 200, start: .8 }}>
-          <button class="close" on:click={() => gameOverClosed = true}>
+          <button class="close" on:click={() => isGameOverClosed = true}>
             <Icon path={mdiClose} />
           </button>
           <h3>Game over!</h3>
@@ -118,6 +132,7 @@
   {/if}
 
 </div>
+
 
 <style lang="sass">
   @use "common"
