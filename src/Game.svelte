@@ -1,20 +1,20 @@
 <script lang="ts">
   import { mdiChevronDoubleLeft, mdiChevronDoubleRight, mdiClose } from "@mdi/js"
   import { onMount } from "svelte"
+  import { fade, scale } from "svelte/transition"
+  import { match } from "ts-pattern"
 
-  import { START_GAME, type Game } from "./chess"
+  import { type Game, START_GAME } from "./chess"
   import { makeClock } from "./Clock.svelte"
   import History from "./History.svelte"
   import Icon from "./Icon.svelte"
   import Perspective from "./Perspective.svelte"
   import { settings } from "./settings"
-  import { match } from "ts-pattern";
-  import { fade, scale } from "svelte/transition";
 
   export let game: Game
   let gameOverClosed = false
 
-  const {remaining, ...clock} = makeClock($settings.clock)
+  const { remaining, ...clock } = makeClock($settings.clock)
   $: {
     if (game.history.length === 0) {
       clock.reset($settings.clock)
@@ -52,7 +52,6 @@
       gameOverClosed = true
     }
   }
-
 </script>
 
 <div class="game">
@@ -70,9 +69,9 @@
       <div
         class="modal"
         on:click={handleModalBackdropClick}
-        transition:fade={{duration: 200}}
+        transition:fade={{ duration: 200 }}
       >
-        <div class="game-over" transition:scale={{duration: 200, start: .8}}>
+        <div class="game-over" transition:scale={{ duration: 200, start: .8 }}>
           <button class="close" on:click={() => gameOverClosed = true}>
             <Icon path={mdiClose} />
           </button>

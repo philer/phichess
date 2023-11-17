@@ -24,13 +24,13 @@
     mdiClockTimeTwelveOutline,
     mdiClockTimeTwo,
     mdiClockTimeTwoOutline,
+    mdiFlag,
     mdiInfinity,
     mdiPause,
-    mdiFlag,
     mdiTrophyVariant,
   } from "@mdi/js"
   import { getContext, setContext } from "svelte"
-  import { type Readable, readonly, writable, derived } from "svelte/store"
+  import { derived, type Readable, readonly, writable } from "svelte/store"
 
   import type { Color } from "./chess"
   import Icon from "./Icon.svelte"
