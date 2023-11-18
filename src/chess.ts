@@ -676,3 +676,41 @@ export const toPGN = ({ history, outcome, termination }: Game): string => {
     "",
   ].join("\n")
 }
+
+/** Turn a ColorPiece into it's FEN eqivalent, e.g. 'wK' => 'K', 'b' => 'p' */
+const pieceToFEN = ([color, piece]: ColorPiece) =>
+  color === "w" ? piece || "P" : (piece || "p").toLowerCase()
+
+/**
+ * Turn game position into Forsyth–Edwards Notation (FEN)
+ * @see https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+ */
+export const toFEN = ({ board, toMove, history, fiftyMoveCounter }: Game): string => {
+  const position = Array.from("87654321")
+    .map(rank =>
+      Array.from("abcdefgh", file => `${file}${rank}` as Square)
+        .reduce(
+          ({ row, empty }, square) => board[square]
+            ? { row: `${row}${empty || ""}${pieceToFEN(board[square]!)}`, empty: 0 }
+            : { row, empty: empty + 1 },
+          { row: "", empty: 0 },
+        ),
+    )
+    .map(({ row, empty }) => `${row}${empty || ""}`)
+    .join("/")
+
+  const lastMove = history.at(-1)
+  const enPassantSquare = lastMove
+                       && board[lastMove.to]?.length === 1
+                       && Math.abs(+lastMove.from[1] - +lastMove.to[1]) === 2
+                       && lastMove.to
+
+    return [
+      position,
+      toMove,
+      getCastlingFen(history) || "-",
+      enPassantSquare || "-",
+      fiftyMoveCounter,
+      Math.floor(history.length / 2) + 1,
+    ].join(" ")
+}

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { mdiDownload, mdiUndo } from "@mdi/js"
+  import { mdiContentCopy, mdiDownload, mdiUndo } from "@mdi/js"
   import { match } from "ts-pattern"
 
 import Algebraic from "./Algebraic.svelte"
-  import { applyMove, type Game, type Move, revertToMove, toPGN } from "./chess"
+  import { applyMove, type Game, type Move, revertToMove, toFEN, toPGN } from "./chess"
   import Icon from "./Icon.svelte"
   import { pairs, saveTextAs } from "./util"
 
@@ -50,10 +50,21 @@ import Algebraic from "./Algebraic.svelte"
       .with("ArrowLeft", undoLastMove)
       .with("ArrowRight", redoLastMove)
 
-  const download = () =>
+  const copyPgn = () =>
+    navigator.clipboard.writeText(toPGN(game))
+
+  const copyFen = () =>
+    navigator.clipboard.writeText(toFEN(game))
+
+  const downloadPgn = () =>
     saveTextAs(
       toPGN(game),
       `${location.hostname}_${new Date().toISOString().slice(0, 10)}.pgn`,
+    )
+  const downloadFen = () =>
+    saveTextAs(
+      toFEN(game),
+      `${location.hostname}_${new Date().toISOString().slice(0, 10)}.fen`,
     )
 </script>
 
@@ -90,14 +101,39 @@ import Algebraic from "./Algebraic.svelte"
   >
     <Icon path={mdiUndo} />
   </button>
-  <button
-    on:click={download}
-    disabled={!game.history.length}
-    class="tools-button"
-    title="Download PGN"
-  >
-    <Icon path={mdiDownload} />
-  </button>
+
+  <div class="button-row">
+    <button
+      on:click={copyPgn}
+      class="tools-button"
+      title="Copy PGN to clipboard"
+    >
+      <Icon path={mdiContentCopy} /> PGN
+    </button>
+    <button
+      on:click={copyFen}
+      class="tools-button"
+      title="Copy FEN to clipboard"
+    >
+      <Icon path={mdiContentCopy} /> FEN
+    </button>
+  </div>
+  <div class="button-row">
+    <button
+      on:click={downloadPgn}
+      class="tools-button"
+      title="Download PGN"
+    >
+      <Icon path={mdiDownload} /> PGN
+    </button>
+    <button
+      on:click={downloadFen}
+      class="tools-button"
+      title="Download FEN"
+    >
+      <Icon path={mdiDownload} /> FEN
+    </button>
+  </div>
 </div>
 
 <style lang="sass">
@@ -130,6 +166,12 @@ import Algebraic from "./Algebraic.svelte"
 
   .ghost
     opacity: .5
+
+  .button-row
+    display: flex
+    justify-content: stretch
+    > button
+      flex: 100% 1 1
 
   button.tools-button
     line-height: 2em
