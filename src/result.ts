@@ -39,10 +39,11 @@ export abstract class Result<T = unknown, E = unknown> implements Promise<T> {
     return this.toPromise().then(onFulfilled, onRejected)
   }
 
-  catch<Y = E>(onRejected?: ((reason: E) => Y | PromiseLike<Y>) | null) {
+  catch <Y = E>(onRejected?: ((reason: E) => Y | PromiseLike<Y>) | null) {
     return this.toPromise().catch(onRejected)
   }
 
+  // eslint-disable-next-line @stylistic/keyword-spacing
   finally(onFinally?: (() => void) | null): Promise<T> {
     return this.toPromise().finally(onFinally)
   }

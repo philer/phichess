@@ -8,6 +8,10 @@ export const isTruthy = <T>(x: T | false | null | undefined | 0 | ""): x is T =>
 
 const sentinel = Symbol("UNSET")
 
+/**
+ * Collect items into pairs
+ * e.g. [1, 2, 3, 4, 5] => [[1, 2], [3, 4], [5]]
+ */
 export function* pairs<T>(xs: Iterable<T>): Iterable<[T, T] | [T]> {
   let left: T | typeof sentinel = sentinel
   for (const x of xs) {
@@ -28,7 +32,7 @@ export function* pairs<T>(xs: Iterable<T>): Iterable<[T, T] | [T]> {
  * to the user.
  */
 export function saveTextAs(text:string, filename:string) {
-  const blob = new Blob([text], {type: "text/plain;charset=utf-8"})
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" })
   const url = URL.createObjectURL(blob)
 
   const downloadLink = document.createElement("a")

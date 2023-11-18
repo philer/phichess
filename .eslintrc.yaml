@@ -102,9 +102,7 @@ rules:
   no-cond-assign: 'off'
   no-console:
     - warn
-    - allow:
-      - warn
-      - error
+    - allow: ["info", "warn", "error"]
   no-else-return: 'off'
   no-lonely-if: 'off'
   no-multi-spaces:

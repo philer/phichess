@@ -300,20 +300,22 @@ const PIECE_NAMES = {
 }
 
 /** Generate algebraic notation for a legal move. */
-export const toAlgebraic = (move: Move, board: Board): Result<AlgebraicMove, string> => {
-  const { from, to } = move
+export const toAlgebraic = (
+  { from, to, promotion, check, mate }: Move,
+  board: Board,
+): Result<AlgebraicMove, string> => {
   const colorPiece = board[from]
   if (!colorPiece) {
     return err(`There is no piece on ${from}.`)
   }
   const color = colorPiece[0] as Color
   const piece = (colorPiece[1] ?? "") as Piece
-  const check = move.mate ? "#" : move.check ? "+" : ""
+  const checkSign = mate ? "#" : check ? "+" : ""
 
   // castling
   const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
   if (piece === "K" && Math.abs(fileDelta) === 2) {
-    return ok(`${fileDelta > 0 ? "O-O" : "O-O-O"}${check}` satisfies AlgebraicMove)
+    return ok(`${fileDelta > 0 ? "O-O" : "O-O-O"}${checkSign}` satisfies AlgebraicMove)
   }
 
   const opponentPiece = board[to]
@@ -338,7 +340,7 @@ export const toAlgebraic = (move: Move, board: Board): Result<AlgebraicMove, str
     return err(`You have no ${PIECE_NAMES[piece]} on ${from}.`)
   }
 
-  const suffix = `${opponentPiece ? "x" : ""}${to}${move.promotion ? `=${move.promotion}` : ""}${check}`
+  const suffix = `${opponentPiece ? "x" : ""}${to}${promotion ? `=${promotion}` : ""}${checkSign}`
   if (candidates.length === 1 && !(piece === "" && opponentPiece)) {
     return ok(`${piece}${suffix}` as AlgebraicMove)
   }
@@ -546,23 +548,27 @@ export const revertToMove = (idx: number, game: Game): Game =>
   applyHistory(START_GAME, game.history.slice(0, idx)).unwrap()
 
 
-export const toPGN = (game: Game): string => {
+/**
+ * Turn game state into Portable Game Notation (PGN)
+ * @see https://en.wikipedia.org/wiki/Portable_Game_Notation
+ */
+export const toPGN = ({ history, outcome, termination }: Game): string => {
   const date = new Date().toISOString().slice(0, 10).replaceAll("-", ".")
-  const result = match(game.outcome)
+  const result = match(outcome)
         .with("w", () => "1-0")
         .with("b", () => "0-1")
         .with("draw", () => "1/2-1/2")
         .with(undefined, () => "*")
         .exhaustive()
-  const termination = game.outcome
+  const term = outcome
     ? (
-      match(game.outcome)
+      match(outcome)
         .with("w", () => "White wins")
         .with("b", () => "Black wins")
         .with("draw", () => "Draw")
         .exhaustive()
       + " "
-      + match(game.termination)
+      + match(termination)
           .with("checkmate", () => "by checkmate.")
           .with("time", () => "on time.")
           .with("stalemate", () => " by stalemate")
@@ -574,10 +580,10 @@ export const toPGN = (game: Game): string => {
       )
     : "unterminated"
   const moves = Array.from(
-    pairs(game.history.map(move => move.algebraic)),
+    pairs(history.map(move => move.algebraic)),
     (movePair, idx) => `${idx + 1}. ${movePair.join(" ")}`,
   )
-  if (game.outcome) {
+  if (outcome) {
     moves.push(result)
   }
   return [
@@ -588,7 +594,7 @@ export const toPGN = (game: Game): string => {
     `[White "?"]`,
     `[Black "?"]`,
     `[Result "${result}"]`,
-    `[Termination "${termination}"]`,
+    `[Termination "${term}"]`,
     // `[TimeControl "120+1"]`,
     // `[Time HH:MM:SS]`,
     // `[EndTime "3:38:57 PST"]`,
