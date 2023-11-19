@@ -1,7 +1,7 @@
 {
-  "name": "chessboard",
-  "version": "0.0.1",
-  "description": "A simple, interactive chessboard with no AI",
+  "name": "phichess",
+  "version": "0.1.0",
+  "description": "Play over the board chess on any device",
   "author": "Philipp Miller",
   "license": "MIT",
   "type": "module",
@@ -10,8 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "lint": "eslint src --max-warnings 0",
-    "format": "eslint src --fix",
+    "lint": "eslint src public/sw.js --max-warnings 0",
+    "format": "eslint src public/sw.js --fix",
     "pre-commit": "yarn lint && yarn typecheck"
   },
   "devDependencies": {

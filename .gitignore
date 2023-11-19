@@ -1,6 +1,8 @@
 /dist
+/dev-dist
 /build
 /example
+/_art
 
 # Languages & Build tools
 node_modules
