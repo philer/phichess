@@ -12,9 +12,14 @@ To do
 -----
 
 * [x] detect checkmate
-* [ ] detect stalemate
-* [ ] proper layout
-* [ ] config menu
+* [x] detect draw by stalemate
+* [ ] detect draw by threefold repetition
+* [ ] detect draw by fifty moves rule
 * [x] piece symbols in algebraic notation
 * [x] highlight last move
 * [x] highlight check
+* [x] download PGN
+* [ ] upload PGN
+* [ ] download FEN
+* [ ] upload FEN
+* [x] progressive web app (PWA)
