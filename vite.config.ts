@@ -34,6 +34,12 @@ export default defineConfig(({ mode }) => ({
           { src: "./icons/phichess-128.png", sizes: "128x128", type: "image/png" },
           { src: "./icons/phichess-64.png", sizes: "64x64", type: "image/png" },
           { src: "./icons/phichess-32.png", sizes: "32x32", type: "image/png" },
+          {
+            src: "./icons/phichess-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
         ],
       },
     }),
