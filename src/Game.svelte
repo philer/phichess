@@ -116,24 +116,21 @@
   .new-game-button
     @include common.start-button
 
-  .game
-    position: relative
-    width: 100%
-    height: 100%
-    display: flex
-    align-items: stretch
-    justify-content: stretch
-
-  .layout
+  .game, .layout
     position: relative
     width: 100%
     height: 100%
     flex: 100% 1 1
-
+    overflow: hidden
     display: flex
+
+  .game
+    align-items: stretch
+    justify-content: stretch
+
+  .layout
     align-items: center
     justify-content: space-around
-    overflow: hidden
 
   .sidebar
     width: 12em
