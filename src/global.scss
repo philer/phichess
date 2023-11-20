@@ -1,10 +1,18 @@
-/* noto-sans-regular - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
   font-family: 'Noto Sans';
+  src: local('Noto Sans'),
+       url('./assets/noto-sans-v32-latin-regular.woff2') format('woff2');
+  font-display: swap;
   font-style: normal;
   font-weight: 400;
-  src: url('./assets/noto-sans-v32-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+@font-face {
+  font-family: 'Linux Libertine';
+  src: local('Linux Libertine'),
+       url('./assets/LinLibertine.woff2') format('woff2');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
 }
 
 * {

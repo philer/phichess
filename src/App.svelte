@@ -47,7 +47,7 @@
   style:--theme-check-dark-square-background={theme.board.checkDarkBackground}
 >
   <header>
-    <h1>Kind of OTB Chess</h1>
+    <h1><a href="/">φ</a></h1>
 
     {#if !isSettingsOpen && game.history.length > 0}
       <button
@@ -97,7 +97,7 @@
     justify-content: stretch
 
   header
-    --header-height: 2em
+    --header-height: 2rem
     flex: var(--header-height) 0 0
     display: flex
     align-items: center
@@ -108,9 +108,16 @@
       height: var(--header-height)
 
   h1
-    font-size: 1.2em
+    font-size: 1.6em
     flex: min-content 1 1
-    text-align: left
-    overflow: hidden
-    text-overflow: ellipsis
+    font-family: "Linux Libertine"
+    font-weight: normal
+    > a
+      display: block
+      width: var(--header-height)
+      height: var(--header-height)
+      line-height: calc(.7 * var(--header-height))
+      text-align: center
+      color: inherit
+      text-decoration: none
 </style>
