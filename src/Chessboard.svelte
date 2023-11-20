@@ -230,35 +230,48 @@
       .dragging &
         cursor: grabbing
 
-
     &.light
       background: var(--theme-light-square-background)
+      .file, .rank
+        color: var(--theme-dark-square-background)
+      &.check
+        background: var(--theme-check-light-square-background)
+        .file, .rank
+          color: var(--theme-check-dark-square-background)
+      &.lastMove
+        background: var(--theme-last-move-light-square-background)
+        .file, .rank
+          color: var(--theme-last-move-dark-square-background)
+      &.selected
+        background: var(--theme-selected-light-square-background)
+        .file, .rank
+          color: var(--theme-selected-dark-square-background)
     &.dark
       background: var(--theme-dark-square-background)
-    &.check
-      &.light
-        background: var(--theme-check-light-square-background)
-      &.dark
+      .file, .rank
+        color: var(--theme-light-square-background)
+      &.check
         background: var(--theme-check-dark-square-background)
-    &.lastMove
-      &.light
-        background: var(--theme-last-move-light-square-background)
-      &.dark
+        .file, .rank
+          color: var(--theme-check-light-square-background)
+      &.lastMove
         background: var(--theme-last-move-dark-square-background)
-    &.selected
-      &.light
-        background: var(--theme-selected-light-square-background)
-      &.dark
+        .file, .rank
+          color: var(--theme-last-move-light-square-background)
+      &.selected
         background: var(--theme-selected-dark-square-background)
+        .file, .rank
+          color: var(--theme-selected-light-square-background)
 
     .file,
     .rank
       position: absolute
-      font-size: max(1vmin, .1em)
+      font-size: max(1vmin, .12em)
       line-height: 1.5em
       height: 1.5em
-      font-family: sans-serif
+      font-family: var(--font-family)
       font-weight: bold
+      text-shadow: none
 
     .rank
       inset: 0.5em auto auto 0.5em
