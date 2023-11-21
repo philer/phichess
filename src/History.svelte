@@ -64,7 +64,7 @@ import Algebraic from "./Algebraic.svelte"
   <ol>
     {#each movePairs as [whiteMove, blackMove], idx (idx)}
       <li>
-        <span class="moveNumber">{idx + 1}.</span>
+        <span class="move-number">{idx + 1}.</span>
         <button
           on:click={() => gotoMove(idx * 2 + 1)}
           class:current={idx * 2 + 1 === game.history.length}
@@ -119,7 +119,7 @@ import Algebraic from "./Algebraic.svelte"
       // display: flex
       // align-items: center
 
-  .moveNumber
+  .move-number
     text-align: right
     font-weight: bold
     opacity: .5

@@ -9,7 +9,11 @@ export default defineConfig(({ mode }) => ({
     target: "es2022",
   },
   plugins: [
-    svelte(),
+    svelte({
+      compilerOptions: {
+        cssHash: ({ css, hash }) => `h${hash(css).slice(0, 6)}`,
+      },
+    }),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "inline",

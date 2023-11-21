@@ -128,11 +128,11 @@
 
 <div
   class="board"
-  class:asWhite
-  class:flipOpponentPieces
-  class:asBlack={!asWhite}
-  class:whiteToMove={toMove === "w"}
-  class:blackToMove={toMove === "b"}
+  class:as-white={asWhite}
+  class:flip-opponent-pieces={flipOpponentPieces}
+  class:as-black={!asWhite}
+  class:white-to-move={toMove === "w"}
+  class:black-to-move={toMove === "b"}
   class:dragging={draggingFromSquare}
 >
   {#each asWhite ? squares.toReversed() : squares as square, idx (`${square}${board[square] || ""}`)}
@@ -146,9 +146,9 @@
       class="square"
       class:light={isLight}
       class:dark={!isLight}
-      class:hasPiece={piece}
+      class:has-piece={piece}
       class:selected={selectedSquare === square}
-      class:lastMove={square === lastMove?.from || square === lastMove?.to}
+      class:last-move={square === lastMove?.from || square === lastMove?.to}
       class:check={lastMove?.check && piece === `${toMove}K`}
       role="button"
       tabindex="0"
@@ -210,8 +210,8 @@
 
     box-shadow: 3px 3px 10px #0006, 3px 3px 40px #0006
 
-  .flipOpponentPieces
-    &.asWhite :global(.b), &:not(.asWhite) :global(.w)
+  .flip-opponent-pieces
+    &.as-white :global(.b), &:not(.as-white) :global(.w)
       transform: rotate(90deg)
 
   .dragging
@@ -225,43 +225,21 @@
     overflow: visible
 
     // text-shadow: 1px 1px 5px #000c
-    &.hasPiece
+    &.has-piece
       cursor: grab
       .dragging &
         cursor: grabbing
 
-    &.light
-      background: var(--theme-light-square-background)
-      .file, .rank
-        color: var(--theme-dark-square-background)
-      &.check
-        background: var(--theme-check-light-square-background)
+    @each $color, $opposite in "dark" "light", "light" "dark"
+      &.#{$color}
+        background: var(--theme-#{$color}-square-background)
         .file, .rank
-          color: var(--theme-check-dark-square-background)
-      &.lastMove
-        background: var(--theme-last-move-light-square-background)
-        .file, .rank
-          color: var(--theme-last-move-dark-square-background)
-      &.selected
-        background: var(--theme-selected-light-square-background)
-        .file, .rank
-          color: var(--theme-selected-dark-square-background)
-    &.dark
-      background: var(--theme-dark-square-background)
-      .file, .rank
-        color: var(--theme-light-square-background)
-      &.check
-        background: var(--theme-check-dark-square-background)
-        .file, .rank
-          color: var(--theme-check-light-square-background)
-      &.lastMove
-        background: var(--theme-last-move-dark-square-background)
-        .file, .rank
-          color: var(--theme-last-move-light-square-background)
-      &.selected
-        background: var(--theme-selected-dark-square-background)
-        .file, .rank
-          color: var(--theme-selected-light-square-background)
+          color: var(--theme-#{$opposite}-square-background)
+        @each $mode in "check", "last-move", "selected"
+          &.#{$mode}
+            background: var(--theme-#{$mode}-#{$color}-square-background)
+            .file, .rank
+              color: var(--theme-#{$mode}-#{$opposite}-square-background)
 
     .file,
     .rank
@@ -299,20 +277,20 @@
 
     top: 0
     flex-direction: column
-    .asWhite.blackToMove &,
-    .asBlack.whiteToMove &
+    .as-white.black-to-move &,
+    .as-black.white-to-move &
       top: auto
       bottom: 0
       flex-direction: column-reverse
 
 
     left: calc(var(--promotion-file-offset) * var(--square-size))
-    .asBlack &
+    .as-black &
       left: calc((7 - var(--promotion-file-offset)) * var(--square-size))
 
 
     background: #000c
-    .blackToMove &
+    .black-to-move &
       background: #fffc
       color: black
 
