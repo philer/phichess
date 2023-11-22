@@ -60,6 +60,7 @@ import Algebraic from "./Algebraic.svelte"
     saveTextAs(
       toPGN(game),
       `${location.hostname}_${new Date().toISOString().slice(0, 10)}.pgn`,
+      "application/vnd.chess-pgn",
     )
   const downloadFen = () =>
     saveTextAs(

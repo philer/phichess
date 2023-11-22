@@ -33,8 +33,8 @@ export function* pairs<T>(xs: Iterable<T>): Iterable<[T, T] | [T]> {
  * Take text and a filename and (hopefully) offer it as a download
  * to the user.
  */
-export function saveTextAs(text:string, filename:string) {
-  const blob = new Blob([text], { type: "text/plain;charset=utf-8" })
+export function saveTextAs(text: string, filename: string, type: string = "text/plain;charset=utf-8") {
+  const blob = new Blob([text], { type })
   const url = URL.createObjectURL(blob)
 
   const downloadLink = document.createElement("a")
