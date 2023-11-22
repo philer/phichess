@@ -38,14 +38,18 @@ export type AlgebraicMove
   | `${File}${1|8}${""|"="}${PieceNotPawn}${Check}`
   | `${File}x${File}${1|8}${""|"="}${PieceNotPawn}${Check}`
 
-export type Move = Readonly<{
-  from: Square
-  to: Square
-  promotion?: PromotablePiece
-  check?: boolean
-  mate?: boolean
-  algebraic?: AlgebraicMove
-}>
+export type MoveInput = {
+  readonly from: Square
+  readonly to: Square
+  readonly promotion?: PromotablePiece
+  readonly capture?: ColorPiece
+}
+
+export type Move = MoveInput & {
+  readonly check: boolean
+  readonly mate: boolean
+  readonly algebraic: AlgebraicMove
+}
 
 export type Termination =
   | "checkmate"
@@ -55,20 +59,28 @@ export type Termination =
   | "fifty-moves"
   | "agreement"
 
-export type Game = Readonly<{
-  board: Board
-  toMove: Color
-  history: ReadonlyArray<Move>
-  graveyard: ReadonlyArray<MortalColorPiece>
-  outcome?: Color | "draw"
-  termination?: Termination
-}>
+export type GameInput = {
+  readonly board: Board
+  readonly toMove: Color
+  readonly history: ReadonlyArray<MoveInput>
+}
+
+export type Game = Omit<GameInput, "history"> & {
+  readonly history: ReadonlyArray<Move>
+  readonly graveyard: ReadonlyArray<MortalColorPiece>
+  readonly fiftyMoveCounter: number
+  readonly repetitions: Readonly<Record<string, number>>
+  readonly outcome?: Color | "draw"
+  readonly termination?: Termination
+}
 
 export const START_GAME: Game = Object.freeze({
   board: START_BOARD,
   toMove: "w",
   history: Object.freeze([]),
   graveyard: Object.freeze([]),
+  fiftyMoveCounter: 0,
+  repetitions: Object.freeze({}),
 })
 
 
@@ -212,7 +224,7 @@ const getAttackedSquaresOnRays = function*(toMove: Color, board: Board, rays: It
   }
 }
 
-const withPromotions = (toMove: Color, { from, to }: Move) =>
+const withPromotions = (toMove: Color, { from, to }: MoveInput) =>
   to[1] === (toMove === "w" ? "8" : "1")
     ? Array.from("QNRB", promotion => ({ from, to, promotion }))
     : [{ from, to }]
@@ -272,20 +284,18 @@ const generateMoves = function*(toMove: Color, board: Board) {
   }
 }
 
-export const generateLegalMoves = function*(game: Game): Iterable<Move> {
+export const generateLegalMoves = function*(game: GameInput): Iterable<MoveInput> {
   for (const move of generateMoves(game.toMove, game.board)) {
-    const result = _applyMove(game, move)
+    const result = checkMove(game, move)
     if (result.isOk()) {
-      yield result.unwrap().history.at(-1)!
+      yield result.unwrap()
     }
   }
 }
 
-export const hasLegalMoves = (game: Game) => {
-  for (const move of generateMoves(game.toMove, game.board)) {
-    if (_applyMove(game, move).isOk()) {
-      return true
-    }
+export const hasLegalMoves = (game: GameInput) => {
+  for (const _move of generateLegalMoves(game)) {
+    return true
   }
   return false
 }
@@ -301,7 +311,7 @@ const PIECE_NAMES = {
 
 /** Generate algebraic notation for a legal move. */
 export const toAlgebraic = (
-  { from, to, promotion, check, mate }: Move,
+  { from, to, promotion, capture, check, mate }: Omit<Move, "algebraic">,
   board: Board,
 ): Result<AlgebraicMove, string> => {
   const colorPiece = board[from]
@@ -318,15 +328,8 @@ export const toAlgebraic = (
     return ok(`${fileDelta > 0 ? "O-O" : "O-O-O"}${checkSign}` satisfies AlgebraicMove)
   }
 
-  const opponentPiece = board[to]
-    // en passant
-    ?? (piece === "" && from[0] !== to[0] ? to[1] + from[0] : undefined)
-  if (opponentPiece?.[0] === color) {
-    return err(`Can't take your own piece on ${to}.`)
-  }
-
   const candidates = match(piece)
-    .with("", () => opponentPiece ? pawnCaptureSquares(color, to) : [from])
+    .with("", () => capture ? pawnCaptureSquares(color, to) : [from])
     .with("N", () => knightSquares(to))
     .with("B", () => bishopPaths(to).map(path => findOnPath(colorPiece, path, board)))
     .with("R", () => rookPaths(to).map(path => findOnPath(colorPiece, path, board)))
@@ -340,8 +343,8 @@ export const toAlgebraic = (
     return err(`You have no ${PIECE_NAMES[piece]} on ${from}.`)
   }
 
-  const suffix = `${opponentPiece ? "x" : ""}${to}${promotion ? `=${promotion}` : ""}${checkSign}`
-  if (candidates.length === 1 && !(piece === "" && opponentPiece)) {
+  const suffix = `${capture ? "x" : ""}${to}${promotion ? `=${promotion}` : ""}${checkSign}`
+  if (candidates.length === 1 && !(piece === "" && capture)) {
     return ok(`${piece}${suffix}` as AlgebraicMove)
   }
   if (candidates.filter(candidate => candidate[0] === from[0]).length === 1) {
@@ -357,7 +360,7 @@ export const toAlgebraic = (
  * Does the given move require specifying a promoted piece,
  * i.e. does a pawn reach the end of the board from its player's perspective?
  * */
-export const requiresPromotion = ({ from, to }: Move, board: Board) =>
+export const requiresPromotion = ({ from, to }: MoveInput, board: Board) =>
   board[from]?.length === 1 && to[1] === (board[from] === "w" ? "8": "1")
 
 /**
@@ -365,10 +368,10 @@ export const requiresPromotion = ({ from, to }: Move, board: Board) =>
  * return an updated game state if the move is legal.
  * The updated game's history contains the unaltered input move.
  */
-const _applyMove = (
-  { board, toMove, history, graveyard }: Game,
-  { from, to, promotion }: Move,
-): Result<Game, string> => {
+const checkMove = (
+  { board, toMove, history }: GameInput,
+  { from, to, promotion }: Readonly<MoveInput>,
+): Result<MoveInput, string> => {
   let { [from]: piece, [to]: capture, ...remainingBoard } = board
 
   if (!piece) {
@@ -508,12 +511,7 @@ const _applyMove = (
   if (isInCheck(toMove, newBoard)) {
     return err("You are in check.")
   }
-  return ok({
-    board: newBoard,
-    toMove: opponent,
-    history: [...history, { from, to, promotion }],
-    graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
-  })
+  return ok({ from, to, promotion, capture })
 }
 
 /**
@@ -521,26 +519,64 @@ const _applyMove = (
  * return an updated game state if the move is legal.
  * The updated game's history contains added details for the new move.
  */
-export const applyMove = (game: Game, move: Move): Result<Game, string> =>
-  _applyMove(game, move)
-    .map(newGame => {
-      const check = isInCheck(newGame.toMove, newGame.board)
-      const hasMoves = hasLegalMoves(newGame)
+export const applyMove = (game: Game, moveInput: Readonly<MoveInput>): Result<Game, string> =>
+  checkMove(game, moveInput)
+    .map(({ from, to, promotion, capture }) => {
+      const { board, toMove, history, graveyard, repetitions } = game
+      const opponent = toMove === "w" ? "b" : "w"
+
+      const { [from]: piece, [to]: captureTarget, ...remainingBoard } = board
+
+      // TODO Creating the new board is currently redundant with work already
+      // done in checkMove, however it may be necessary for
+      // decodeAlgebraicMove(game, algebraic)
+      const newBoard: Writable<Board> = { ...remainingBoard, [to]: promotion ?? piece }
+      if (!captureTarget && capture === opponent) {
+        // En passant pawn capture
+        // @ts-ignore remainingBoard isn't empty
+        delete newBoard[`${to[0]}${from[1]}`]
+      }
+
+      if (piece === `${toMove}K` && Math.abs(+from[1] - +to[1]) > 1) {
+        // Castling, move the rook
+        const rank = to[1] as Rank
+        if (to[0] === "c") {  // queen side
+          newBoard[`d${rank}`] = `${toMove}R`
+          delete newBoard[`a${rank}`]
+        } else {  // king side
+          newBoard[`f${rank}`] = `${toMove}R`
+          delete newBoard[`a${rank}`]
+        }
+      }
+
+      const check = isInCheck(toMove, newBoard)
+      const hasMoves = hasLegalMoves({
+        board: newBoard,
+        toMove: opponent,
+        history: [...history, moveInput],
+      })
       const mate = check && !hasMoves
+      const algebraic = toAlgebraic({ ...moveInput, capture, check, mate }, board).unwrap()
+
       const stalemate = !check && !hasMoves
-      // TODO check threefold & 50 moves
-      const algebraic = toAlgebraic({ ...move, check, mate }, game.board).unwrap()
+      const fiftyMoveCounter = capture || piece === toMove ? 0 : game.fiftyMoveCounter + 1
+      const fiftyMoves = fiftyMoveCounter >= 50
+
       return {
-        ...newGame,
-        history: [...game.history, { ...move, check, mate, algebraic }],
-        outcome: mate ? game.toMove : stalemate ? "draw" : undefined,
-        termination: mate ? "checkmate" : stalemate ? "stalemate" : undefined,
+        board: newBoard,
+        toMove: opponent,
+        history: [...history, { ...moveInput, capture, check, mate, algebraic }],
+        graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
+        fiftyMoveCounter,
+        repetitions,  // TODO
+        outcome: mate ? toMove : stalemate || fiftyMoves ? "draw" : undefined,
+        termination: mate ? "checkmate" : stalemate ? "stalemate" : fiftyMoves ? "fifty-moves" : undefined,
       }
     })
 
 
 /** Validate and apply an array of moves to a given game */
-export const applyHistory = (game: Game, history: ReadonlyArray<Move>): Result<Game> =>
+export const applyHistory = (game: Game, history: ReadonlyArray<MoveInput>): Result<Game> =>
   history.reduce((result, move) => result.flatMap(game => applyMove(game, move)), ok(game))
 
 /** Re-create the given game up to a specific move. */

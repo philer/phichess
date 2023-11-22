@@ -4,3 +4,5 @@ declare namespace svelteHTML {
     "on:click_outside"?: (event: CustomEvent) => void;
   }
 }
+
+declare type Writable<T> = { -readonly [K in keyof T]: T[K] }
