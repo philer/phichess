@@ -72,76 +72,77 @@ import Algebraic from "./Algebraic.svelte"
 
 <svelte:document on:keydown={handleGlobalKeydown} />
 
-<div>
-  <ol>
-    {#each movePairs as [whiteMove, blackMove], idx (idx)}
-      <li>
-        <span class="move-number">{idx + 1}.</span>
-        <button
-          on:click={() => gotoMove(idx * 2 + 1)}
-          class:current={idx * 2 + 1 === game.history.length}
-          class:ghost={idx * 2 + 1 > game.history.length}
-        >
-          <Algebraic move={whiteMove} />
-        </button>
-        <button
-          on:click={() => gotoMove(idx * 2 + 2)}
-          class:current={idx * 2 + 2 === game.history.length}
-          class:ghost={idx * 2 + 2 > game.history.length}
-        >
-          <Algebraic move={blackMove} />
-        </button>
-      </li>
-    {/each}
-  </ol>
-  <button
-    on:click={undoLastMove}
-    disabled={!game.history.length}
-    class="tools-button"
-    title="Undo last move"
-  >
-    <Icon path={mdiUndo} />
-  </button>
+<ol>
+  {#each movePairs as [whiteMove, blackMove], idx (idx)}
+    <li>
+      <span class="move-number">{idx + 1}.</span>
+      <button
+        on:click={() => gotoMove(idx * 2 + 1)}
+        class:current={idx * 2 + 1 === game.history.length}
+        class:ghost={idx * 2 + 1 > game.history.length}
+      >
+        <Algebraic move={whiteMove} />
+      </button>
+      <button
+        on:click={() => gotoMove(idx * 2 + 2)}
+        class:current={idx * 2 + 2 === game.history.length}
+        class:ghost={idx * 2 + 2 > game.history.length}
+      >
+        <Algebraic move={blackMove} />
+      </button>
+    </li>
+  {/each}
+</ol>
 
-  <div class="button-row">
-    <button
-      on:click={copyPgn}
-      class="tools-button"
-      title="Copy PGN to clipboard"
-    >
-      <Icon path={mdiContentCopy} /> PGN
-    </button>
-    <button
-      on:click={copyFen}
-      class="tools-button"
-      title="Copy FEN to clipboard"
-    >
-      <Icon path={mdiContentCopy} /> FEN
-    </button>
-  </div>
-  <div class="button-row">
-    <button
-      on:click={downloadPgn}
-      class="tools-button"
-      title="Download PGN"
-    >
-      <Icon path={mdiDownload} /> PGN
-    </button>
-    <button
-      on:click={downloadFen}
-      class="tools-button"
-      title="Download FEN"
-    >
-      <Icon path={mdiDownload} /> FEN
-    </button>
-  </div>
+<button
+  on:click={undoLastMove}
+  disabled={!game.history.length}
+  class="tools-button"
+  title="Undo last move"
+>
+  <Icon path={mdiUndo} />
+</button>
+
+<div style:flex-grow="1" />
+
+<div class="button-row">
+  <button
+    on:click={copyPgn}
+    class="tools-button"
+    title="Copy PGN to clipboard"
+  >
+    <Icon path={mdiContentCopy} /> PGN
+  </button>
+  <button
+    on:click={downloadPgn}
+    class="tools-button"
+    title="Download PGN"
+  >
+    <Icon path={mdiDownload} /> PGN
+  </button>
+  <button
+    on:click={copyFen}
+    class="tools-button"
+    title="Copy FEN to clipboard"
+  >
+    <Icon path={mdiContentCopy} /> FEN
+  </button>
+  <button
+    on:click={downloadFen}
+    class="tools-button"
+    title="Download FEN"
+  >
+    <Icon path={mdiDownload} /> FEN
+  </button>
 </div>
+
 
 <style lang="sass">
   ol
     display: grid
     align-content: start
     grid-template-columns: min-content 1fr 1fr
+    overflow: auto
     // gap: 0.5em 1em
 
     // padding: 1em 1em .5em
@@ -169,10 +170,16 @@ import Algebraic from "./Algebraic.svelte"
     opacity: .5
 
   .button-row
-    display: flex
+    display: grid
+    grid-template-rows: 1fr 1fr
+    grid-template-columns: 1fr 1fr
+    grid-auto-flow: column
     justify-content: stretch
+    font-size: .7em
+    gap: 2px
     > button
       flex: 100% 1 1
+      white-space: nowrap
 
   button.tools-button
     line-height: 2em
