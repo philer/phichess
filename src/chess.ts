@@ -514,6 +514,25 @@ const checkMove = (
   return ok({ from, to, promotion, capture })
 }
 
+
+/**
+ * Determine which sides both players are still able to castle on,
+ * in the "KQkq" notation defined by FEN.
+ * @see https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation#Definition
+ */
+const getCastlingFen = (history: ReadonlyArray<MoveInput>) =>
+  history.reduce((KQkq, { from }) =>
+      match(from)
+        .with("e1", () => KQkq.replace(/[KQ]/g, ""))
+        .with("a1", () => KQkq.replace("Q", ""))
+        .with("h1", () => KQkq.replace("K", ""))
+        .with("e8", () => KQkq.replace(/[kq]/g, ""))
+        .with("a8", () => KQkq.replace("q", ""))
+        .with("h8", () => KQkq.replace("k", ""))
+        .otherwise(() => KQkq),
+      "KQkq",
+    )
+
 /**
  * Validate a move given as user input against the current game state and
  * return an updated game state if the move is legal.
@@ -522,7 +541,7 @@ const checkMove = (
 export const applyMove = (game: Game, moveInput: Readonly<MoveInput>): Result<Game, string> =>
   checkMove(game, moveInput)
     .map(({ from, to, promotion, capture }) => {
-      const { board, toMove, history, graveyard, repetitions } = game
+      const { board, toMove, graveyard } = game
       const opponent = toMove === "w" ? "b" : "w"
 
       const { [from]: piece, [to]: captureTarget, ...remainingBoard } = board
@@ -553,24 +572,41 @@ export const applyMove = (game: Game, moveInput: Readonly<MoveInput>): Result<Ga
       const hasMoves = hasLegalMoves({
         board: newBoard,
         toMove: opponent,
-        history: [...history, moveInput],
+        history: [...game.history, moveInput],
       })
       const mate = check && !hasMoves
       const algebraic = toAlgebraic({ ...moveInput, capture, check, mate }, board).unwrap()
+      const history = [...game.history, { ...moveInput, capture, check, mate, algebraic }]
 
       const stalemate = !check && !hasMoves
+
       const fiftyMoveCounter = capture || piece === toMove ? 0 : game.fiftyMoveCounter + 1
       const fiftyMoves = fiftyMoveCounter >= 50
+
+      const position = [
+          Object.entries(board).flat().join(""),
+          getCastlingFen(history),
+          piece === toMove && Math.abs(+from[1] - +to[1]) === 2 ? to : "",
+        ].join(":")
+      const repetitions = {
+        ...game.repetitions,
+        [position]: (game.repetitions[position] ?? 0) + 1,
+      }
+      const threefold = repetitions[position] >= 3
 
       return {
         board: newBoard,
         toMove: opponent,
-        history: [...history, { ...moveInput, capture, check, mate, algebraic }],
+        history,
         graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
         fiftyMoveCounter,
-        repetitions,  // TODO
-        outcome: mate ? toMove : stalemate || fiftyMoves ? "draw" : undefined,
-        termination: mate ? "checkmate" : stalemate ? "stalemate" : fiftyMoves ? "fifty-moves" : undefined,
+        repetitions,
+        outcome: mate ? toMove : stalemate || fiftyMoves || threefold ? "draw" : undefined,
+        termination: mate ? "checkmate"
+          : stalemate ? "stalemate"
+          : threefold ? "repetition"
+          : fiftyMoves ? "fifty-moves"
+          : undefined,
       }
     })
 
