@@ -1,9 +1,11 @@
 
-export const clsx = (...classes: any[]) =>
-  classes.filter(Boolean).join(" ")
+export const identity = <T>(x: T) => x
 
 export const isTruthy = <T>(x: T | false | null | undefined | 0 | ""): x is T =>
   !!x
+
+export const clsx = (...classes: any[]) =>
+  classes.filter(Boolean).join(" ")
 
 
 const sentinel = Symbol("UNSET")

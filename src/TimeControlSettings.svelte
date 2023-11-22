@@ -1,6 +1,6 @@
 <script lang="ts">
   import Checkbox from "./Checkbox.svelte"
-  import { settings } from "./settings"
+  import { settings } from "./stores"
 
   let hours = Math.floor($settings.clock.secondsPerSide / 3600)
   let minutes = Math.floor($settings.clock.secondsPerSide % 3600 / 60)

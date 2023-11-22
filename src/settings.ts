@@ -1,5 +1,3 @@
-import { writable } from "svelte/store"
-
 export type LayoutPerspective = {
   asWhite: boolean,
   rotate: 0 | 90 | 180 | 270,
@@ -44,7 +42,7 @@ export type Settings = {
   // minimal: boolean
 }
 
-export const boardThemes: ReadonlyArray<BoardTheme> = [
+export const BOARD_THEMES: ReadonlyArray<Readonly<BoardTheme>> = [
   {
     _name: "lichess",
     lightBackground: "#f0d9b5",
@@ -91,7 +89,8 @@ export const boardThemes: ReadonlyArray<BoardTheme> = [
   },
 ] as const
 
-export const settings = writable<Settings>({
+
+export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   showCoordinates: true,
   showHistory: false,
   showGraveyards: true,
@@ -103,16 +102,16 @@ export const settings = writable<Settings>({
       asWhite: false,
       rotate: navigator.maxTouchPoints > 0 ? 180 : 0,
       flipOpponentPieces: false,
-    },
+    } as const,
     {
       asWhite: true,
       rotate: 0,
       flipOpponentPieces: false,
-    },
+    } as const,
   ],
   theme: {
     pageBackground: "#222",
-    board: boardThemes[0],
+    board: BOARD_THEMES[0],
     pieces: { name: "classic", scale: 1 },
   },
 })

@@ -2,7 +2,8 @@
   import { match } from "ts-pattern"
 
   import LayoutSettingsOption from "./LayoutSettingsOption.svelte"
-  import { type LayoutPerspective, settings } from "./settings"
+  import { type LayoutPerspective } from "./settings"
+  import { settings } from "./stores"
 
   type LayoutName =
     | "single"

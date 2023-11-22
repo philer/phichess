@@ -5,8 +5,8 @@
   import { START_GAME } from "./chess"
   import Game from "./Game.svelte"
   import Icon from "./Icon.svelte"
-  import { settings } from "./settings"
   import Settings from "./Settings.svelte"
+  import { game, settings } from "./stores"
 
   let isSettingsOpen = location.hash === "#settings"
   const handleHashChange = (_evt: HashChangeEvent) => {
@@ -20,8 +20,6 @@
       window.location.hash = ""
     }
   }
-
-  let game = START_GAME
 
   $: theme = $settings.theme
 
@@ -49,9 +47,9 @@
   <header>
     <h1><a href="/">φ</a></h1>
 
-    {#if !isSettingsOpen && game.history.length > 0}
+    {#if !isSettingsOpen && $game.history.length > 0}
       <button
-        on:click={() => game = START_GAME}
+        on:click={() => $game = START_GAME}
         title="New game"
         class="icon-button"
       >
@@ -81,7 +79,7 @@
   {#if isSettingsOpen}
     <Settings />
   {:else}
-    <Game bind:game />
+    <Game bind:game={$game} />
   {/if}
 </div>
 

@@ -1,15 +1,16 @@
 <script lang="ts">
-  import { boardThemes, settings } from "./settings"
+  import { BOARD_THEMES } from "./settings"
+  import { settings } from "./stores"
 
   let themeName = $settings.theme.board._name
-  $: $settings.theme.board = boardThemes.find(theme => theme._name === themeName) ?? boardThemes[0]
+  $: $settings.theme.board = BOARD_THEMES.find(theme => theme._name === themeName) ?? BOARD_THEMES[0]
 </script>
 
 
 <legend>Theme</legend>
 
 <div class="theme-list">
-  {#each boardThemes as theme (theme._name)}
+  {#each BOARD_THEMES as theme (theme._name)}
     <label class:selected={themeName === theme._name}>
       <input type="radio" value={theme._name} bind:group={themeName} />
       <div

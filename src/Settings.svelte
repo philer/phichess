@@ -1,7 +1,7 @@
 <script lang="ts">
   import Checkbox from "./Checkbox.svelte"
   import LayoutSettings from "./LayoutSettings.svelte"
-  import { settings } from "./settings"
+  import { settings } from "./stores"
   import ThemeSettings from "./ThemeSettings.svelte"
   import TimeControlSettings from "./TimeControlSettings.svelte"
 

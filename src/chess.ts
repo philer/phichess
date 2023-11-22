@@ -540,7 +540,7 @@ export const applyMove = (game: Game, move: Move): Result<Game, string> =>
 
 
 /** Validate and apply an array of moves to a given game */
-export const applyHistory = (game: Game, history: Move[]): Result<Game> =>
+export const applyHistory = (game: Game, history: ReadonlyArray<Move>): Result<Game> =>
   history.reduce((result, move) => result.flatMap(game => applyMove(game, move)), ok(game))
 
 /** Re-create the given game up to a specific move. */

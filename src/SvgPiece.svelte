@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ColorPiece } from "./chess"
-  import { settings } from "./settings"
+  import { settings } from "./stores"
 
   export let piece: ColorPiece
   export let glow: boolean = false

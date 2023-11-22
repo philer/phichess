@@ -6,7 +6,7 @@
   import Clock from "./Clock.svelte"
   import Graveyard from "./Graveyard.svelte"
   import Icon from "./Icon.svelte"
-  import { settings } from "./settings"
+  import { settings } from "./stores"
 
   export let game: Game
   export let asWhite = true

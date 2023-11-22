@@ -8,7 +8,7 @@
   import History from "./History.svelte"
   import Modal from "./Modal.svelte"
   import Perspective from "./Perspective.svelte"
-  import { settings } from "./settings"
+  import { settings } from "./stores"
 
   export let game: Game
 
