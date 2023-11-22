@@ -13,6 +13,9 @@ export type PromotablePiece = Exclude<Piece, "" | "K">
 export type Check = "" | "+" | "#"
 export type Color = "w" | "b"
 
+export const invert = (color: Color) =>
+  color === "w" ? "b" : "w"
+
 export type Square = `${File}${Rank}`
 export type ColorPiece = `${Color}${Piece}`
 export type MortalColorPiece = `${Color}${MortalPiece}`
@@ -207,7 +210,7 @@ export const isAttacked = (by: Color, square: Square, board: Board) =>
 
 export const isInCheck = (color: Color, board: Board) =>
   isAttacked(
-    color === "w" ? "b" : "w",
+    invert(color),
     (Object.keys(board) as Square[]).find(square => board[square] === `${color}K`) as Square,
     board,
   )
@@ -388,7 +391,6 @@ const checkMove = (
     return err(`Only pawns can be promoted.`)
   }
 
-  const opponent = toMove === "w" ? "b" : "w"
   const pieceName = (piece[1] ?? "") as Piece
 
   const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
@@ -422,7 +424,7 @@ const checkMove = (
           if (!capture) {
             return err("Pawns can only move diagonally when capturing.")
           }
-          if (capture !== opponent) {
+          if (capture !== invert(toMove)) {
             return err("Pawns can only capture pawns en passant.")
           }
           const prev = history[history.length - 1]
@@ -459,6 +461,7 @@ const checkMove = (
           if (findBlockedSquare(board, from, rookFrom)) {
             return err("You can't castle on this side, there is a piece in the way.")
           }
+          const opponent = invert(toMove)
           if (isAttacked(opponent, from, board)) {
             return err("You can't castle while in check.")
           }
@@ -639,7 +642,7 @@ export const applyMove = (game: Game, input: MoveInput | AlgebraicMove): Result<
     .map(move => {
       const { board, toMove, graveyard } = game
       const { from, to, promotion, capture } = move
-      const opponent = toMove === "w" ? "b" : "w"
+      const opponent = invert(toMove)
       const { [from]: piece, [to]: captureTarget, ...remainingBoard } = board
 
       // TODO Creating the new board is currently redundant with work already
@@ -795,18 +798,19 @@ export const toFEN = ({ board, toMove, history, fiftyMoveCounter }: Game): strin
     .map(({ row, empty }) => `${row}${empty || ""}`)
     .join("/")
 
-  const lastMove = history.at(-1)
-  const enPassantSquare = lastMove
-                       && board[lastMove.to]?.length === 1
-                       && Math.abs(+lastMove.from[1] - +lastMove.to[1]) === 2
-                       && lastMove.to
-
-    return [
-      position,
-      toMove,
-      getCastlingFen(history) || "-",
-      enPassantSquare || "-",
-      fiftyMoveCounter,
-      Math.floor(history.length / 2) + 1,
-    ].join(" ")
+  let enPassantSquare = "-"
+  if (history.length) {
+    const { from, to } = history[history.length - 1]
+    if (board[to] === invert(toMove) && Math.abs(+from[1] - +to[1]) === 2) {
+      enPassantSquare = `${from[0]}${toMove === "w" ? 6 : 3}`
+    }
+  }
+  return [
+    position,
+    toMove,
+    getCastlingFen(history) || "-",
+    enPassantSquare || "-",
+    fiftyMoveCounter,
+    Math.floor(history.length / 2) + 1,
+  ].join(" ")
 }
