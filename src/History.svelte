@@ -23,10 +23,8 @@ import Algebraic from "./Algebraic.svelte"
 
   const isSubGame = (short: Game, long: Game) =>
     short.history.length <= long.history.length
-        && short.history.every(({ from, to, promotion }, idx) =>
-            long.history[idx].from === from
-            && long.history[idx].to === to
-            && long.history[idx].promotion === promotion,
+        && short.history.every(({ algebraic }, idx) =>
+            long.history[idx].algebraic === algebraic,
           )
 
   const gotoMove = (idx: number) => {
