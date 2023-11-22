@@ -9,6 +9,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "vitest",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "lint": "eslint src public/sw.js --max-warnings 0",
     "format": "eslint src public/sw.js --fix",
@@ -33,6 +34,7 @@
     "tslib": "^2.6.2",
     "typescript": "^5.3.2",
     "vite": "^5.0.2",
-    "vite-plugin-pwa": "^0.17.0"
+    "vite-plugin-pwa": "^0.17.0",
+    "vitest": "^0.34.6"
   }
 }

@@ -547,7 +547,7 @@ const CASTLING_PATTERN = /^[O0]-?[O0](-?[O0])?(?:\b|$)/i
  * + Surplus qualifying rank & file are accepted as long as they do not lead to
  *   contradiction.
  */
-const decodeAlgebraicMove = (game: GameInput, algebraic: AlgebraicMove): Result<MoveInput, string> => {
+const decodeAlgebraicMove = (game: GameInput, algebraic: string): Result<MoveInput, string> => {
   const { board, toMove } = game
   const forwards = toMove === "w" ? 1 : -1
   let matchArray: RegExpMatchArray | null = null
@@ -636,7 +636,7 @@ const getCastlingFen = (history: ReadonlyArray<MoveInput>) =>
  * return an updated game state if the move is legal.
  * The updated game's history contains added details for the new move.
  */
-export const applyMove = (game: Game, input: MoveInput | AlgebraicMove): Result<Game, string> =>
+export const applyMove = (game: Game, input: MoveInput | string): Result<Game, string> =>
   // @ts-ignore too complex, lol
   (typeof input === "string" ? decodeAlgebraicMove : checkMove)(game, input)
     .map(move => {
@@ -645,9 +645,6 @@ export const applyMove = (game: Game, input: MoveInput | AlgebraicMove): Result<
       const opponent = invert(toMove)
       const { [from]: piece, [to]: captureTarget, ...remainingBoard } = board
 
-      // TODO Creating the new board is currently redundant with work already
-      // done in checkMove, however it may be necessary for
-      // decodeAlgebraicMove(game, algebraic)
       const newBoard: Writable<Board> = { ...remainingBoard, [to]: promotion ?? piece }
       if (!captureTarget && capture === opponent) {
         // En passant pawn capture
@@ -655,7 +652,7 @@ export const applyMove = (game: Game, input: MoveInput | AlgebraicMove): Result<
         delete newBoard[`${to[0]}${from[1]}`]
       }
 
-      if (piece === `${toMove}K` && Math.abs(+from[1] - +to[1]) > 1) {
+      if (piece === `${toMove}K` && Math.abs(to.charCodeAt(0) - from.charCodeAt(0)) > 1) {
         // Castling, move the rook
         const rank = to[1] as Rank
         if (to[0] === "c") {  // queen side
@@ -663,11 +660,11 @@ export const applyMove = (game: Game, input: MoveInput | AlgebraicMove): Result<
           delete newBoard[`a${rank}`]
         } else {  // king side
           newBoard[`f${rank}`] = `${toMove}R`
-          delete newBoard[`a${rank}`]
+          delete newBoard[`h${rank}`]
         }
       }
 
-      const check = isInCheck(toMove, newBoard)
+      const check = isInCheck(opponent, newBoard)
       const hasMoves = hasLegalMoves({
         board: newBoard,
         toMove: opponent,
@@ -680,10 +677,10 @@ export const applyMove = (game: Game, input: MoveInput | AlgebraicMove): Result<
       const stalemate = !check && !hasMoves
 
       const fiftyMoveCounter = capture || piece === toMove ? 0 : game.fiftyMoveCounter + 1
-      const fiftyMoves = fiftyMoveCounter >= 50
+      const fiftyMoves = fiftyMoveCounter >= 100
 
       const position = [
-          Object.entries(board).flat().join(""),
+          Object.entries(board).sort().flat().join(""),
           getCastlingFen(history),
           piece === toMove && Math.abs(+from[1] - +to[1]) === 2 ? to : "",
         ].join(":")
@@ -711,7 +708,7 @@ export const applyMove = (game: Game, input: MoveInput | AlgebraicMove): Result<
 
 
 /** Validate and apply an array of moves to a given game */
-export const applyHistory = (game: Game, history: ReadonlyArray<MoveInput | AlgebraicMove>): Result<Game> =>
+export const applyHistory = (game: Game, history: ReadonlyArray<MoveInput | string>): Result<Game> =>
   history.reduce((result, move) => result.flatMap(game => applyMove(game, move)), ok(game))
 
 /** Re-create the given game up to a specific move. */

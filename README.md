@@ -13,8 +13,10 @@ To do
 
 * [x] detect checkmate
 * [x] detect draw by stalemate
-* [ ] detect draw by threefold repetition
-* [ ] detect draw by fifty moves rule
+* [x] detect draw by threefold repetition
+* [x] detect draw by fifty moves rule
+* [ ] detect draw by insufficient material (including timeout)
+* [ ] detect blocked positions?
 * [x] piece symbols in algebraic notation
 * [x] highlight last move
 * [x] highlight check
