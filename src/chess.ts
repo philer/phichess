@@ -1,4 +1,4 @@
-import { match } from "ts-pattern"
+import { match, Pattern } from "ts-pattern"
 
 import { err, ok, type Result } from "./result"
 import { isTruthy, pairs } from "./util"
@@ -337,7 +337,7 @@ export const toAlgebraic = (
     .with("K", () => kingSquares(to).concat(castleSquares(to)))
     .exhaustive()
     .filter(isTruthy)
-    .filter(sqr => board[sqr] === colorPiece)
+    .filter(square => board[square] === colorPiece)
 
   if (candidates.length === 0) {
     return err(`You have no ${PIECE_NAMES[piece]} on ${from}.`)
@@ -364,9 +364,7 @@ export const requiresPromotion = ({ from, to }: MoveInput, board: Board) =>
   board[from]?.length === 1 && to[1] === (board[from] === "w" ? "8": "1")
 
 /**
- * Validate a move given as user input against the current game state and
- * return an updated game state if the move is legal.
- * The updated game's history contains the unaltered input move.
+ * Validate a move given as user input against the current game state.
  */
 const checkMove = (
   { board, toMove, history }: GameInput,
@@ -385,6 +383,9 @@ const checkMove = (
   }
   if (capture && capture[0] === toMove) {
     return err("You can't capture your own piece.")
+  }
+  if (promotion && piece !== toMove) {
+    return err(`Only pawns can be promoted.`)
   }
 
   const opponent = toMove === "w" ? "b" : "w"
@@ -442,6 +443,8 @@ const checkMove = (
           return err(`Cannot promote to '${promotion}'`)
         }
         piece = `${toMove}${promotion}`
+      } else if (promotion) {
+        return err("The pawn has not reached the last rank and cannot promote.")
       }
       break
     }
@@ -515,6 +518,98 @@ const checkMove = (
 }
 
 
+type Opt<T> = T | undefined
+
+type PawnMoveMatch = [AlgebraicMove, Square, Opt<PromotablePiece>]
+const PAWN_MOVE_PATTERN = /^([a-h][1-8])(:?=?([NBRQ]))?(?:\b|$)/
+
+type PawnCaptureMatch = [AlgebraicMove, File, Square, Opt<PromotablePiece>]
+const PAWN_CAPTURE_PATTERN = /^([a-h])x([a-h][1-8])(:?=?([NBRQ]))?(?:\b|$)/
+
+type PieceMoveOrCaptureMatch = [AlgebraicMove, PieceNotPawn, Opt<File>, Opt<Rank>, Opt<"x">, Square]
+const PIECE_MOVE_OR_CAPTURE_PATTERN = /^([NBRQK])([a-h])?([1-8])?(x)?([a-h][1-8])(?:\b|$)/
+
+const CASTLING_PATTERN = /^[O0]-?[O0](-?[O0])?(?:\b|$)/i
+
+/**
+ * Decode a move given in algebraic notation and validate it against the current
+ * game state.
+ *
+ * Details:
+ * + Check/mate suffixes (+/#) are completely ignored
+ * + Abbreviated pawn capture notation (e.g. 'de' or 'de5' for 'dxe5') is not
+ *   (yet) supported.
+ * + For piece moves, incorrect capture 'x' yields an error,
+ *   while a missing 'x' is ignored.
+ * + Surplus qualifying rank & file are accepted as long as they do not lead to
+ *   contradiction.
+ */
+const decodeAlgebraicMove = (game: GameInput, algebraic: AlgebraicMove): Result<MoveInput, string> => {
+  const { board, toMove } = game
+  const forwards = toMove === "w" ? 1 : -1
+  let matchArray: RegExpMatchArray | null = null
+
+  if (matchArray = PAWN_MOVE_PATTERN.exec(algebraic)) {
+    const [_, to, promotion] = matchArray as PawnMoveMatch
+    const singleStepFrom = shift(0, -forwards, to)
+    if (singleStepFrom && board[singleStepFrom] === toMove) {
+      return checkMove(game, { from: singleStepFrom, to, promotion })
+    }
+    const doubleStepFrom = shift(0, -2 * forwards, to)
+    if (doubleStepFrom && board[doubleStepFrom] === toMove) {
+      return checkMove(game, { from: doubleStepFrom, to, promotion })
+    }
+    return err(`There is no Pawn to move to ${to}.`)
+  }
+
+  if (matchArray = PAWN_CAPTURE_PATTERN.exec(algebraic)) {
+    const [_, fromFile, to, promotion] = matchArray as PawnCaptureMatch
+    const from = shift(0, -forwards, `${fromFile}${to[1] as Rank}`)
+    if (!from) {
+      return err(`There is no Pawn that can capture on ${to}.`)
+    }
+    return checkMove(game, { from, to, promotion })
+  }
+
+  if (matchArray = PIECE_MOVE_OR_CAPTURE_PATTERN.exec(algebraic)) {
+    const [_, piece, file, rank, capture, to] = matchArray as PieceMoveOrCaptureMatch
+    const colorPiece: ColorPiece = `${toMove}${piece}`
+    if (capture && !board[to]) {
+      return err(`There is nothing to capture on ${to}.`)
+    }
+    let candidates = match(piece)
+      .with("N", () => knightSquares(to))
+      .with("B", () => bishopPaths(to).map(path => findOnPath(colorPiece, path, board)))
+      .with("R", () => rookPaths(to).map(path => findOnPath(colorPiece, path, board)))
+      .with("Q", () => queenPaths(to).map(path => findOnPath(colorPiece, path, board)))
+      .with("K", () => kingSquares(to).concat(castleSquares(to)))
+      .exhaustive()
+      .filter(isTruthy)
+      .filter(square => board[square] === colorPiece)
+    if (file) {
+      candidates = candidates.filter(square => square[0] === file)
+    }
+    if (rank) {
+      candidates = candidates.filter(square => square[1] === rank)
+    }
+    return match(candidates)
+      .returnType<Result<Square, string>>()
+      .with([], () => err(`No candidate ${PIECE_NAMES[piece]} found`))  // TODO details
+      .with([Pattern.string], ([square]) => ok(square))
+      .otherwise(() => err(`Ambiguous move: multiple ${PIECE_NAMES[piece]} could move to ${to}.`))
+      .flatMap(from => checkMove(game, { from, to }))
+  }
+
+  if (matchArray = CASTLING_PATTERN.exec(algebraic)) {
+    const rank = toMove === "w" ? "1" : "8"
+    return checkMove(game, { from: `e${rank}`, to: `${matchArray[1] ? "c" : "g"}${rank}` })
+  }
+
+  return err(`'${algebraic}' is not a known move format.`)
+}
+
+
+
 /**
  * Determine which sides both players are still able to castle on,
  * in the "KQkq" notation defined by FEN.
@@ -538,12 +633,13 @@ const getCastlingFen = (history: ReadonlyArray<MoveInput>) =>
  * return an updated game state if the move is legal.
  * The updated game's history contains added details for the new move.
  */
-export const applyMove = (game: Game, moveInput: Readonly<MoveInput>): Result<Game, string> =>
-  checkMove(game, moveInput)
-    .map(({ from, to, promotion, capture }) => {
+export const applyMove = (game: Game, input: MoveInput | AlgebraicMove): Result<Game, string> =>
+  // @ts-ignore too complex, lol
+  (typeof input === "string" ? decodeAlgebraicMove : checkMove)(game, input)
+    .map(move => {
       const { board, toMove, graveyard } = game
+      const { from, to, promotion, capture } = move
       const opponent = toMove === "w" ? "b" : "w"
-
       const { [from]: piece, [to]: captureTarget, ...remainingBoard } = board
 
       // TODO Creating the new board is currently redundant with work already
@@ -572,11 +668,11 @@ export const applyMove = (game: Game, moveInput: Readonly<MoveInput>): Result<Ga
       const hasMoves = hasLegalMoves({
         board: newBoard,
         toMove: opponent,
-        history: [...game.history, moveInput],
+        history: [...game.history, move],
       })
       const mate = check && !hasMoves
-      const algebraic = toAlgebraic({ ...moveInput, capture, check, mate }, board).unwrap()
-      const history = [...game.history, { ...moveInput, capture, check, mate, algebraic }]
+      const algebraic = toAlgebraic({ ...move, check, mate }, board).unwrap()
+      const history = [...game.history, { ...move, check, mate, algebraic }]
 
       const stalemate = !check && !hasMoves
 
@@ -612,7 +708,7 @@ export const applyMove = (game: Game, moveInput: Readonly<MoveInput>): Result<Ga
 
 
 /** Validate and apply an array of moves to a given game */
-export const applyHistory = (game: Game, history: ReadonlyArray<MoveInput>): Result<Game> =>
+export const applyHistory = (game: Game, history: ReadonlyArray<MoveInput | AlgebraicMove>): Result<Game> =>
   history.reduce((result, move) => result.flatMap(game => applyMove(game, move)), ok(game))
 
 /** Re-create the given game up to a specific move. */
