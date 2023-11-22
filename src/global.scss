@@ -36,7 +36,7 @@ html, body {
   background: #222;
   color: #ddd;
   --font-family: 'Noto Sans', Helvetica, sans-serif;
-  font-family: var('Noto Sans', Helvetica, sans-serif);
+  font-family: var(--font-family);
   font-size: 16pt;
   text-align: center;
   transition: none;
