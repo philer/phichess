@@ -35,6 +35,6 @@ export const game = persisted(
   "game",
   START_GAME,
   // TODO store only algebraic
-  game => game.history,
-  history => applyHistory(START_GAME, history).unwrap(),
+  game => game.history.map(move => move.algebraic).join(" "),
+  history => applyHistory(START_GAME, history ? history.split(" ") : []).unwrap(),
 )
