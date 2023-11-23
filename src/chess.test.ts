@@ -180,6 +180,58 @@ describe.concurrent(applyMove, () => {
     })
   })
 
+  describe.concurrent("promotion", () => {
+    test.each(["Q", "N", "B", "Q"] as const)("promote to %s; input", p => {
+      expect(applyMove(
+        { ...START_GAME, board: { a1: "wK", h5: "bK", a7: "w" } },
+        { from: "a7", to: "a8", promotion: p },
+      )).toEqual(ok(expect.objectContaining({
+        board: { a1: "wK", h5: "bK", a8: `w${p}` },
+        history: [expect.objectContaining({ algebraic: `a8=${p}` })],
+      })))
+    })
+
+    test.each(["Q", "N", "B", "Q"] as const)("promote to %s; algebraic", p => {
+      expect(applyMove(
+        { ...START_GAME, board: { a1: "wK", h5: "bK", a7: "w" } },
+        `a8=${p}`,
+      )).toEqual(ok(expect.objectContaining({
+        board: { a1: "wK", h5: "bK", a8: `w${p}` },
+        history: [expect.objectContaining({ algebraic: `a8=${p}` })],
+      })))
+    })
+
+    test("promote with check", () => {
+      expect(applyMove(
+        { ...START_GAME, board: { a1: "wK", h8: "bK", a7: "w" } },
+        "a8=Q",
+      )).toEqual(ok(expect.objectContaining({
+        board: { a1: "wK", h8: "bK", a8: "wQ" },
+        history: [expect.objectContaining({ algebraic: "a8=Q+" })],
+      })))
+    })
+
+    test("promote with capture; input", () => {
+      expect(applyMove(
+        { ...START_GAME, board: { a1: "wK", h8: "bK", a7: "w", b8: "bR" } },
+        { from: "a7", to: "b8", promotion: "Q" },
+      )).toEqual(ok(expect.objectContaining({
+        board: { a1: "wK", h8: "bK", b8: "wQ" },
+        history: [expect.objectContaining({ algebraic: "axb8=Q+" })],
+      })))
+    })
+
+    test("promote with capture; algebraic", () => {
+      expect(applyMove(
+        { ...START_GAME, board: { a1: "wK", h8: "bK", a7: "w", b8: "bR" } },
+        "axb8=Q",
+      )).toEqual(ok(expect.objectContaining({
+        board: { a1: "wK", h8: "bK", b8: "wQ" },
+        history: [expect.objectContaining({ algebraic: "axb8=Q+" })],
+      })))
+    })
+  })
+
   test("detect checkmate", () => {
     const board: Board = { f5: "wK", h5: "bK", a1: "wR" }
 
@@ -394,6 +446,26 @@ describe(applyHistory, () => {
         ],
         outcome: "b",
         termination: "checkmate",
+      })))
+  })
+
+  test("full game: draw by insufficient material", () => {
+    const moves =
+      `e4 e5 Nf3 Nf6 Nc3 Bc5 Bc4 d6 d3 Be6 Bxe6 fxe6 h3 O-O a3 Nbd7 O-O a6 Bg5
+       Qe8 Re1 Qg6 Bxf6 Nxf6 Ne2 Nh5 Rf1 Ng3 Nxg3 Qxg3 b4 Ba7 Qe2 Rf6 Rac1
+       Raf8 Kh1 Qf4 c4 Rh6 c5 dxc5 bxc5 b6 d4 exd4 Nxd4 e5 Nf5 Re6 Qc4 Re8
+       cxb6 Bxb6 a4 g6 Nh6+ Qxh6 f3 a5 Qd5 Qf4 Rc6 Qf7 Rfc1 Rxc6 Qxf7+ Kxf7
+       Rxc6 Re6 Rxe6 Kxe6 Kh2 h5 Kg3 g5 h4 gxh4+ Kxh4 Kd6 Kxh5 Kc5 Kg6 Kb4 Kf5
+       Bd4 g4 c5 g5 c4 g6 c3 g7 c2 g8=Q c1=Q Qb8+ Kxa4 Qe8+ Kb3 Qb5+ Kc2 Qxa5
+       Qf4+ Ke6 Qxf3 Qc7+ Kd3 Qc6 Qxe4 Qb5+ Ke3 Qb3+ Qd3 Qb7 e4 Qd5 Qc3 Kf5
+       Qd3 Qa2 Kf3 Qd5 Qe3 Ke6 Qf4 Kd7 Be3 Kc6 Ke2 Qc4+ Kf2 Qc2+ Kg3 Qc4 Qf3
+       Qg8+ Kf2 Kd5 Ke2 Qa8 Kd3 Qa3+ Ke2 Qa2+ Kd3 Qb3+ Ke2 Qc2+ Bd2 Qxe4+
+       Qxe4+ Kxe4`.split(/\s+/)
+    expect(applyHistory(START_GAME, moves))
+      .toEqual(ok(expect.objectContaining({
+        board: { e4: "wK", e2: "bK", d2: "bB" },
+        outcome: "draw",
+        termination: "insufficient",
       })))
   })
 })

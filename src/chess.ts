@@ -446,7 +446,7 @@ const checkMove = (
       } else {
         return err("Pawns can't move like that.")
       }
-      if (to[1] === "1" || to[1] === "8") {
+      if (to[1] === (toMove === "w" ? "8" : "1")) {
         if (!promotion) {
           return err("Promotion required")
         }
@@ -533,10 +533,10 @@ const checkMove = (
 type Opt<T> = T | undefined
 
 type PawnMoveMatch = [AlgebraicMove, Square, Opt<PromotablePiece>]
-const PAWN_MOVE_PATTERN = /^([a-h][1-8])(:?=?([NBRQ]))?(?:\b|$)/
+const PAWN_MOVE_PATTERN = /^([a-h][1-8])(?:=?([NBRQ]))?(?:\b|$)/
 
 type PawnCaptureMatch = [AlgebraicMove, File, Square, Opt<PromotablePiece>]
-const PAWN_CAPTURE_PATTERN = /^([a-h])x([a-h][1-8])(:?=?([NBRQ]))?(?:\b|$)/
+const PAWN_CAPTURE_PATTERN = /^([a-h])x([a-h][1-8])(?:=?([NBRQ]))?(?:\b|$)/
 
 type PieceMoveOrCaptureMatch = [AlgebraicMove, PieceNotPawn, Opt<File>, Opt<Rank>, Opt<"x">, Square]
 const PIECE_MOVE_OR_CAPTURE_PATTERN = /^([NBRQK])([a-h])?([1-8])?(x)?([a-h][1-8])(?:\b|$)/
@@ -604,10 +604,13 @@ const decodeAlgebraicMove = (game: GameInput, algebraic: string): Result<MoveInp
     if (rank) {
       candidates = candidates.filter(square => square[1] === rank)
     }
-    return match(candidates)
+    if (candidates.length > 1) {
+      candidates = candidates.filter(square => checkMove(game, { from: square, to }).isOk())
+    }
+    return match(candidates.length)
       .returnType<Result<Square, string>>()
-      .with([], () => err(`No candidate ${PIECE_NAMES[piece]} found`))  // TODO details
-      .with([Pattern.string], ([square]) => ok(square))
+      .with(0, () => err(`No candidate ${PIECE_NAMES[piece]} found`))  // TODO details
+      .with(1, () => ok(candidates[0]))
       .otherwise(() => err(`Ambiguous move: multiple ${PIECE_NAMES[piece]} could move to ${to}.`))
       .flatMap(from => checkMove(game, { from, to }))
   }
@@ -667,7 +670,11 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
       const opponent = invert(toMove)
       const { [from]: piece, [to]: captureTarget, ...remainingBoard } = board
 
-      const newBoard: Mutable<Board> = { ...remainingBoard, [to]: promotion ?? piece }
+      const newBoard: Mutable<Board> = {
+        ...remainingBoard,
+        [to]: promotion ? `${toMove}${promotion}` : piece,
+      }
+
       if (!captureTarget && capture === opponent) {
         // En passant pawn capture
         // @ts-ignore remainingBoard isn't empty
@@ -734,8 +741,11 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
 
 
 /** Validate and apply an array of moves to a given game */
-export const applyHistory = (game: Game, history: ReadonlyArray<MoveInput | string>): Result<Game> =>
-  history.reduce((result, move) => result.flatMap(game => applyMove(game, move)), ok(game))
+export const applyHistory = (game: Game, history: ReadonlyArray<MoveInput | string>) =>
+  history.reduce(
+    (result, move) => result.flatMap(game => applyMove(game, move)),
+    ok<Game, string>(game),
+  )
 
 /** Re-create the given game up to a specific move. */
 export const revertToMove = (idx: number, game: Game): Game =>
