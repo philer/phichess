@@ -5,4 +5,4 @@ declare namespace svelteHTML {
   }
 }
 
-declare type Writable<T> = { -readonly [K in keyof T]: T[K] }
+declare type Mutable<T> = { -readonly [K in keyof T]: T[K] }

@@ -31,7 +31,7 @@ describe.concurrent(isInCheck, () => {
 
 describe.concurrent(applyMove, () => {
   test("algebraic e4", () => {
-    const board: Writable<Board> = { ...START_BOARD }
+    const board: Mutable<Board> = { ...START_BOARD }
     delete board["e2"]
     board["e4"] = "w"
 
@@ -57,7 +57,7 @@ describe.concurrent(applyMove, () => {
   })
 
   test("input e4", () => {
-    const board: Writable<Board> = { ...START_BOARD }
+    const board: Mutable<Board> = { ...START_BOARD }
     delete board["e2"]
     board["e4"] = "w"
 
@@ -281,7 +281,7 @@ describe(applyHistory, () => {
   })
 
   test("single algebraic move", () => {
-    const board: Writable<Board> = { ...START_BOARD }
+    const board: Mutable<Board> = { ...START_BOARD }
     delete board["e2"]
     board["e4"] = "w"
 
@@ -307,7 +307,7 @@ describe(applyHistory, () => {
   })
 
   test("single input move", () => {
-    const board: Writable<Board> = { ...START_BOARD }
+    const board: Mutable<Board> = { ...START_BOARD }
     delete board["e2"]
     board["e4"] = "w"
 

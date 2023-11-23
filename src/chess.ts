@@ -645,7 +645,7 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
       const opponent = invert(toMove)
       const { [from]: piece, [to]: captureTarget, ...remainingBoard } = board
 
-      const newBoard: Writable<Board> = { ...remainingBoard, [to]: promotion ?? piece }
+      const newBoard: Mutable<Board> = { ...remainingBoard, [to]: promotion ?? piece }
       if (!captureTarget && capture === opponent) {
         // En passant pawn capture
         // @ts-ignore remainingBoard isn't empty
