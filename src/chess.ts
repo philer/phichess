@@ -54,12 +54,16 @@ export type Move = MoveInput & {
   readonly algebraic: AlgebraicMove
 }
 
+export type Outcome = Color | "draw"
+
 export type Termination =
   | "checkmate"
   | "time"
   | "stalemate"
   | "repetition"
   | "fifty-moves"
+  | "insufficient"
+  // | "blocked"
   | "agreement"
 
 export type GameInput = {
@@ -90,6 +94,11 @@ export const START_GAME: Game = Object.freeze({
 export const squares: readonly Square[] =
   Array.from("12345678")
     .flatMap(rank => Array.from("abcdefgh", file => `${file}${rank}` as Square))
+
+
+export const getSquareColor = (square: Square): Color =>
+  // Note: Char codes for 'a' -> 97 and '1' -> 49 are both odd.
+  (square.charCodeAt(0) & 1) ^ (square.charCodeAt(1) & 1) ? "w" : "b"
 
 
 const shift = (fileDelta: number, rankDelta: number, square: Square): Square | undefined => {
@@ -632,6 +641,19 @@ const getCastlingFen = (history: ReadonlyArray<MoveInput>) =>
     )
 
 /**
+ * Detect draw by insufficient material. This is a simple check if only two kings
+ * or two kings with a single night or bishop remain.
+ *
+ * Note that there are other scenarios that could be considered an immediate
+ * draw, such as a king with two knights vs. a lone king
+ * or kings with one same colored bishop each. These are not covered here.
+ */
+const isInsufficientMaterial = (board: Board): boolean => {
+  const pieces = Object.values(board).filter(piece => piece[1] !== "K")
+  return pieces.length === 0 || pieces.length === 1 && "NB".includes(pieces[0][1])
+}
+
+/**
  * Validate a move given as user input against the current game state and
  * return an updated game state if the move is legal.
  * The updated game's history contains added details for the new move.
@@ -690,6 +712,9 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
       }
       const threefold = repetitions[position] >= 3
 
+      const insufficient = isInsufficientMaterial(newBoard)
+      const isDraw = stalemate || fiftyMoves || threefold || insufficient
+
       return {
         board: newBoard,
         toMove: opponent,
@@ -697,11 +722,12 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
         graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
         fiftyMoveCounter,
         repetitions,
-        outcome: mate ? toMove : stalemate || fiftyMoves || threefold ? "draw" : undefined,
+        outcome: mate ? toMove : isDraw ? "draw" : undefined,
         termination: mate ? "checkmate"
           : stalemate ? "stalemate"
           : threefold ? "repetition"
           : fiftyMoves ? "fifty-moves"
+          : insufficient ? "insufficient"
           : undefined,
       }
     })
@@ -716,6 +742,28 @@ export const revertToMove = (idx: number, game: Game): Game =>
   applyHistory(START_GAME, game.history.slice(0, idx)).unwrap()
 
 
+export const outcomeToString = (outcome?: Outcome, termination?: Termination) =>
+  outcome
+    ? (
+      match(outcome)
+        .with("w", () => "White wins")
+        .with("b", () => "Black wins")
+        .with("draw", () => "Draw")
+        .exhaustive()
+      + match(termination)
+          .with("checkmate", () => " by checkmate.")
+          .with("time", () => " on time.")
+          .with("stalemate", () => " by stalemate")
+          .with("insufficient", () => " by insufficient material")
+          .with("repetition", () => " by threefold repetition")
+          .with("fifty-moves", () => " by fifty-move rule")
+          .with("agreement", () => " by agreement")
+          .with(undefined, () => "")
+          .exhaustive()
+      )
+    : "unterminated"
+
+
 /**
  * Turn game state into Portable Game Notation (PGN)
  * @see https://en.wikipedia.org/wiki/Portable_Game_Notation
@@ -728,25 +776,7 @@ export const toPGN = ({ history, outcome, termination }: Game): string => {
         .with("draw", () => "1/2-1/2")
         .with(undefined, () => "*")
         .exhaustive()
-  const term = outcome
-    ? (
-      match(outcome)
-        .with("w", () => "White wins")
-        .with("b", () => "Black wins")
-        .with("draw", () => "Draw")
-        .exhaustive()
-      + " "
-      + match(termination)
-          .with("checkmate", () => "by checkmate.")
-          .with("time", () => "on time.")
-          .with("stalemate", () => " by stalemate")
-          .with("repetition", () => " by threefold repetition")
-          .with("fifty-moves", () => " by fifty moves rule")
-          .with("agreement", () => " by agreement")
-          .with(undefined, () => "")
-          .exhaustive()
-      )
-    : "unterminated"
+  const term = outcomeToString(outcome, termination)
   const moves = Array.from(
     pairs(history.map(move => move.algebraic)),
     (movePair, idx) => `${idx + 1}. ${movePair.join(" ")}`,

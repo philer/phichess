@@ -3,7 +3,7 @@
   import { slide } from "svelte/transition"
   import { match } from "ts-pattern"
 
-  import { type Game, START_GAME } from "./chess"
+  import { type Game, outcomeToString, START_GAME } from "./chess"
   import { makeClock } from "./Clock.svelte"
   import History from "./History.svelte"
   import Modal from "./Modal.svelte"
@@ -78,23 +78,7 @@
     <Modal bind:open={openOutcome} on:close={() => outcomeClosed = true}>
       <svelte:fragment slot="title">Game over!</svelte:fragment>
       <p slot="content">
-        {match(game.outcome)
-            .with("w", () => "White wins")
-            .with("b", () => "Black wins")
-            .with("draw", () => "Draw")
-            .with(undefined, () => "???")
-            .exhaustive()
-        }
-        {match(game.termination)
-            .with("checkmate", () => "by checkmate.")
-            .with("time", () => "on time.")
-            .with("stalemate", () => " by stalemate")
-            .with("repetition", () => " by threefold repetition")
-            .with("fifty-moves", () => " by fifty moves rule")
-            .with("agreement", () => " by agreement")
-            .with(undefined, () => "")
-            .exhaustive()
-        }
+        {outcomeToString(game.outcome, game.termination)}
       </p>
       <button slot="actions" class="new-game-button" on:click={() => game = START_GAME}>
         New game

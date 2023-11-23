@@ -5,7 +5,9 @@ import {
   applyMove,
   type Board,
   type Game,
+  getSquareColor,
   isInCheck,
+  outcomeToString,
   START_BOARD,
   START_GAME,
   toFEN,
@@ -15,6 +17,18 @@ import { err, ok } from "./result"
 
 const makeGame = (moves: string) =>
   applyHistory(START_GAME, moves.split(/\s+/)).unwrap()
+
+
+test.concurrent(getSquareColor, () => {
+  expect(getSquareColor("a1")).toBe("b")
+  expect(getSquareColor("b1")).toBe("w")
+  expect(getSquareColor("a2")).toBe("w")
+  expect(getSquareColor("b2")).toBe("b")
+
+  expect(getSquareColor("a8")).toBe("w")
+  expect(getSquareColor("h1")).toBe("w")
+  expect(getSquareColor("h8")).toBe("b")
+})
 
 
 describe.concurrent(isInCheck, () => {
@@ -271,6 +285,38 @@ describe.concurrent(applyMove, () => {
     expect(game.outcome).toBe("draw")
     expect(game.termination).toBe("fifty-moves")
   })
+
+  describe.concurrent("detect insufficient material", () => {
+    test("King vs. King", () => {
+      expect(applyMove(
+        { ...START_GAME, board: { a1: "wK", h8: "bK", b1: "bQ" } },
+        "Kxb1",
+      )).toEqual(ok(expect.objectContaining({
+        outcome: "draw",
+        termination: "insufficient",
+      })))
+    })
+
+    test("King & Bishop vs. King", () => {
+      expect(applyMove(
+        { ...START_GAME, board: { a1: "wK", h8: "bK", b1: "bQ", a8: "bB" } },
+        "Kxb1",
+      )).toEqual(ok(expect.objectContaining({
+        outcome: "draw",
+        termination: "insufficient",
+      })))
+    })
+
+    test("King & Knight vs. King", () => {
+      expect(applyMove(
+        { ...START_GAME, board: { a1: "wK", h8: "bK", b1: "bQ", a8: "wN" } },
+        "Kxb1",
+      )).toEqual(ok(expect.objectContaining({
+        outcome: "draw",
+        termination: "insufficient",
+      })))
+    })
+  })
 })
 
 
@@ -350,6 +396,18 @@ describe(applyHistory, () => {
         termination: "checkmate",
       })))
   })
+})
+
+
+test.concurrent(outcomeToString, () => {
+  expect(outcomeToString("w", "checkmate")).toBe("White wins by checkmate.")
+  expect(outcomeToString("w", "time")).toBe("White wins on time.")
+  expect(outcomeToString("draw", "stalemate")).toBe("Draw by stalemate")
+  expect(outcomeToString("draw", "agreement")).toBe("Draw by agreement")
+
+  expect(outcomeToString(undefined, "stalemate")).toBe("unterminated")
+  expect(outcomeToString("w")).toBe("White wins")
+  expect(outcomeToString("draw")).toBe("Draw")
 })
 
 
