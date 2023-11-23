@@ -232,6 +232,14 @@ describe.concurrent(applyMove, () => {
     })
   })
 
+  test("en passant", () => {
+    const game = makeGame("e4 a6 e5 d5")
+    const result = applyMove(game, "exd6")
+    expect(result.isOk()).toBe(true)
+    expect(result.unwrap().board).toEqual(expect.objectContaining({ d6: "w" }))
+    expect(result.unwrap().board).toEqual(expect.not.objectContaining({ d5: "b" }))
+  })
+
   test("detect checkmate", () => {
     const board: Board = { f5: "wK", h5: "bK", a1: "wR" }
 
