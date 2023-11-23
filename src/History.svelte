@@ -107,28 +107,28 @@ import Algebraic from "./Algebraic.svelte"
   <button
     on:click={copyPgn}
     class="tools-button"
-    title="Copy PGN to clipboard"
+    title="Copy Portable Game Notation to clipboard"
   >
     <Icon path={mdiContentCopy} /> PGN
   </button>
   <button
     on:click={downloadPgn}
     class="tools-button"
-    title="Download PGN"
+    title="Download Portable Game Notation"
   >
     <Icon path={mdiDownload} /> PGN
   </button>
   <button
     on:click={copyFen}
     class="tools-button"
-    title="Copy FEN to clipboard"
+    title="Copy Forsyth–Edwards Notation to clipboard"
   >
     <Icon path={mdiContentCopy} /> FEN
   </button>
   <button
     on:click={downloadFen}
     class="tools-button"
-    title="Download FEN"
+    title="Download Forsyth–Edwards Notation"
   >
     <Icon path={mdiDownload} /> FEN
   </button>
