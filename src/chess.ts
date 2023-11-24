@@ -229,7 +229,7 @@ const getAttackedSquaresOnRays = function*(toMove: Color, board: Board, rays: It
   for (const path of rays) {
     for (const square of path) {
       if (board[square]) {
-        if (board[square][0] !== toMove) {
+        if (board[square]![0] !== toMove) {
           yield square
         }
         break
