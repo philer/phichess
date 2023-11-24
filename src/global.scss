@@ -62,6 +62,21 @@ label {
   cursor: pointer;
   user-select: none;
 }
+textarea {
+  appearance: none;
+  font-size: .85em;
+  padding: .5em;
+  border: 1px solid #555;
+  background: #111;
+  color: white;
+  border-radius: 2px;
+  outline: none;
+  transition: .2s border-color;
+}
+textarea:focus {
+  border-color: white;
+  background: #191919;
+}
 
 #app {
   width: 100%;

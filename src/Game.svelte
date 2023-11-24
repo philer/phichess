@@ -127,4 +127,8 @@
     flex-direction: column
     background: #0003
     box-shadow: 1px 1px 3px #0008
+
+    @media (min-width: 900px)
+      margin-left: .5em
+      border-left: 1px solid #333
 </style>

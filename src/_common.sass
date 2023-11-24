@@ -1,21 +1,22 @@
 @mixin button
-  padding: 0 .5em
+  padding: 0 1em
   font-size: .85em
   font-weight: bold
-  line-height: 1.5em
+  line-height: 2em
   border: 1px solid #555
-  border-radius: .25em
-  background: #999
-  color: #222
-  box-shadow: 1px 1px 3px #0008
+  background: #333
+  color: #white
   text-shadow: none
+  box-shadow: 0 0 5px #0003
   &:hover, &:active, &:focus
-    background: #bbb
+    background: #444
+    border-color: #666
 
 @mixin start-button
   @include button
   color: #040
-  border-color: #050
+  border-color: #af8
   background: #6c5
   &:hover, &:active, &:focus
-    background: #8d6
+    background: #bf7
+    border-color: #cfa

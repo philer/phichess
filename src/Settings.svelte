@@ -7,7 +7,7 @@
 
 </script>
 
-<form>
+<form on:submit={evt => evt.preventDefault()}>
   <!-- layout -->
   <fieldset>
     <legend>Layout</legend>

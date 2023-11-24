@@ -1,14 +1,17 @@
 <script lang="ts">
-  import { mdiContentCopy, mdiDownload, mdiUndo } from "@mdi/js"
+  import { mdiUndo } from "@mdi/js"
   import { match } from "ts-pattern"
 
-import Algebraic from "./Algebraic.svelte"
-  import { applyMove, type Game, type Move, revertToMove, toFEN, toPGN } from "./chess"
+  import Algebraic from "./Algebraic.svelte"
+  import { applyMove, type Game, type Move, revertToMove } from "./chess"
+  import Export from "./Export.svelte"
   import Icon from "./Icon.svelte"
-  import { pairs, saveTextAs } from "./util"
+  import Modal from "./Modal.svelte"
+  import { pairs } from "./util"
 
   export let game: Game
 
+  let showExport = false
   let fullGame = game
   let movePairs: ([] | [Move] | [Move, Move])[] = []
 
@@ -47,24 +50,6 @@ import Algebraic from "./Algebraic.svelte"
     match(evt.key)
       .with("ArrowLeft", undoLastMove)
       .with("ArrowRight", redoLastMove)
-
-  const copyPgn = () =>
-    navigator.clipboard.writeText(toPGN(game))
-
-  const copyFen = () =>
-    navigator.clipboard.writeText(toFEN(game))
-
-  const downloadPgn = () =>
-    saveTextAs(
-      toPGN(game),
-      `${location.hostname}_${new Date().toISOString().slice(0, 10)}.pgn`,
-      "application/vnd.chess-pgn",
-    )
-  const downloadFen = () =>
-    saveTextAs(
-      toFEN(game),
-      `${location.hostname}_${new Date().toISOString().slice(0, 10)}.fen`,
-    )
 </script>
 
 
@@ -97,42 +82,22 @@ import Algebraic from "./Algebraic.svelte"
   disabled={!game.history.length}
   class="tools-button"
   title="Undo last move"
->
-  <Icon path={mdiUndo} />
-</button>
+><Icon path={mdiUndo} /></button>
 
 <div style:flex-grow="1" />
 
-<div class="button-row">
-  <button
-    on:click={copyPgn}
-    class="tools-button"
-    title="Copy Portable Game Notation to clipboard"
-  >
-    <Icon path={mdiContentCopy} /> PGN
-  </button>
-  <button
-    on:click={downloadPgn}
-    class="tools-button"
-    title="Download Portable Game Notation"
-  >
-    <Icon path={mdiDownload} /> PGN
-  </button>
-  <button
-    on:click={copyFen}
-    class="tools-button"
-    title="Copy Forsyth–Edwards Notation to clipboard"
-  >
-    <Icon path={mdiContentCopy} /> FEN
-  </button>
-  <button
-    on:click={downloadFen}
-    class="tools-button"
-    title="Download Forsyth–Edwards Notation"
-  >
-    <Icon path={mdiDownload} /> FEN
-  </button>
-</div>
+<button
+  on:click={() => showExport = true}
+  disabled={!game.history.length}
+  class="tools-button"
+  title="Export game as PGN or FEN"
+>Export</button>
+
+<Modal bind:open={showExport}>
+  <svelte:fragment slot="title">Export</svelte:fragment>
+  <Export {game} />
+</Modal>
+
 
 
 <style lang="sass">
@@ -141,10 +106,7 @@ import Algebraic from "./Algebraic.svelte"
     align-content: start
     grid-template-columns: min-content 1fr 1fr
     overflow: auto
-    // gap: 0.5em 1em
-
-    // padding: 1em 1em .5em
-    background: #fff1
+    background: #222
 
   li
     display: contents
@@ -152,41 +114,33 @@ import Algebraic from "./Algebraic.svelte"
       padding: .25em .5em
       text-align: left
       white-space: nowrap
-      // display: flex
-      // align-items: center
 
   .move-number
     text-align: right
     font-weight: bold
     opacity: .5
-    background: #fff2
+    background: #444
+
+  li > button
+    transition: .2s background, .2s opacity
+    &:hover
+      background: #fff2
 
   .current
     background: #fff2
+    &:hover
+      background: #fff4
 
   .ghost
     opacity: .5
-
-  .button-row
-    display: grid
-    grid-template-rows: 1fr 1fr
-    grid-template-columns: 1fr 1fr
-    grid-auto-flow: column
-    justify-content: stretch
-    font-size: .7em
-    gap: 2px
-    > button
-      flex: 100% 1 1
-      white-space: nowrap
 
   button.tools-button
     line-height: 2em
     width: 100%
     background: #333
-    transition: .3s background
+    transition: .2s background
     &:not(:disabled):hover
       background: #555
-
     &:disabled
       opacity: .3
       cursor: default
