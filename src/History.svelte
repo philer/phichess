@@ -123,7 +123,7 @@
 
   li > button
     transition: .2s background, .2s opacity
-    &:hover
+    &:hover, &:focus, &:active
       background: #fff2
 
   .current
@@ -139,8 +139,11 @@
     width: 100%
     background: #333
     transition: .2s background
-    &:not(:disabled):hover
-      background: #555
+
+    &:not(:disabled)
+      &:hover, &:focus, &:active
+        background: #555
+
     &:disabled
       opacity: .3
       cursor: default

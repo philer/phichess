@@ -153,6 +153,8 @@
       on:keyup={evt => (evt.key === "Enter" || evt.key === "Space") && handleSquareClick(square)}
       on:mousedown={evt => handleSquareMousedown(evt, square)}
       on:mouseup={() => handleSquareMouseup(square)}
+      role="button"
+      tabindex="-1"
       class="square"
       class:light={isLight}
       class:dark={!isLight}
@@ -161,8 +163,6 @@
       class:selected={selectedSquare === square}
       class:last-move={square === lastMove?.from || square === lastMove?.to}
       class:check={lastMove?.check && piece === `${toMove}K`}
-      role="button"
-      tabindex="0"
     >
       {#if $settings.showCoordinates}
         {#if square[1] === (asWhite ? "1" : "8")}

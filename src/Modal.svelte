@@ -37,6 +37,7 @@
     class="backdrop"
     on:click={handleModalBackdropClick}
     transition:fade={{ duration: 200 }}
+    tabindex="-1"
   >
     <div class="modal" transition:scale={{ duration: 200, start: .8 }}>
       <button class="close" on:click={close}>
