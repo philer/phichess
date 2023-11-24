@@ -47,12 +47,13 @@
         <h3><slot name="title" /></h3>
       {/if}
 
-      <slot name="content" />
-
-      <footer>
-        <button class="close" on:click={close}>Close</button>
-        <slot name="actions" />
-      </footer>
+      <div class="content">
+        <slot />
+        <footer>
+          <button class="close" on:click={close}>Close</button>
+          <slot name="actions" />
+        </footer>
+      </div>
     </div>
   </div>
 {/if}
@@ -75,27 +76,34 @@
     background: #333
     border-radius: 3px
     box-shadow: 3px 3px 10px #0008
-
     > button.close
       position: absolute
       inset: 0 0 auto auto
       width: 2.4em
       height: 2.4em
 
-    > h3
-      font-size: 1.2em
-      line-height: 2em
-      padding: 0 2em
-      background: #555
+  .content
+    padding: 1em 2em 0em
+    max-height: calc(90vh - 2.4em)
+    max-width: 90vw
+    overflow: auto
+    @media (max-width: 900px)
+      max-height: calc(100vh - 2.4em)
+      max-width: 100vw
 
-    > footer, > :global(p)
-      padding: 0em 2em
-      margin: 1em 0
+  h3
+    font-size: 1.2em
+    line-height: 2em
+    padding: 0 2em
+    background: #555
 
-    > footer
-      display: flex
-      justify-content: center
-      gap: .5em
-      > button.close
-        @include common.button
+  footer
+    padding: 1em 2em
+
+    display: flex
+    justify-content: center
+    gap: .5em
+    > button.close
+      @include common.button
+
 </style>

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import { slide } from "svelte/transition"
-  import { match } from "ts-pattern"
 
   import { type Game, outcomeToString, START_GAME } from "./chess"
   import { makeClock } from "./Clock.svelte"
@@ -49,18 +48,26 @@
   let flowDirection: "row" | "column" = "row"
   let perspectiveSize: number = 100
 
+  const resize = (width: number, height: number) => {
+    flowDirection = width > height ? "row" : "column"
+    perspectiveSize = flowDirection === "row"
+      ? Math.min(height, width / $settings.layout.length)
+      : Math.min(width, height / $settings.layout.length)
+  }
+
+  $: if (layoutContainer && $settings.layout.length) {
+    const { width, height } = layoutContainer.getBoundingClientRect()
+    resize(width, height)
+  }
+
   onMount(() => {
     const resizeObserver = new ResizeObserver(([entry]) => {
       const { inlineSize: width, blockSize: height } = entry.contentBoxSize[0]
-      flowDirection = width > height ? "row" : "column"
-      perspectiveSize = flowDirection === "row"
-        ? Math.min(height, width / $settings.layout.length)
-        : Math.min(width, height / $settings.layout.length)
+      resize(width, height)
     })
     resizeObserver.observe(layoutContainer)
     return () => resizeObserver.unobserve(layoutContainer)
   })
-
 </script>
 
 
@@ -77,9 +84,7 @@
 
     <Modal bind:open={openOutcome} on:close={() => outcomeClosed = true}>
       <svelte:fragment slot="title">Game over!</svelte:fragment>
-      <p slot="content">
-        {outcomeToString(game.outcome, game.termination)}
-      </p>
+      <p>{outcomeToString(game.outcome, game.termination)}</p>
       <button slot="actions" class="new-game-button" on:click={() => game = START_GAME}>
         New game
       </button>
@@ -91,7 +96,6 @@
       <History bind:game />
     </aside>
   {/if}
-
 </div>
 
 

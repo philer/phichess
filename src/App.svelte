@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { mdiChevronDoubleLeft, mdiChevronDoubleRight, mdiClose, mdiCog, mdiRestart } from "@mdi/js"
+  import { mdiChevronDoubleLeft, mdiChevronDoubleRight, mdiCog, mdiRestart } from "@mdi/js"
   import { match } from "ts-pattern"
 
   import { START_GAME } from "./chess"
   import Game from "./Game.svelte"
   import Icon from "./Icon.svelte"
+  import Modal from "./Modal.svelte"
   import Settings from "./Settings.svelte"
   import { game, settings } from "./stores"
 
@@ -47,40 +48,35 @@
   <header>
     <h1><a href="/">φ</a></h1>
 
-    {#if !isSettingsOpen && $game.history.length > 0}
+    {#if $game.history.length > 0}
       <button
         on:click={() => $game = START_GAME}
         title="New game"
         class="icon-button"
-      >
-        <Icon path={mdiRestart} />
-      </button>
+      ><Icon path={mdiRestart} /></button>
     {/if}
 
     <button
       on:click={isSettingsOpen ? closeSettings : openSettings}
       title="Settings"
       class="icon-button"
-    >
-      <Icon path={isSettingsOpen ? mdiClose : mdiCog} />
-    </button>
+    ><Icon path={mdiCog} /></button>
 
-    {#if !isSettingsOpen}
-      <button
-        on:click={() => $settings.showHistory = !$settings.showHistory}
-        title={$settings.showHistory ? "Hide history" : "Show history"}
-        class="icon-button"
-      >
-        <Icon path={$settings.showHistory ? mdiChevronDoubleRight : mdiChevronDoubleLeft} />
-      </button>
-    {/if}
+    <button
+      on:click={() => $settings.showHistory = !$settings.showHistory}
+      title={$settings.showHistory ? "Hide history" : "Show history"}
+      class="icon-button"
+    >
+      <Icon path={$settings.showHistory ? mdiChevronDoubleRight : mdiChevronDoubleLeft} />
+    </button>
   </header>
 
-  {#if isSettingsOpen}
+  <Game bind:game={$game} />
+
+  <Modal open={isSettingsOpen} on:close={closeSettings}>
     <Settings />
-  {:else}
-    <Game bind:game={$game} />
-  {/if}
+    <svelte:fragment slot="title">Settings</svelte:fragment>
+  </Modal>
 </div>
 
 

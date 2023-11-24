@@ -39,8 +39,8 @@
     gap: 2em 2em
 
   .board
-    width: 6em
-    height: 6em
+    width: 5em
+    height: 5em
     display: grid
     grid-template-rows: 1fr 1fr
     grid-template-columns: 1fr 1fr
