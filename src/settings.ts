@@ -45,7 +45,7 @@ export type Settings = {
 
 export const BOARD_THEMES: ReadonlyArray<Readonly<BoardTheme>> = [
   {
-    _name: "lichess",
+    _name: "brown",
     lightBackground: "#f0d9b5",
     darkBackground: "#b58863",
     selectedLightBackground: "#819669",
@@ -56,7 +56,7 @@ export const BOARD_THEMES: ReadonlyArray<Readonly<BoardTheme>> = [
     checkDarkBackground: "#d56853",
   },
   {
-    _name: "chessCom",
+    _name: "green",
     lightBackground: "#e9edcc",
     darkBackground: "#779954",
     selectedLightBackground: "#f4f67e",
@@ -67,7 +67,7 @@ export const BOARD_THEMES: ReadonlyArray<Readonly<BoardTheme>> = [
     checkDarkBackground: "#779954",
   },
   {
-    _name: "cyan",
+    _name: "teal",
     lightBackground: "#9ee",
     darkBackground: "#488",
     selectedLightBackground: "#dda",
