@@ -2,6 +2,7 @@
   import {
     applyMove,
     type Game,
+    generateLegalMoves,
     type MoveInput,
     type PromotablePiece,
     requiresPromotion,
@@ -52,6 +53,15 @@
   let draggingFromPosition: Point = zero
   /** Current cursor drag position relative to piece's original position */
   let dragPositionOffset: Point = zero
+
+  $: legalMoves = new Set(
+      $settings.showLegalMoves && (draggingFromSquare || selectedSquare)
+        ? Array.from(
+            generateLegalMoves((draggingFromSquare || selectedSquare)!, game),
+            ({ to }) => to,
+          )
+        : [],
+    )
 
   const makeMove = (from: Square, to: Square, promotion?: PromotablePiece) => {
     const input: MoveInput = { from, to, promotion }
@@ -147,6 +157,7 @@
       class:light={isLight}
       class:dark={!isLight}
       class:has-piece={piece}
+      class:legal-move={legalMoves.has(square)}
       class:selected={selectedSquare === square}
       class:last-move={square === lastMove?.from || square === lastMove?.to}
       class:check={lastMove?.check && piece === `${toMove}K`}
@@ -224,7 +235,17 @@
 
     overflow: visible
 
-    // text-shadow: 1px 1px 5px #000c
+    &.legal-move::before
+      content: ""
+      position: absolute
+      inset: calc(.333 * var(--square-size))
+      border-radius: var(--square-size)
+      background-color: #0003
+    &.legal-move.has-piece::before
+      background-color: transparent
+      inset: 0
+      border: calc(.1 * var(--square-size)) solid #0003
+
     &.has-piece
       cursor: grab
       .dragging &
@@ -258,6 +279,8 @@
       inset: auto 0.5em 0.5em auto
 
   .piece
+    z-index: 1
+    position: relative
     width: 100%
     height: 100%
     pointer-events: none
@@ -266,7 +289,6 @@
     align-items: center
     &.dragging
       z-index: 100
-      position: relative
 
   .promotion
     position: absolute

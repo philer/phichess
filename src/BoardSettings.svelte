@@ -7,7 +7,7 @@
 </script>
 
 
-<legend>Theme</legend>
+<legend>Board</legend>
 
 <div class="theme-list">
   {#each BOARD_THEMES as theme (theme._name)}

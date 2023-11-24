@@ -30,16 +30,17 @@ export type Theme = {
 }
 
 export type Settings = {
-  layout: LayoutPerspective[]
-  theme: Theme
-
-  useTimeControl: boolean
-  clock: ClockSettings
-
+  showLegalMoves: boolean
   showCoordinates: boolean
   showHistory: boolean
   showGraveyards: boolean
   // minimal: boolean
+
+  useTimeControl: boolean
+  clock: ClockSettings
+
+  layout: LayoutPerspective[]
+  theme: Theme
 }
 
 export const BOARD_THEMES: ReadonlyArray<Readonly<BoardTheme>> = [
@@ -91,11 +92,14 @@ export const BOARD_THEMES: ReadonlyArray<Readonly<BoardTheme>> = [
 
 
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
+  showLegalMoves: true,
   showCoordinates: true,
   showHistory: false,
   showGraveyards: true,
+
   useTimeControl: false,
   clock: { secondsPerSide: 5 * 60, increment: 3 },
+
   layout: [
     // Assume that any touchscreen is a mobile device placed in between players
     {
@@ -109,6 +113,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
       flipOpponentPieces: false,
     } as const,
   ],
+
   theme: {
     pageBackground: "#222",
     board: BOARD_THEMES[0],

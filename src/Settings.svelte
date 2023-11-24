@@ -1,8 +1,8 @@
 <script lang="ts">
+  import BoardSettings from "./BoardSettings.svelte"
   import Checkbox from "./Checkbox.svelte"
   import LayoutSettings from "./LayoutSettings.svelte"
   import { settings } from "./stores"
-  import ThemeSettings from "./ThemeSettings.svelte"
   import TimeControlSettings from "./TimeControlSettings.svelte"
 
 </script>
@@ -17,17 +17,18 @@
 
     <Checkbox bind:checked={$settings.showHistory}>Show history</Checkbox>
     <Checkbox bind:checked={$settings.showGraveyards}>Show graveyards</Checkbox>
+  </fieldset>
+
+  <!-- board -->
+  <fieldset>
+    <BoardSettings />
+    <Checkbox bind:checked={$settings.showLegalMoves}>Show legal moves</Checkbox>
     <Checkbox bind:checked={$settings.showCoordinates}>Show coordinates</Checkbox>
   </fieldset>
 
   <!-- time control -->
   <fieldset>
     <TimeControlSettings />
-  </fieldset>
-
-  <!-- theme -->
-  <fieldset>
-    <ThemeSettings />
   </fieldset>
 
 </form>

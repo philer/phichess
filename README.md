@@ -20,6 +20,7 @@ To do
 * [x] piece symbols in algebraic notation
 * [x] highlight last move
 * [x] highlight check
+* [x] show legal moves
 * [x] download PGN
 * [ ] upload PGN
 * [x] download FEN
