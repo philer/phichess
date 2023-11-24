@@ -8,6 +8,7 @@
     type Square,
     squares,
   } from "./chess"
+  import { settings } from "./stores"
   import { clickOutside } from "./svelte-util"
   import SvgPiece from "./SvgPiece.svelte"
 
@@ -37,7 +38,6 @@
   export let asWhite: boolean = true
   export let rotate: number = 0
   export let flipOpponentPieces: boolean = false
-  export let showCoordinates: boolean = true
 
   $: ({ board, toMove } = game)
   $: lastMove = game.history.at(-1)
@@ -153,7 +153,7 @@
       role="button"
       tabindex="0"
     >
-      {#if showCoordinates}
+      {#if $settings.showCoordinates}
         {#if square[1] === (asWhite ? "1" : "8")}
           <div class="file">{square[0]}</div>
         {/if}
