@@ -2,31 +2,13 @@
   import { onMount } from "svelte"
   import { slide } from "svelte/transition"
 
-  import { type Game, outcomeToString, START_GAME } from "./chess"
+  import { type Game } from "./chess"
   import { makeClock } from "./Clock.svelte"
   import History from "./History.svelte"
-  import Modal from "./Modal.svelte"
   import Perspective from "./Perspective.svelte"
   import { settings } from "./stores"
 
   export let game: Game
-
-  /** Show the game over modal */
-  let openOutcome = false
-  /**
-   * Game over modal was closed by user and should not be shown again
-   * until a new game has been started.
-   */
-  let outcomeClosed = false
-  $: {
-    if (game.history.length === 0) {
-      openOutcome = false
-      outcomeClosed = false
-    }
-    if (game.outcome && !outcomeClosed) {
-      openOutcome = true
-    }
-  }
 
   const { remaining, ...clock } = makeClock($settings.clock)
   $: {
@@ -82,13 +64,6 @@
       <Perspective bind:game bind:asWhite bind:rotate bind:flipOpponentPieces />
     {/each}
 
-    <Modal bind:open={openOutcome} on:close={() => outcomeClosed = true}>
-      <svelte:fragment slot="title">Game over!</svelte:fragment>
-      <p>{outcomeToString(game.outcome, game.termination)}</p>
-      <button slot="actions" class="new-game-button" on:click={() => game = START_GAME}>
-        New game
-      </button>
-    </Modal>
   </div>
 
   {#if $settings.showHistory}
@@ -100,10 +75,6 @@
 
 
 <style lang="sass">
-  @use "common"
-  .new-game-button
-    @include common.start-button
-
   .game, .layout
     position: relative
     width: 100%

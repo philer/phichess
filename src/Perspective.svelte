@@ -1,17 +1,35 @@
 <script lang="ts">
   import { mdiArrowUpDownBold, mdiChessPawn, mdiFormatRotate90 } from "@mdi/js"
 
-  import { type Game } from "./chess"
+  import { type Game, outcomeToString, START_GAME } from "./chess"
   import Chessboard from "./Chessboard.svelte"
   import Clock from "./Clock.svelte"
   import Graveyard from "./Graveyard.svelte"
   import Icon from "./Icon.svelte"
+  import Modal from "./Modal.svelte"
   import { settings } from "./stores"
 
   export let game: Game
   export let asWhite = true
   export let rotate = 0
   export let flipOpponentPieces = false
+
+  /** Show the game over modal */
+  let openOutcome = false
+  /**
+   * Game over modal was closed by user and should not be shown again
+   * until a new game has been started.
+   */
+  let outcomeClosed = false
+  $: {
+    if (game.history.length === 0) {
+      openOutcome = false
+      outcomeClosed = false
+    }
+    if (game.outcome && !outcomeClosed) {
+      openOutcome = true
+    }
+  }
 </script>
 
 <div class="perspective" style:transform={`rotate(${rotate}deg)`}>
@@ -49,9 +67,19 @@
   </div>
 
   <Chessboard bind:game {asWhite} {rotate} {flipOpponentPieces} />
+
+  <Modal local bind:open={openOutcome} on:close={() => outcomeClosed = true}>
+    <svelte:fragment slot="title">Game over!</svelte:fragment>
+    <p>{outcomeToString(game.outcome, game.termination)}</p>
+    <button slot="actions" class="new-game-button" on:click={() => game = START_GAME}>
+      New game
+    </button>
+  </Modal>
 </div>
 
 <style lang="sass">
+  @use "common"
+
   .perspective
     --board-size: calc(8/9 * var(--perspective-size))
     --frame-size: calc(1/2/9 * var(--perspective-size))
@@ -107,4 +135,7 @@
       &:hover, &:active, &:focus
         background: #fff5
 
+  .new-game-button
+    @include common.start-button
+    white-space: nowrap
 </style>

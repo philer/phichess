@@ -6,6 +6,7 @@
   import Icon from "./Icon.svelte"
 
   export let open = false
+  export let local = false
 
   const dispatch = createEventDispatcher()
 
@@ -35,6 +36,7 @@
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
     class="backdrop"
+    class:local
     on:click={handleModalBackdropClick}
     transition:fade={{ duration: 200 }}
     tabindex="-1"
@@ -64,13 +66,17 @@
   @use "common"
 
   .backdrop
+    z-index: 100
     position: absolute
     inset: 0
     display: flex
     justify-content: center
     align-items: center
-    background: #1115
-    backdrop-filter: blur(3px)
+
+    &:not(.local)
+      position: fixed
+      background: #1115
+      backdrop-filter: blur(3px)
     
   .modal
     position: relative
