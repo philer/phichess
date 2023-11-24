@@ -144,6 +144,8 @@
   class:white-to-move={toMove === "w"}
   class:black-to-move={toMove === "b"}
   class:dragging={draggingFromSquare}
+  use:clickOutside
+  on:click_outside={() => selectedSquare = undefined}
 >
   {#each asWhite ? squares.toReversed() : squares as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
