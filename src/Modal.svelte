@@ -97,6 +97,7 @@
     @media (max-width: 900px)
       max-height: calc(100vh - 2.4em)
       max-width: 100vw
+      padding: 1em 1em 0em
 
   h3
     font-size: 1.2em

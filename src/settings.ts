@@ -33,8 +33,8 @@ export type Settings = {
   showLegalMoves: boolean
   showCoordinates: boolean
   showHistory: boolean
+  showBoardFrame: boolean
   showGraveyards: boolean
-  // minimal: boolean
 
   useTimeControl: boolean
   clock: ClockSettings
@@ -95,6 +95,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   showLegalMoves: true,
   showCoordinates: true,
   showHistory: false,
+  showBoardFrame: true,
   showGraveyards: true,
 
   useTimeControl: false,

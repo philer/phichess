@@ -138,6 +138,7 @@
 
 <div
   class="board"
+  class:show-board-frame={$settings.showBoardFrame}
   class:as-white={asWhite}
   class:flip-opponent-pieces={flipOpponentPieces}
   class:as-black={!asWhite}
@@ -221,7 +222,8 @@
     font-family: "Linux Libertine"
     user-select: none
 
-    box-shadow: 3px 3px 10px #0006, 3px 3px 40px #0006
+    .show-board-frame
+      box-shadow: 3px 3px 10px #0006, 3px 3px 40px #0006
 
   .flip-opponent-pieces
     &.as-white :global(.b), &:not(.as-white) :global(.w)

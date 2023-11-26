@@ -32,39 +32,46 @@
   }
 </script>
 
-<div class="perspective" style:transform={`rotate(${rotate}deg)`}>
-  <div class="above">
-    {#if $settings.showGraveyards}
-      <Graveyard {game} color={asWhite ? "w" : "b"} />
-    {/if}
-    {#if $settings.useTimeControl}
-      <Clock forColor={asWhite ? "b" : "w"} />
-    {/if}
-  </div>
-  <div class="below">
-    {#if $settings.showGraveyards}
-      <Graveyard {game} color={asWhite ? "b" : "w"} />
-    {/if}
-    {#if $settings.useTimeControl}
-      <Clock forColor={asWhite ? "w" : "b"} />
-    {/if}
-  </div>
-
-  <div class="left"></div>
-
-  <div class="right">
-    <div class="tools">
-      <button on:click={() => rotate += 90}>
-        <Icon path={mdiFormatRotate90} flip="vertical" />
-      </button>
-      <button on:click={() => asWhite = !asWhite}>
-        <Icon path={mdiArrowUpDownBold} />
-      </button>
-      <button on:click={() => flipOpponentPieces = !flipOpponentPieces}>
-        <Icon path={mdiChessPawn} flip={flipOpponentPieces ? undefined : "vertical"} />
-      </button>
+<div
+  class="perspective"
+  class:show-board-frame={$settings.showBoardFrame}
+  style:transform={`rotate(${rotate}deg)`}
+>
+  {#if $settings.showBoardFrame}
+    <div class="above">
+      {#if $settings.showGraveyards}
+        <Graveyard {game} color={asWhite ? "w" : "b"} />
+      {/if}
+      {#if $settings.useTimeControl}
+        <Clock forColor={asWhite ? "b" : "w"} />
+      {/if}
     </div>
-  </div>
+
+    <div class="below">
+      {#if $settings.showGraveyards}
+        <Graveyard {game} color={asWhite ? "b" : "w"} />
+      {/if}
+      {#if $settings.useTimeControl}
+        <Clock forColor={asWhite ? "w" : "b"} />
+      {/if}
+    </div>
+
+   <!-- <div class="left"></div> -->
+
+    <div class="right">
+      <div class="tools">
+        <button on:click={() => rotate += 90}>
+          <Icon path={mdiFormatRotate90} flip="vertical" />
+        </button>
+        <button on:click={() => asWhite = !asWhite}>
+          <Icon path={mdiArrowUpDownBold} />
+        </button>
+        <button on:click={() => flipOpponentPieces = !flipOpponentPieces}>
+          <Icon path={mdiChessPawn} flip={flipOpponentPieces ? undefined : "vertical"} />
+        </button>
+      </div>
+    </div>
+  {/if}
 
   <Chessboard bind:game {asWhite} {rotate} {flipOpponentPieces} />
 
@@ -81,8 +88,10 @@
   @use "common"
 
   .perspective
-    --board-size: calc(8/9 * var(--perspective-size))
     --frame-size: calc(1/2/9 * var(--perspective-size))
+    &:not(.show-board-frame)
+      --frame-size: 0px
+    --board-size: calc(var(--perspective-size) - 2 * var(--frame-size))
     --square-size: calc(1/8 * var(--board-size))
 
     width: var(--perspective-size)
@@ -103,17 +112,17 @@
     grid-area: above
   .below
     grid-area: below
-  .left
-    grid-area: left
+  // .left
+  //   grid-area: left
   .right
     grid-area: right
 
-  .left, .right, .above, .below
+  .right, .above, .below //, .left
     display: flex
     align-items: center
     justify-content: space-between
 
-  .left, .right
+  .right //, .left
     flex-direction: column
 
   .tools

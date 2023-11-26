@@ -40,7 +40,13 @@
 
 <legend>Time control</legend>
 
-<Checkbox bind:checked={$settings.useTimeControl}>Enable time control</Checkbox>
+{#if $settings.showBoardFrame}
+  <Checkbox bind:checked={$settings.useTimeControl}>Enable time control</Checkbox>
+{:else}
+  <div>
+    <Checkbox checked={false} disabled help="Unavailable without board frame">Enable time control</Checkbox>
+  </div>
+{/if}
 
 <fieldset disabled={!$settings.useTimeControl}>
   <label>
@@ -125,8 +131,4 @@
       display: inline-block
     > div
       display: inline-block
-
-  small
-    display: block
-    opacity: .75
 </style>

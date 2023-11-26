@@ -12,8 +12,17 @@
   <fieldset>
     <legend>Layout</legend>
     <LayoutSettings />
-    <Checkbox bind:checked={$settings.showHistory}>Show history</Checkbox>
-    <Checkbox bind:checked={$settings.showGraveyards}>Show captured pieces</Checkbox>
+
+    <Checkbox bind:checked={$settings.showHistory}>Show moves in sidebar</Checkbox>
+    <Checkbox bind:checked={$settings.showBoardFrame} help="Required for time control">
+      Show board frame
+    </Checkbox>
+
+    {#if $settings.showBoardFrame}
+      <Checkbox bind:checked={$settings.showGraveyards}>Show captured pieces</Checkbox>
+    {:else}
+      <Checkbox checked={false} disabled help="Unavailable without board frame">Show captured pieces</Checkbox>
+    {/if}
   </fieldset>
 
   <!-- board -->
@@ -60,4 +69,8 @@
 
       &:last-child
         border-bottom: 0 solid transparent
+
+    :global(small)
+      display: block
+      opacity: .75
 </style>

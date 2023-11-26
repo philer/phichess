@@ -57,6 +57,7 @@
   <div
     bind:this={layoutContainer}
     class="layout"
+    class:show-board-frame={$settings.showBoardFrame}
     style:flex-flow={flowDirection}
     style:--perspective-size={`${perspectiveSize}px`}
   >
