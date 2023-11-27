@@ -32,7 +32,7 @@
 
 <form on:submit={evt => evt.preventDefault()}>
   <label for="fen">FEN</label>
-  <textarea id="fen" readonly rows="1" style:resize="none">{fen}</textarea>
+  <textarea id="fen" readonly rows="1">{fen}</textarea>
   <div>
     <button
       on:click={copyFen}
@@ -63,8 +63,6 @@
   @use "common"
 
   form
-    display: flex
-    flex-direction: column
     text-align: left
 
   div
@@ -72,12 +70,19 @@
     justify-content: end
     gap: .5em
 
-  label:not(:first-child)
-    margin-top: 1em
+  label
+    display: block
+    &:not(:first-child)
+      margin-top: 1em
 
   textarea
     margin: .5em 0 1em
     width: 40em
+    @media (max-width: 900px)
+      width: 100%
+    &#fen
+      resize: none
+      white-space: nowrap
 
   button
     @include common.button
