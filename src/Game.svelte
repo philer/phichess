@@ -14,7 +14,7 @@
   $: {
     if (game.history.length === 0) {
       clock.reset($settings.clock)
-    } else if ($settings.useTimeControl) {
+    } else if ($settings.useTimeControl && $settings.showBoardFrame) {
       if (game.outcome) {
         clock.stop()
       } else {
