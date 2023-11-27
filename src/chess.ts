@@ -240,12 +240,12 @@ const getAttackedSquaresOnRays = function*(toMove: Color, board: Board, rays: It
   }
 }
 
-const withPromotions = (toMove: Color, { from, to }: MoveInput) =>
+const withPromotions = (toMove: Color, { from, to }: MoveInput): MoveInput =>
   to[1] === (toMove === "w" ? "8" : "1")
     ? Array.from("QNRB", promotion => ({ from, to, promotion }))
     : [{ from, to }]
 
-const generateMoves = function*(from: Square, board: Board) {
+const generateMoves = function*(from: Square, board: Board): Iterable<MoveInput> {
   const piece = board[from]
   if (!piece) {
     return
@@ -258,12 +258,12 @@ const generateMoves = function*(from: Square, board: Board) {
       for (const fileDelta of [1, -1]) {
         to = shift(fileDelta, forwards, from)
         if (to && board[to] && board[to]![0] !== toMove) {
-          yield * withPromotions(toMove, { from, to })
+          yield* withPromotions(toMove, { from, to })
         }
       }
       to = shift(0, forwards, from)!
       if (!board[to]) {
-        yield * withPromotions(toMove, { from, to })
+        yield* withPromotions(toMove, { from, to })
       }
       if (from[1] === (toMove === "w" ? "2" : "7")) {
         to = shift(0, 2 * forwards, from)!
@@ -274,15 +274,21 @@ const generateMoves = function*(from: Square, board: Board) {
       break
     }
     case "N":
-      yield * knightSquares(from)
+      yield* knightSquares(from)
         .filter(to => board[to]?.[0] !== toMove)
         .map(to => ({ from, to }))
       break
-    case "K":
-      yield * kingSquares(from)
+    case "K": {
+      yield* kingSquares(from)
         .filter(to => board[to]?.[0] !== toMove)
         .map(to => ({ from, to }))
+      const rank = toMove === "w" ? 1 : 8
+      if (from === `e${rank}`) {
+        yield { from, to: `c${rank}` }
+        yield { from, to: `g${rank}` }
+      }
       break
+    }
     case "B":
       for (const to of getAttackedSquaresOnRays(toMove, board, bishopPaths(from))) {
         yield { from, to }
@@ -313,7 +319,7 @@ export const generateLegalMoves = function*(from: Square, game: GameInput): Iter
 export const generateAllLegalMoves = function*(game: GameInput): Iterable<MoveInput> {
   for (const [from, piece] of Object.entries(game.board) as [Square, ColorPiece][]) {
     if (piece[0] === game.toMove) {
-      yield *generateLegalMoves(from, game)
+      yield* generateLegalMoves(from, game)
     }
   }
 }
