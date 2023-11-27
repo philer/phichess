@@ -1,4 +1,4 @@
-import "./global.scss"
+import "./global.sass"
 
 import App from "./App.svelte"
 

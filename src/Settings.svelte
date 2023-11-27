@@ -13,7 +13,6 @@
     <legend>Layout</legend>
     <LayoutSettings />
 
-    <Checkbox bind:checked={$settings.showHistory}>Show moves in sidebar</Checkbox>
     <Checkbox bind:checked={$settings.showBoardFrame} help="Required for time control">
       Show board frame
     </Checkbox>
@@ -25,6 +24,11 @@
     {/if}
   </fieldset>
 
+  <!-- time control -->
+  <fieldset>
+    <TimeControlSettings />
+  </fieldset>
+
   <!-- board -->
   <fieldset>
     <BoardSettings />
@@ -32,9 +36,17 @@
     <Checkbox bind:checked={$settings.showCoordinates}>Show coordinates</Checkbox>
   </fieldset>
 
-  <!-- time control -->
+  <!-- sidebar -->
   <fieldset>
-    <TimeControlSettings />
+    <legend>History</legend>
+    <Checkbox bind:checked={$settings.showHistory}>Show moves in sidebar</Checkbox>
+    <label>
+      Notation:
+      <select bind:value={$settings.notation}>
+        <option value="algebraic">Simple</option>
+        <option value="fancy_algebraic">Fancy</option>
+      </select>
+    </label>
   </fieldset>
 </form>
 

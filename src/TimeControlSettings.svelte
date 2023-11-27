@@ -108,24 +108,6 @@
 
 
 <style lang="sass">
-  select, input[type="number"]
-    font-size: inherit
-    line-height: inherit
-    padding: .25em
-    border-radius: .15em
-    background: #444
-    color: inherit
-    border: 1px solid #666
-    box-shadow: 1px 1px 3px #0003
-
-  input[type="number"]
-    width: 4em
-    padding: .1em .3em
-    text-align: right
-
-  :disabled
-    opacity: .5
-
   .time-per-side
     > legend
       display: inline-block

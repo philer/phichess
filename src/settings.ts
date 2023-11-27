@@ -29,12 +29,17 @@ export type Theme = {
   pieces: PieceTheme
 }
 
+export type Notation =
+  | "algebraic"
+  | "fancy_algebraic"
+
 export type Settings = {
   showLegalMoves: boolean
   showCoordinates: boolean
   showHistory: boolean
   showBoardFrame: boolean
   showGraveyards: boolean
+  notation: Notation
 
   useTimeControl: boolean
   clock: ClockSettings
@@ -97,6 +102,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   showHistory: false,
   showBoardFrame: true,
   showGraveyards: true,
+  notation: "fancy_algebraic",
 
   useTimeControl: false,
   clock: { secondsPerSide: 5 * 60, increment: 3 },
