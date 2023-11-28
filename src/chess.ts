@@ -1,4 +1,4 @@
-import { match, Pattern } from "ts-pattern"
+import { match } from "ts-pattern"
 
 import { err, ok, type Result } from "./result"
 import { isTruthy, pairs } from "./util"
@@ -69,12 +69,12 @@ export type Termination =
 export type GameInput = {
   readonly board: Board
   readonly toMove: Color
-  readonly history: ReadonlyArray<MoveInput>
+  readonly history: readonly MoveInput[]
 }
 
 export type Game = Omit<GameInput, "history"> & {
-  readonly history: ReadonlyArray<Move>
-  readonly graveyard: ReadonlyArray<MortalColorPiece>
+  readonly history: readonly Move[]
+  readonly graveyard: readonly MortalColorPiece[]
   readonly fiftyMoveCounter: number
   readonly repetitions: Readonly<Record<string, number>>
   readonly outcome?: Color | "draw"
@@ -240,9 +240,9 @@ const getAttackedSquaresOnRays = function*(toMove: Color, board: Board, rays: It
   }
 }
 
-const withPromotions = (toMove: Color, { from, to }: MoveInput): MoveInput =>
+const withPromotions = (toMove: Color, { from, to }: MoveInput): MoveInput[] =>
   to[1] === (toMove === "w" ? "8" : "1")
-    ? Array.from("QNRB", promotion => ({ from, to, promotion }))
+    ? Array.from("QNRB" as Iterable<PromotablePiece>, promotion => ({ from, to, promotion }))
     : [{ from, to }]
 
 const generateMoves = function*(from: Square, board: Board): Iterable<MoveInput> {
@@ -649,7 +649,7 @@ const decodeAlgebraicMove = (game: GameInput, algebraic: string): Result<MoveInp
  * in the "KQkq" notation defined by FEN.
  * @see https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation#Definition
  */
-const getCastlingFen = (history: ReadonlyArray<MoveInput>) =>
+const getCastlingFen = (history: readonly MoveInput[]) =>
   history.reduce((KQkq, { from }) =>
       match(from)
         .with("e1", () => KQkq.replace(/[KQ]/g, ""))
@@ -760,7 +760,7 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
 
 
 /** Validate and apply an array of moves to a given game */
-export const applyHistory = (game: Game, history: ReadonlyArray<MoveInput | string>) =>
+export const applyHistory = (game: Game, history: readonly (MoveInput | string)[]) =>
   history.reduce(
     (result, move) => result.flatMap(game => applyMove(game, move)),
     ok<Game, string>(game),
