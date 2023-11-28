@@ -1,4 +1,6 @@
-export abstract class Result<T = unknown, E = unknown> implements Promise<T>, Iterable<T> {
+export type Result<T = unknown, E = unknown> = Ok<T, E> | Err<T, E>
+
+export abstract class BaseResult<T = unknown, E = unknown> implements Promise<T>, Iterable<T> {
 
   static of<T = unknown, E = unknown>(value: T): Result<T, E> {
     return new Ok(value)
@@ -10,9 +12,9 @@ export abstract class Result<T = unknown, E = unknown> implements Promise<T>, It
 
   static wrap<T = unknown, E = unknown>(fn: () => T): Result<T, E> {
     try {
-      return Result.of(fn())
+      return BaseResult.of(fn())
     } catch (err) {
-      return Result.err(err as E)
+      return BaseResult.err(err as E)
     }
   }
 
@@ -55,7 +57,7 @@ export abstract class Result<T = unknown, E = unknown> implements Promise<T>, It
   abstract [Symbol.iterator](): IterableIterator<T>
 }
 
-export class Ok<T = unknown, E = unknown> extends Result<T, E> {
+export class Ok<T = unknown, E = unknown> extends BaseResult<T, E> {
   _value: T
 
   constructor(value: T) {
@@ -100,7 +102,7 @@ export class Ok<T = unknown, E = unknown> extends Result<T, E> {
   }
 }
 
-export class Err<T = unknown, E = unknown> extends Result<T, E> {
+export class Err<T = unknown, E = unknown> extends BaseResult<T, E> {
   _value: E
 
   constructor(value: E) {
@@ -144,7 +146,7 @@ export class Err<T = unknown, E = unknown> extends Result<T, E> {
 }
 
 /** Create an Ok instance, alias to Result.of */
-export const ok = Result.of
+export const ok = BaseResult.of
 
 /** Create an Err instance, alias to Result.err */
-export const err = Result.err
+export const err = BaseResult.err
