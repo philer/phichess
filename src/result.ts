@@ -1,4 +1,4 @@
-export abstract class Result<T = unknown, E = unknown> implements Promise<T> {
+export abstract class Result<T = unknown, E = unknown> implements Promise<T>, Iterable<T> {
 
   static of<T = unknown, E = unknown>(value: T): Result<T, E> {
     return new Ok(value)
@@ -51,6 +51,8 @@ export abstract class Result<T = unknown, E = unknown> implements Promise<T> {
   get [Symbol.toStringTag]() {
     return "Result"
   }
+
+  abstract [Symbol.iterator](): IterableIterator<T>
 }
 
 export class Ok<T = unknown, E = unknown> extends Result<T, E> {
@@ -91,6 +93,10 @@ export class Ok<T = unknown, E = unknown> extends Result<T, E> {
 
   toPromise() {
     return Promise.resolve(this._value)
+  }
+
+  *[Symbol.iterator]() {
+    yield this._value
   }
 }
 
@@ -133,6 +139,8 @@ export class Err<T = unknown, E = unknown> extends Result<T, E> {
   toPromise() {
     return Promise.reject(this._value)
   }
+
+  *[Symbol.iterator]() {}
 }
 
 /** Create an Ok instance, alias to Result.of */
