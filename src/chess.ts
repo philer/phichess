@@ -399,7 +399,7 @@ export const requiresPromotion = ({ from, to }: MoveInput, board: Board) =>
  */
 const checkMove = (
   { board, toMove, history }: GameInput,
-  { from, to, promotion }: Readonly<MoveInput>,
+  { from, to, promotion }: MoveInput,
 ): Result<MoveInput, string> => {
   let { [from]: piece, [to]: capture, ...remainingBoard } = board
 
@@ -722,24 +722,26 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
       const algebraic = toAlgebraic({ ...move, check, mate }, board).unwrap()
       const history = [...game.history, { ...move, check, mate, algebraic }]
 
-      const stalemate = !check && !hasMoves
-
       const fiftyMoveCounter = capture || piece === toMove ? 0 : game.fiftyMoveCounter + 1
-      const fiftyMoves = fiftyMoveCounter >= 100
 
       const position = [
           Object.entries(board).sort().flat().join(""),
           getCastlingFen(history),
           piece === toMove && Math.abs(+from[1] - +to[1]) === 2 ? to : "",
         ].join(":")
+
       const repetitions = {
         ...game.repetitions,
         [position]: (game.repetitions[position] ?? 0) + 1,
       }
-      const threefold = repetitions[position] >= 3
 
-      const insufficient = isInsufficientMaterial(newBoard)
-      const isDraw = stalemate || fiftyMoves || threefold || insufficient
+      const termination =
+        mate ? "checkmate"
+        : !hasMoves ? "stalemate"
+        : repetitions[position] >= 3 ? "repetition"
+        : fiftyMoveCounter >= 100 ? "fifty-moves"
+        : isInsufficientMaterial(newBoard) ? "insufficient"
+        : undefined
 
       return {
         board: newBoard,
@@ -748,13 +750,8 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
         graveyard: capture ? [...graveyard, (capture as MortalColorPiece)] : graveyard,
         fiftyMoveCounter,
         repetitions,
-        outcome: mate ? toMove : isDraw ? "draw" : undefined,
-        termination: mate ? "checkmate"
-          : stalemate ? "stalemate"
-          : threefold ? "repetition"
-          : fiftyMoves ? "fifty-moves"
-          : insufficient ? "insufficient"
-          : undefined,
+        outcome: termination && (termination === "checkmate" ? toMove : "draw"),
+        termination,
       }
     })
 
