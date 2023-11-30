@@ -11,8 +11,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "lint": "eslint src public/sw.js --max-warnings 0",
-    "format": "eslint src public/sw.js --fix",
+    "lint": "eslint src --max-warnings 0",
+    "format": "eslint src --fix",
     "pre-commit": "yarn lint && yarn typecheck"
   },
   "devDependencies": {
