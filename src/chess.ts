@@ -255,41 +255,29 @@ const generateMoves = function*(from: Square, board: Board): Iterable<MoveInput>
   switch (piece.slice(1)) {
     case "": {
       const forwards = toMove === "w" ? 1 : -1
-      let to: Square | undefined
       for (const fileDelta of [1, -1]) {
-        to = shift(fileDelta, forwards, from)
-        if (to && board[to] && board[to]![0] !== toMove) {
+        const to = shift(fileDelta, forwards, from)
+        if (to) {
           yield* withPromotions(toMove, { from, to })
         }
       }
-      to = shift(0, forwards, from)!
-      if (!board[to]) {
-        yield* withPromotions(toMove, { from, to })
-      }
+      yield* withPromotions(toMove, { from, to: shift(0, forwards, from)! })
       if (from[1] === (toMove === "w" ? "2" : "7")) {
-        to = shift(0, 2 * forwards, from)!
-        if (!board[to]) {
-          yield { from, to }
-        }
+        yield { from, to: shift(0, 2 * forwards, from)! }
+      }
+      break
+    }
+    case "K": {
+      yield* kingSquares(from).map(to => ({ from, to }))
+      const rank = toMove === "w" ? 1 : 8
+      if (from === `e${rank}`) {
+        yield* Array.from("acgh" as Iterable<File>, file => ({ from, to: `${file}${rank}` }))
       }
       break
     }
     case "N":
-      yield* knightSquares(from)
-        .filter(to => board[to]?.[0] !== toMove)
-        .map(to => ({ from, to }))
+      yield* knightSquares(from).map(to => ({ from, to }))
       break
-    case "K": {
-      yield* kingSquares(from)
-        .filter(to => board[to]?.[0] !== toMove)
-        .map(to => ({ from, to }))
-      const rank = toMove === "w" ? 1 : 8
-      if (from === `e${rank}`) {
-        yield { from, to: `c${rank}` }
-        yield { from, to: `g${rank}` }
-      }
-      break
-    }
     case "B":
       for (const to of getAttackedSquaresOnRays(toMove, board, bishopPaths(from))) {
         yield { from, to }
@@ -308,16 +296,13 @@ const generateMoves = function*(from: Square, board: Board): Iterable<MoveInput>
   }
 }
 
-export const generateLegalMoves = function*(from: Square, game: GameInput): Iterable<MoveInput> {
+export const generateLegalMoves = function*(from: Square, game: GameInput): IterableIterator<MoveInput> {
   for (const move of generateMoves(from, game.board)) {
-    const result = checkMove(game, move)
-    if (result.isOk()) {
-      yield result.unwrap()
-    }
+    yield* checkMove(game, move)
   }
 }
 
-export const generateAllLegalMoves = function*(game: GameInput): Iterable<MoveInput> {
+export const generateAllLegalMoves = function*(game: GameInput): IterableIterator<MoveInput> {
   for (const [from, piece] of Object.entries(game.board) as [Square, ColorPiece][]) {
     if (piece[0] === game.toMove) {
       yield* generateLegalMoves(from, game)
@@ -325,12 +310,8 @@ export const generateAllLegalMoves = function*(game: GameInput): Iterable<MoveIn
   }
 }
 
-export const hasLegalMoves = (game: GameInput) => {
-  for (const _move of generateAllLegalMoves(game)) {
-    return true
-  }
-  return false
-}
+export const hasLegalMoves = (game: GameInput) =>
+  !generateAllLegalMoves(game).next().done
 
 const PIECE_NAMES = {
   "K": "king",
@@ -356,7 +337,7 @@ export const toAlgebraic = (
 
   // castling
   const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
-  if (piece === "K" && abs(fileDelta) === 2) {
+  if (piece === "K" && abs(fileDelta) > 1) {
     return ok(`${fileDelta > 0 ? "O-O" : "O-O-O"}${checkSign}` satisfies AlgebraicMove)
   }
 
@@ -413,9 +394,6 @@ const checkMove = (
   if (from === to) {
     return err("Nothing moved.")
   }
-  if (capture && capture[0] === toMove) {
-    return err("You can't capture your own piece.")
-  }
   if (promotion && piece !== toMove) {
     return err(`Only pawns can be promoted.`)
   }
@@ -424,6 +402,9 @@ const checkMove = (
 
   const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
   const rankDelta = to.charCodeAt(1) - from.charCodeAt(1)
+
+  let isCastling = false
+  let normalizedTo = to
 
   switch (pieceName) {
     case "": {
@@ -504,7 +485,8 @@ const checkMove = (
           if (history.some(mv => mv.from === rookFrom)) {
             return err("You can no longer castle on this side, the rook has already moved.")
           }
-          to = kingTo
+          isCastling = true
+          normalizedTo = kingTo
           // @ts-ignore remainingBoard isn't empty
           remainingBoard[rookTo] = remainingBoard[rookFrom]
           // @ts-ignore remainingBoard isn't empty
@@ -542,7 +524,12 @@ const checkMove = (
       break
     }
   }
-  const newBoard: Board = { ...remainingBoard, [to]: piece }
+
+  if (capture && capture[0] === toMove && !isCastling) {
+    return err("You can't capture your own piece.")
+  }
+
+  const newBoard: Board = { ...remainingBoard, [normalizedTo]: piece }
   if (isInCheck(toMove, newBoard)) {
     return err("You are in check.")
   }
@@ -701,15 +688,20 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
         delete newBoard[`${to[0]}${from[1]}`]
       }
 
-      if (piece === `${toMove}K` && abs(to.charCodeAt(0) - from.charCodeAt(0)) > 1) {
-        // Castling, move the rook
+      const rankDelta = to.charCodeAt(0) - from.charCodeAt(0)
+      if (piece === `${toMove}K` && abs(rankDelta) > 1) {
+        // Castling, move the rook & king
         const rank = to[1] as Rank
-        if (to[0] === "c") {  // queen side
-          newBoard[`d${rank}`] = `${toMove}R`
+        if (rankDelta < 0) {  // queen side
+          delete newBoard[to]
           delete newBoard[`a${rank}`]
+          newBoard[`c${rank}`] = `${toMove}K`
+          newBoard[`d${rank}`] = `${toMove}R`
         } else {  // king side
-          newBoard[`f${rank}`] = `${toMove}R`
+          delete newBoard[to]
           delete newBoard[`h${rank}`]
+          newBoard[`g${rank}`] = `${toMove}K`
+          newBoard[`f${rank}`] = `${toMove}R`
         }
       }
 

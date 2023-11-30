@@ -82,16 +82,12 @@
   const promote = (piece: PromotablePiece) =>
     makeMove(promotionMove!.from, promotionMove!.to, piece)
 
-  const handleSquareClick = (square: Square) => {
-    if (board[square]?.[0] === toMove) {
-      selectedSquare = square
-    } else if (selectedSquare) {
-      makeMove(selectedSquare, square)
-    }
-  }
-
   const handleSquareMousedown = (evt: MouseEvent, square: Square) => {
-    if (board[square]?.[0] === toMove) {
+    if (selectedSquare && legalMoves.has(square)) {
+      makeMove(selectedSquare, square)
+
+    } else if (board[square]?.[0] === toMove) {
+      selectedSquare = square
       draggingFromSquare = square
 
       const { target, clientX, clientY, offsetX, offsetY } = evt
@@ -152,8 +148,6 @@
     {@const piece = board[square]}
     {@const isLight = (idx + ~~(idx / 8)) % 2 > 0}
     <div
-      on:click={() => handleSquareClick(square)}
-      on:keyup={evt => (evt.key === "Enter" || evt.key === "Space") && handleSquareClick(square)}
       on:mousedown={evt => handleSquareMousedown(evt, square)}
       on:mouseup={() => handleSquareMouseup(square)}
       role="button"

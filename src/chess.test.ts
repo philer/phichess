@@ -99,42 +99,38 @@ describe.concurrent(applyMove, () => {
   describe("castling", () => {
     test("castling king side as white", () => {
       const game = makeGame("Nf3 Nf6 g3 g6 Bg2 Bg7")
-      const expected = ok(expect.objectContaining({
-        board: expect.objectContaining({ g1: "wK", f1: "wR" }),
-      }))
-      expect(applyMove(game, "O-O")).toEqual(expected)
-      expect(applyMove(game, "0-0")).toEqual(expected)
-      expect(applyMove(game, { from: "e1", to: "g1" })).toEqual(expected)
+      const expectedBoard = expect.objectContaining({ g1: "wK", f1: "wR" })
+      expect(applyMove(game, "O-O").unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, "0-0").unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, { from: "e1", to: "g1" }).unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, { from: "e1", to: "h1" }).unwrap().board).toEqual(expectedBoard)
     })
 
     test("castling king side as black", () => {
       const game = makeGame("Nf3 Nf6 g3 g6 Bg2 Bg7 O-O")
-      const expected = ok(expect.objectContaining({
-        board: expect.objectContaining({ g8: "bK", f8: "bR" }),
-      }))
-      expect(applyMove(game, "O-O")).toEqual(expected)
-      expect(applyMove(game, "0-0")).toEqual(expected)
-      expect(applyMove(game, { from: "e8", to: "g8" })).toEqual(expected)
+      const expectedBoard = expect.objectContaining({ g8: "bK", f8: "bR" })
+      expect(applyMove(game, "O-O").unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, "0-0").unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, { from: "e8", to: "g8" }).unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, { from: "e8", to: "h8" }).unwrap().board).toEqual(expectedBoard)
     })
 
     test("castling queen side as white", () => {
       const game = makeGame("Nc3 Nc6 b3 b6 Bb2 Bb7 d4 d5 Qd2 Qd7")
-      const expected = ok(expect.objectContaining({
-        board: expect.objectContaining({ c1: "wK", d1: "wR" }),
-      }))
-      expect(applyMove(game, "O-O-O")).toEqual(expected)
-      expect(applyMove(game, "0-0-0")).toEqual(expected)
-      expect(applyMove(game, { from: "e1", to: "c1" })).toEqual(expected)
+      const expectedBoard = expect.objectContaining({ c1: "wK", d1: "wR" })
+      expect(applyMove(game, "O-O-O").unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, "0-0-0").unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, { from: "e1", to: "c1" }).unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, { from: "e1", to: "a1" }).unwrap().board).toEqual(expectedBoard)
     })
 
     test("castling queen side as black", () => {
       const game = makeGame("Nc3 Nc6 b3 b6 Bb2 Bb7 d4 d5 Qd2 Qd7 O-O-O")
-      const expected = ok(expect.objectContaining({
-        board: expect.objectContaining({ c8: "bK", d8: "bR" }),
-      }))
-      expect(applyMove(game, "O-O-O")).toEqual(expected)
-      expect(applyMove(game, "0-0-0")).toEqual(expected)
-      expect(applyMove(game, { from: "e8", to: "c8" })).toEqual(expected)
+      const expectedBoard = expect.objectContaining({ c8: "bK", d8: "bR" })
+      expect(applyMove(game, "O-O-O").unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, "0-0-0").unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, { from: "e8", to: "c8" }).unwrap().board).toEqual(expectedBoard)
+      expect(applyMove(game, { from: "e8", to: "a8" }).unwrap().board).toEqual(expectedBoard)
     })
 
     test("castling blocked by piece", () => {
