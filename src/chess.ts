@@ -3,7 +3,9 @@ import { match } from "ts-pattern"
 import { err, ok, type Result } from "./result"
 import { isTruthy, pairs } from "./util"
 
-const { abs, floor, sign } = Math
+const { abs, floor, min, sign } = Math
+const ASCII_a = "a".charCodeAt(0)
+const ASCII_1 = "1".charCodeAt(0)
 
 export type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"
 export type Rank = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8"
@@ -103,18 +105,24 @@ export const getSquareColor = (square: Square): Color =>
 
 
 const shift = (fileDelta: number, rankDelta: number, square: Square): Square | undefined => {
-  const a = 97  // char code for 'a'
-  const file = square.charCodeAt(0) - a + fileDelta
-  const rank = +square[1] + rankDelta
-  if (1 > rank || rank > 8 || 0 > file || file > 7) {
+  const file = square.charCodeAt(0) - ASCII_a + fileDelta
+  const rank = square.charCodeAt(1) - ASCII_1 + rankDelta
+  if (0 > rank || rank > 7 || 0 > file || file > 7) {
     return undefined
   }
-  return String.fromCharCode(file + a) + rank as Square
+  return String.fromCharCode(file + ASCII_a) + String.fromCharCode(rank + ASCII_1) as Square
 }
 
-function* ray(file: -1|0|1, rank: -1|0|1, square: Square) {
-  for (let target, i = 1 ; target = shift(i * file, i * rank, square) ; ++i) {
-    yield target
+function* ray(fileStep: -1|0|1, rankStep: -1|0|1, from: Square) {
+  const fromFile = from.charCodeAt(0) - ASCII_a
+  const fromRank = from.charCodeAt(1) - ASCII_1
+  const limit = min(
+    fileStep < 0 ? fromFile + 1 : 8 - fromFile * fileStep,
+    rankStep < 0 ? fromRank + 1 : 8 - fromRank * rankStep,
+  )
+  for (let i = 1 ; i < limit ; ++i) {
+    yield String.fromCharCode(fromFile + i * fileStep + ASCII_a)
+        + String.fromCharCode(fromRank + i * rankStep + ASCII_1) as Square
   }
 }
 
@@ -157,7 +165,7 @@ const pawnCaptureSquares = (color: Color, square: Square) =>
   [
     shift(-1, color === "w" ? -1 : 1, square),
     shift(+1, color === "w" ? -1 : 1, square),
-  ].filter(Boolean) as Square[]
+  ].filter(isTruthy)
 
 const knightSquares = (square: Square): Square[] =>
   [
@@ -169,7 +177,7 @@ const knightSquares = (square: Square): Square[] =>
     shift(+2, -1, square),
     shift(-2, +1, square),
     shift(-2, -1, square),
-  ].filter(Boolean) as Square[]
+  ].filter(isTruthy)
 
 const bishopPaths = (square: Square): Iterable<Square>[] =>
   [
@@ -200,14 +208,14 @@ const kingSquares = (square: Square): Square[] =>
     shift(+1, -1, square),
     shift(+1, 0, square),
     shift(+1, +1, square),
-  ].filter(Boolean) as Square[]
+  ].filter(isTruthy)
 
 
 const castleSquares = (square: Square): Square[] =>
   [
     shift(+2, 0, square),
     shift(-2, 0, square),
-  ].filter(Boolean) as Square[]
+  ].filter(isTruthy)
 
 
 export const isAttacked = (by: Color, square: Square, board: Board) =>
