@@ -759,7 +759,11 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
 /** Validate and apply an array of moves to a given game */
 export const applyHistory = (game: Game, history: readonly (MoveInput | string)[]) =>
   history.reduce(
-    (result, move) => result.flatMap(game => applyMove(game, move)),
+    (result, move, idx) => result.isOk()
+      ? result
+          .flatMap(game => applyMove(game, move))
+          .mapError(msg => `Move [${idx}] ${typeof move === "string" ? move : `${move.from}-${move.to}`} failed: ${msg}`)
+      : result,
     ok<Game, string>(game),
   )
 
