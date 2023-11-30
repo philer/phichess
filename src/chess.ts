@@ -3,6 +3,7 @@ import { match } from "ts-pattern"
 import { err, ok, type Result } from "./result"
 import { isTruthy, pairs } from "./util"
 
+const { abs, floor, sign } = Math
 
 export type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"
 export type Rank = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8"
@@ -128,9 +129,9 @@ function* range(from: Square, to: Square) {
   const toRank = to.charCodeAt(1)
   const fileDelta = toFile - fromFile
   const rankDelta = toRank - fromRank
-  const delta = Math.abs(fileDelta || rankDelta)
-  const fileStep = Math.sign(fileDelta)
-  const rankStep = Math.sign(rankDelta)
+  const delta = abs(fileDelta || rankDelta)
+  const fileStep = sign(fileDelta)
+  const rankStep = sign(rankDelta)
   for (let i = 1 ; i < delta ; ++i) {
     yield `${String.fromCharCode(fromFile + fileStep)}${String.fromCharCode(fromRank + rankStep)}` as Square
   }
@@ -355,7 +356,7 @@ export const toAlgebraic = (
 
   // castling
   const fileDelta = to.charCodeAt(0) - from.charCodeAt(0)
-  if (piece === "K" && Math.abs(fileDelta) === 2) {
+  if (piece === "K" && abs(fileDelta) === 2) {
     return ok(`${fileDelta > 0 ? "O-O" : "O-O-O"}${checkSign}` satisfies AlgebraicMove)
   }
 
@@ -479,7 +480,7 @@ const checkMove = (
       break
     }
     case "K": {
-      if (Math.abs(rankDelta) > 1 || Math.abs(fileDelta) > 1) {
+      if (abs(rankDelta) > 1 || abs(fileDelta) > 1) {
         if (from === (toMove === "w" ? "e1" : "e8") && rankDelta === 0) {
           // castling
           const rank = from[1] as Rank
@@ -515,8 +516,8 @@ const checkMove = (
       break
     }
     case "N": {
-      const dr = Math.abs(rankDelta)
-      const df = Math.abs(fileDelta)
+      const dr = abs(rankDelta)
+      const df = abs(fileDelta)
       if (!(df === 1 && dr === 2 || df === 2 && dr === 1)) {
         return err("Knights must move by 2/1 or 1/2.")
       }
@@ -526,7 +527,7 @@ const checkMove = (
     case "R":
     case "Q": {
       const isRookMove = rankDelta === 0 || fileDelta === 0
-      const isBishopMove = Math.abs(rankDelta) === Math.abs(fileDelta)
+      const isBishopMove = abs(rankDelta) === abs(fileDelta)
       if (!(
         pieceName === "B" && isBishopMove
         || pieceName === "R" && isRookMove
@@ -700,7 +701,7 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
         delete newBoard[`${to[0]}${from[1]}`]
       }
 
-      if (piece === `${toMove}K` && Math.abs(to.charCodeAt(0) - from.charCodeAt(0)) > 1) {
+      if (piece === `${toMove}K` && abs(to.charCodeAt(0) - from.charCodeAt(0)) > 1) {
         // Castling, move the rook
         const rank = to[1] as Rank
         if (to[0] === "c") {  // queen side
@@ -727,7 +728,7 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
       const position = [
           Object.entries(board).sort().flat().join(""),
           getCastlingFen(history),
-          piece === toMove && Math.abs(+from[1] - +to[1]) === 2 ? to : "",
+          piece === toMove && abs(+from[1] - +to[1]) === 2 ? to : "",
         ].join(":")
 
       const repetitions = {
@@ -858,7 +859,7 @@ export const toFEN = ({ board, toMove, history, fiftyMoveCounter }: Game): strin
   let enPassantSquare = "-"
   if (history.length) {
     const { from, to } = history[history.length - 1]
-    if (board[to] === invert(toMove) && Math.abs(+from[1] - +to[1]) === 2) {
+    if (board[to] === invert(toMove) && abs(+from[1] - +to[1]) === 2) {
       enPassantSquare = `${from[0]}${toMove === "w" ? 6 : 3}`
     }
   }
@@ -868,6 +869,6 @@ export const toFEN = ({ board, toMove, history, fiftyMoveCounter }: Game): strin
     getCastlingFen(history) || "-",
     enPassantSquare || "-",
     fiftyMoveCounter,
-    Math.floor(history.length / 2) + 1,
+    floor(history.length / 2) + 1,
   ].join(" ")
 }
