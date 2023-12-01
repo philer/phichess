@@ -834,6 +834,24 @@ export const toPGN = ({ history, outcome, termination }: Game): string => {
   ].join("\n")
 }
 
+
+/**
+ * Parse a game given as string in Portable Game Notation (PGN).
+ * Only moves are imported, all tags are ignored.
+ */
+export const parsePGN = (pgn: string): Result<Game, string> => {
+  const match = pgn.match(/^1\..*/ms)
+  if (!match) {
+    return err("Found no moves in PGN.")
+  }
+  const moves = match[0]
+    .replace(/\{.*?\}/g, "")
+    .split(/\s+/sm)
+    .filter(mv => !/[./{}]|(?:0 ?- ?1)|(?:1 ?- ?0)/.test(mv))
+  return applyHistory(START_GAME, moves)
+}
+
+
 /** Turn a ColorPiece into it's FEN eqivalent, e.g. 'wK' => 'K', 'b' => 'p' */
 const pieceToFEN = ([color, piece]: ColorPiece) =>
   color === "w" ? piece || "P" : (piece || "p").toLowerCase()

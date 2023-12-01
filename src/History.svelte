@@ -1,17 +1,19 @@
 <script lang="ts">
-  import { mdiUndo } from "@mdi/js"
+  import { mdiDownload, mdiImport, mdiUndo } from "@mdi/js"
   import { match } from "ts-pattern"
 
   import Algebraic from "./Algebraic.svelte"
   import { applyMove, type Game, type Move, revertToMove } from "./chess"
   import Export from "./Export.svelte"
   import Icon from "./Icon.svelte"
+  import ImportDialog from "./ImportDialog.svelte"
   import Modal from "./Modal.svelte"
   import { pairs } from "./util"
 
   export let game: Game
 
   let showExport = false
+  let showImport = false
   let fullGame = game
   let movePairs: ([] | [Move] | [Move, Move])[] = []
 
@@ -82,7 +84,7 @@
   disabled={!game.history.length}
   class="tools-button"
   title="Undo last move"
-><Icon path={mdiUndo} /></button>
+><Icon path={mdiUndo} /> Undo</button>
 
 <div style:flex-grow="1" />
 
@@ -91,13 +93,23 @@
   disabled={!game.history.length}
   class="tools-button"
   title="Export game as PGN or FEN"
->Export</button>
+><Icon path={mdiDownload} /> Export</button>
+
+<button
+  on:click={() => showImport = true}
+  class="tools-button"
+  title="Import game as PGN"
+><Icon path={mdiImport} /> Import</button>
 
 <Modal bind:open={showExport}>
   <svelte:fragment slot="title">Export</svelte:fragment>
   <Export {game} />
 </Modal>
 
+<ImportDialog
+  bind:open={showImport}
+  on:import={({ detail }) => game = detail}
+/>
 
 
 <style lang="sass">
@@ -137,6 +149,7 @@
   button.tools-button
     line-height: 2em
     width: 100%
+    margin-top: 1px
     background: #333
     transition: .2s background
 

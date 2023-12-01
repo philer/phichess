@@ -8,7 +8,7 @@
   export let open = false
   export let local = false
 
-  const dispatch = createEventDispatcher()
+  const dispatch = createEventDispatcher<{ close: void }>()
 
   const close = () => {
     open = false

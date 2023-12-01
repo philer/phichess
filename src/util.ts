@@ -48,3 +48,12 @@ export function saveTextAs(text: string, filename: string, type: string = "text/
 
   setTimeout(() => URL.revokeObjectURL(url), 60 * 1000)
 }
+
+/** Read a text file (e.g. .pgn file) */
+export const readFile = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.addEventListener("load", () => resolve(reader.result as string))
+    reader.addEventListener("error", () => reject(reader.error))
+    reader.readAsText(file)
+  })
