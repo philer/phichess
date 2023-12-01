@@ -39,6 +39,7 @@
   export let asWhite: boolean = true
   export let rotate: number = 0
   export let flipOpponentPieces: boolean = false
+  export let readonly: boolean = false
 
   $: ({ board, toMove } = game)
   $: lastMove = game.history.at(-1)
@@ -134,6 +135,7 @@
 
 <div
   class="board"
+  class:readonly
   class:show-board-frame={$settings.showBoardFrame}
   class:as-white={asWhite}
   class:flip-opponent-pieces={flipOpponentPieces}
@@ -142,14 +144,14 @@
   class:black-to-move={toMove === "b"}
   class:dragging={draggingFromSquare}
   use:clickOutside
-  on:click_outside={() => selectedSquare = undefined}
+  on:click_outside={readonly ? undefined : () => selectedSquare = undefined}
 >
   {#each asWhite ? squares.toReversed() : squares as square, idx (`${square}${board[square] || ""}`)}
     {@const piece = board[square]}
     {@const isLight = (idx + ~~(idx / 8)) % 2 > 0}
     <div
-      on:mousedown={evt => handleSquareMousedown(evt, square)}
-      on:mouseup={() => handleSquareMouseup(square)}
+      on:mousedown={readonly ? undefined : evt => handleSquareMousedown(evt, square)}
+      on:mouseup={readonly ? undefined : () => handleSquareMouseup(square)}
       role="button"
       tabindex="-1"
       class="square"
@@ -201,9 +203,12 @@
 
 <style lang="sass">
   .board
+    --default-board-size: 200px
+    --square-size: calc(var(--board-size, var(--default-board-size)) / 8)
+
     position: relative
-    width: var(--board-size)
-    height: var(--board-size)
+    width: var(--board-size, var(--default-board-size))
+    height: var(--board-size, var(--default-board-size))
     font-size: calc(0.9 * var(--square-size))
 
     grid-area: board  // place self in the surrounding grid context
@@ -215,6 +220,10 @@
 
     font-family: "Linux Libertine"
     user-select: none
+
+    &.readonly div
+      pointer-events: none
+      cursor: default !important
 
     .show-board-frame
       box-shadow: 3px 3px 10px #0006, 3px 3px 40px #0006
@@ -263,7 +272,7 @@
     .file,
     .rank
       position: absolute
-      font-size: max(1vmin, .12em)
+      font-size: .15em
       line-height: 1.5em
       height: 1.5em
       font-family: var(--font-family)

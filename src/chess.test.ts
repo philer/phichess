@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-
+import {readFile} from 'node:fs/promises'
 import {
   applyHistory,
   applyMove,
@@ -11,6 +11,7 @@ import {
   START_BOARD,
   START_GAME,
   toFEN,
+  parsePGN,
 } from "./chess"
 import { err, ok } from "./result"
 
@@ -506,5 +507,17 @@ describe.concurrent(toFEN, () => {
   test("piece moved", () => {
     expect(toFEN(makeGame("e4 c5 Nf3")))
       .toEqual("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2")
+  })
+})
+
+
+describe.concurrent(parsePGN, () => {
+  test.each([
+    "lichess_pgn_2023.12.01_VincentKeymer2004_vs_nihalsarin2004.PySVjOpL.pgn",
+    "ljuks68_vs_IMRosen_2023.10.31.pgn",
+    "ljuks68_vs_IMRosen_2023.10.31_timestamps.pgn",
+  ])("parse %s", async fileName => {
+    const pgn = await readFile(`./src/_fixtures/${fileName}`, { encoding:"utf8" })
+    expect(() => parsePGN(pgn).unwrap()).not.toThrow()
   })
 })

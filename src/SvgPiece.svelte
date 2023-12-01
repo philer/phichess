@@ -24,6 +24,4 @@
         filter: drop-shadow(0 0 1px black)
       &:global(.b)
         filter: drop-shadow(0 0 1px white)
-
-
 </style>

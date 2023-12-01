@@ -32,12 +32,12 @@
 <svelte:document on:keydown={handleGlobalKeydown} />
 
 {#if open}
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
     class="backdrop"
     class:local
     on:click={handleModalBackdropClick}
+    on:keydown={evt => evt.stopPropagation()}
     transition:fade={{ duration: 200 }}
     tabindex="-1"
   >

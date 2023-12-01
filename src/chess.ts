@@ -763,7 +763,7 @@ export const applyHistory = (game: Game, history: readonly (MoveInput | string)[
     (result, move, idx) => result.isOk()
       ? result
           .flatMap(game => applyMove(game, move))
-          .mapError(msg => `Move [${idx}] ${typeof move === "string" ? move : `${move.from}-${move.to}`} failed: ${msg}`)
+          .mapError(msg => `Move [${idx}] ${typeof move === "string" ? `'${move}'` : `${move.from}-${move.to}`} failed: ${msg}`)
       : result,
     ok<Game, string>(game),
   )
@@ -840,14 +840,12 @@ export const toPGN = ({ history, outcome, termination }: Game): string => {
  * Only moves are imported, all tags are ignored.
  */
 export const parsePGN = (pgn: string): Result<Game, string> => {
-  const match = pgn.match(/^1\..*/ms)
-  if (!match) {
+  // Let's hope people aren't nesting the same type of brackets; or using 0-0 instead of O-O
+  const clean = pgn.replace(/\[.*?\]|\{.*?\}|\(.*?\)|;.*$|\d+\.+|[012/½]+-[012/½]+/smg, "").trim()
+  if (!clean) {
     return err("Found no moves in PGN.")
   }
-  const moves = match[0]
-    .replace(/\{.*?\}/g, "")
-    .split(/\s+/sm)
-    .filter(mv => !/[./{}]|(?:0 ?- ?1)|(?:1 ?- ?0)/.test(mv))
+  const moves = clean.split(/\s+/g)
   return applyHistory(START_GAME, moves)
 }
 

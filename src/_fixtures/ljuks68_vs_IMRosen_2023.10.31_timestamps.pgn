@@ -1,0 +1,38 @@
+[Event "Live Chess"]
+[Site "Chess.com"]
+[Date "2023.10.31"]
+[Round "?"]
+[White "ljuks68"]
+[Black "IMRosen"]
+[Result "0-1"]
+[ECO "B48"]
+[WhiteElo "2375"]
+[BlackElo "2674"]
+[TimeControl "180+1"]
+[EndTime "14:06:34 PDT"]
+[Termination "IMRosen won by resignation"]
+
+1. e4 {[%timestamp 13]} 1... c5 {[%timestamp 18]} 2. Nf3 {[%timestamp 13]} 2...
+e6 {[%timestamp 5]} 3. d4 {[%timestamp 6]} 3... cxd4 {[%timestamp 5]} 4. Nxd4
+{[%timestamp 3]} 4... Nc6 {[%timestamp 4]} 5. Nc3 {[%timestamp 7]} 5... Qc7
+{[%timestamp 12]} 6. Be3 {[%timestamp 13]} 6... a6 {[%timestamp 9]} 7. Qd2
+{[%timestamp 11]} 7... Nf6 {[%timestamp 13]} 8. f3 {[%timestamp 7]} 8... Ne5
+{[%timestamp 13]} 9. O-O-O {[%timestamp 30]} 9... b5 {[%timestamp 14]} 10. g4
+{[%timestamp 19]} 10... d6 {[%timestamp 13]} 11. h4 {[%timestamp 12]} 11... Be7
+{[%timestamp 69]} 12. h5 {[%timestamp 18]} 12... Nc4 {[%timestamp 236]} 13. Bxc4
+{[%timestamp 30]} 13... Qxc4 {[%timestamp 1]} 14. g5 {[%timestamp 185]} 14...
+Nd7 {[%timestamp 11]} 15. g6 {[%timestamp 15]} 15... Ne5 {[%timestamp 202]} 16.
+gxf7+ {[%timestamp 39]} 16... Nxf7 {[%timestamp 46]} 17. Kb1 {[%timestamp 111]}
+17... Bd7 {[%timestamp 36]} 18. f4 {[%timestamp 55]} 18... b4 {[%timestamp 136]}
+19. Nce2 {[%timestamp 19]} 19... a5 {[%timestamp 17]} 20. Rc1 {[%timestamp 153]}
+20... a4 {[%timestamp 45]} 21. c3 {[%timestamp 15]} 21... b3 {[%timestamp 132]}
+22. a3 {[%timestamp 34]} 22... e5 {[%timestamp 7]} 23. fxe5 {[%timestamp 263]}
+23... dxe5 {[%timestamp 15]} 24. Rhg1 {[%timestamp 21]} 24... exd4 {[%timestamp
+71]} 25. cxd4 {[%timestamp 14]} 25... Qe6 {[%timestamp 67]} 26. Qd3 {[%timestamp
+78]} 26... O-O {[%timestamp 72]} 27. Nf4 {[%timestamp 72]} 27... Qa6
+{[%timestamp 133]} 28. Qd2 {[%timestamp 60]} 28... Bg5 {[%timestamp 173]} 29. e5
+{[%timestamp 93]} 29... Bf5+ {[%timestamp 18]} 30. Ka1 {[%timestamp 15]} 30...
+Qh6 {[%timestamp 37]} 31. Rg3 {[%timestamp 372]} 31... Rac8 {[%timestamp 70]}
+32. Rf1 {[%timestamp 56]} 32... Rc2 {[%timestamp 12]} 33. Qd1 {[%timestamp 28]}
+33... Nd6 {[%timestamp 73]} 34. exd6 {[%timestamp 31]} 34... Qxd6 {[%timestamp
+9]} 35. Rxg5 {[%timestamp 26]} 35... Qxa3+ {[%timestamp 20]} 0-1
