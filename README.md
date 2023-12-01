@@ -8,13 +8,16 @@ It features an adaptive layout with one or two board views:
 Play on a mobile screen while sitting opposite each other
 or on a monitor while sitting next to each other.
 
+
+## Live: 👉 [philer.org/chess](https://philer.org/chess)
+
 ![Screenshots](screenshots.png)
 
 On devices & browsers that support it, the app can be installed as a Progressive Web App (PWA).
 
 
-To do
------
+Features / To do
+----------------
 
 * [x] detect checkmate
 * [x] detect draw by stalemate
@@ -30,5 +33,5 @@ To do
 * [x] option for regular notation
 * [x] export PGN
 * [x] export FEN
-* [ ] import PGN (import FEN?)
+* [x] import PGN (skipping FEN import for now)
 * [x] progressive web app (PWA)
