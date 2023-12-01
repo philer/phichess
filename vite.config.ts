@@ -10,9 +10,9 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     svelte({
-      compilerOptions: {
-        cssHash: ({ css, hash }) => `h${hash(css).slice(0, 6)}`,
-      },
+      compilerOptions: mode === "development"
+        ? {}
+        : { cssHash: ({ css, hash }) => `h${hash(css).slice(0, 6)}` },
     }),
     VitePWA({
       registerType: "autoUpdate",
