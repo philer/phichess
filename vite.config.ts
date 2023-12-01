@@ -1,8 +1,7 @@
-import { svelte } from "@sveltejs/vite-plugin-svelte"
+import { svelte, vitePreprocess } from "@sveltejs/vite-plugin-svelte"
 import { defineConfig } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   base: "./",
   build: {
@@ -10,6 +9,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     svelte({
+      preprocess: vitePreprocess(),
       compilerOptions: mode === "development"
         ? {}
         : { cssHash: ({ css, hash }) => `h${hash(css).slice(0, 6)}` },
