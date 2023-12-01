@@ -8,6 +8,8 @@ It features an adaptive layout with one or two board views:
 Play on a mobile screen while sitting opposite each other
 or on a monitor while sitting next to each other.
 
+![Screenshots](screenshots.png)
+
 On devices & browsers that support it, the app can be installed as a Progressive Web App (PWA).
 
 
