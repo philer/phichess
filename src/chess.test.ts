@@ -1,5 +1,6 @@
+import { readFile } from "node:fs/promises"
 import { describe, expect, test } from "vitest"
-import {readFile} from 'node:fs/promises'
+
 import {
   applyHistory,
   applyMove,
@@ -8,10 +9,10 @@ import {
   getSquareColor,
   isInCheck,
   outcomeToString,
+  parsePGN,
   START_BOARD,
   START_GAME,
   toFEN,
-  parsePGN,
 } from "./chess"
 import { err, ok } from "./result"
 
@@ -516,8 +517,9 @@ describe.concurrent(parsePGN, () => {
     "lichess_pgn_2023.12.01_VincentKeymer2004_vs_nihalsarin2004.PySVjOpL.pgn",
     "ljuks68_vs_IMRosen_2023.10.31.pgn",
     "ljuks68_vs_IMRosen_2023.10.31_timestamps.pgn",
+    "lichess_pgn_2023.08.06_WorstFish_vs_CautiousSeat.VZYRpVwT.pgn",
   ])("parse %s", async fileName => {
-    const pgn = await readFile(`./src/_fixtures/${fileName}`, { encoding:"utf8" })
+    const pgn = await readFile(`./src/_fixtures/${fileName}`, { encoding: "utf8" })
     expect(() => parsePGN(pgn).unwrap()).not.toThrow()
   })
 })
