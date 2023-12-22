@@ -1,6 +1,14 @@
 <script lang="ts">
+  import {
+    mdiCheckerboard,
+    mdiClockOutline,
+    mdiFormatListNumbered,
+    mdiMonitorDashboard,
+  } from "@mdi/js"
+
   import BoardSettings from "./BoardSettings.svelte"
   import Checkbox from "./Checkbox.svelte"
+  import Icon from "./Icon.svelte"
   import LayoutSettings from "./LayoutSettings.svelte"
   import { settings } from "./stores"
   import TimeControlSettings from "./TimeControlSettings.svelte"
@@ -10,7 +18,7 @@
 <form on:submit={evt => evt.preventDefault()}>
   <!-- layout -->
   <fieldset>
-    <legend>Layout</legend>
+    <legend><Icon path={mdiMonitorDashboard} size="1.2em" />Layout</legend>
     <LayoutSettings />
 
     <Checkbox bind:checked={$settings.showBoardFrame} help="Required for time control">
@@ -26,11 +34,13 @@
 
   <!-- time control -->
   <fieldset>
+    <legend><Icon path={mdiClockOutline} size="1.2em" />Time Control</legend>
     <TimeControlSettings />
   </fieldset>
 
   <!-- board -->
   <fieldset>
+    <legend><Icon path={mdiCheckerboard} size="1.2em" />Board</legend>
     <BoardSettings />
     <Checkbox bind:checked={$settings.showLegalMoves}>Show legal moves</Checkbox>
     <Checkbox bind:checked={$settings.showCoordinates}>Show coordinates</Checkbox>
@@ -38,7 +48,7 @@
 
   <!-- sidebar -->
   <fieldset>
-    <legend>History</legend>
+    <legend><Icon path={mdiFormatListNumbered} size="1.2em" />History</legend>
     <Checkbox bind:checked={$settings.showHistory}>Show moves in sidebar</Checkbox>
     <label>
       Notation:
@@ -56,7 +66,7 @@
     display: flex
     flex-direction: column
     align-items: stretch
-    gap: 1em
+    gap: 1.5em
 
   form
     max-width: 35em
@@ -65,22 +75,26 @@
     --icon-size: 1.5em
 
     > :global(fieldset)
-      padding: .5em 1em
-
+      padding-bottom: 1em
       background: #3a3a3a
-      border-left: .15em solid #555
-      > :global(fieldset)
-        padding: .5em 1em
-        background: #424242
-        border-left: .15em solid #5c5c5c
+      border: 1px solid #555
+      box-shadow: 0 0 5px #0003
+
+      > :global(*)
+        margin: 0 1em
 
       > :global(legend)
-        display: contents
-        font-weight: bold
+        margin: 0
+        float: left
+        display: flex
+        align-items: center
+        gap: .333em
+        padding: .5em
+        border-bottom: 1px solid #555
+        background: #4a4a4a
         font-size: 1.1em
-
-      &:last-child
-        border-bottom: 0 solid transparent
+        font-weight: bold
+        font-variant: small-caps
 
     :global(small)
       display: block

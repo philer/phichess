@@ -191,13 +191,13 @@
     display: flex
     align-items: center
     justify-content: center
-    gap: .33em
+    gap: .333em
     padding: .2em .33em
 
+    font-family: 'Noto Sand', sans-serif
     font-weight: bold
     background: #0008
     border: 1px solid #fff4
-    border-radius: 3px
     color: #fffa
     &.running
       color: white

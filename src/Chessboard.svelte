@@ -275,7 +275,7 @@
       font-size: .15em
       line-height: 1.5em
       height: 1.5em
-      font-family: var(--font-family)
+      font-family: 'Noto Sans', sans-serif
       font-weight: bold
       text-shadow: none
 

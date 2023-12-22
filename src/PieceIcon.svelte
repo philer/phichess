@@ -11,7 +11,7 @@
   import Icon from "./Icon.svelte"
 
   export let piece: string
-  export let size: string = "1em"
+  export let size: string | undefined = undefined
   export let flip: "horizontal" | "vertical" | undefined = undefined
   export let rotate: number = 0
 </script>

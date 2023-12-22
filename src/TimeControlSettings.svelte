@@ -38,8 +38,6 @@
 </script>
 
 
-<legend>Time control</legend>
-
 {#if $settings.showBoardFrame}
   <Checkbox bind:checked={$settings.useTimeControl}>Enable time control</Checkbox>
 {:else}

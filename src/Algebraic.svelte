@@ -11,7 +11,7 @@
     {move.algebraic}
   {:else}
     {#each move.algebraic as character, idx (`${idx}${character}`)}
-      <PieceIcon piece={character} />
+      <PieceIcon piece={character} size=".85em" />
     {/each}
   {/if}
 {/if}

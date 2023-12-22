@@ -7,8 +7,6 @@
 </script>
 
 
-<legend>Board</legend>
-
 <div class="theme-list">
   {#each BOARD_THEMES as theme (theme._name)}
     <label class:selected={themeName === theme._name}>

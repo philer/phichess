@@ -10,7 +10,7 @@
 
 <label class:disabled>
   <input type="checkbox" bind:checked {disabled} />
-  <Icon path={checked ? mdiCheckboxMarkedOutline : mdiCheckboxBlankOutline} />
+  <Icon path={checked ? mdiCheckboxMarkedOutline : mdiCheckboxBlankOutline} size="1.2em" />
   <slot />
   {#if help}
     <small>({help})</small>
@@ -21,8 +21,9 @@
 <style lang="sass">
   label
     display: flex
+    align-items: center
     flex-wrap: wrap
-    gap: 0 .5em
+    gap: 0 .333em
     &.disabled
       opacity: .5
       cursor: default

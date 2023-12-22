@@ -123,9 +123,12 @@
   li
     display: contents
     span, button
+      display: flex
+      align-items: center
       padding: .25em .5em
       text-align: left
       white-space: nowrap
+      font-variant: normal
 
   .move-number
     text-align: right
@@ -147,9 +150,15 @@
     opacity: .5
 
   button.tools-button
+    display: flex
+    justify-content: center
+    align-items: center
+    gap: .333em
+
     line-height: 2em
     width: 100%
     margin-top: 1px
+
     background: #333
     transition: .2s background
 

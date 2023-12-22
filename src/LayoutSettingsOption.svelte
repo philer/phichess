@@ -46,7 +46,7 @@
     > span
       display: flex
       align-items: center
-      gap: .5em
+      gap: .333em
       white-space: nowrap
 
   .layout-preview

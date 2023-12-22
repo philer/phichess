@@ -81,7 +81,6 @@
   .modal
     position: relative
     background: #333
-    border-radius: 3px
     box-shadow: 3px 3px 10px #0008
     > button.close
       position: absolute

@@ -20,7 +20,7 @@
       <div>
         {#each { length: count } as _, idx (idx)}
           <div>
-            <PieceIcon piece={piece.slice(1)} />
+            <PieceIcon piece={piece.slice(1)} size="1em" />
           </div>
         {/each}
       </div>
