@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mdiArrowUpDownBold, mdiChessPawn, mdiFormatRotate90 } from "@mdi/js"
+  import { mdiChessPawn, mdiFormatRotate90, mdiSwapVerticalBold } from "@mdi/js"
 
   import { type Game, outcomeToString, START_GAME } from "./chess"
   import Chessboard from "./Chessboard.svelte"
@@ -30,6 +30,14 @@
       openOutcome = true
     }
   }
+
+  const newGame = () => game = START_GAME
+
+  const rematch = () => {
+    $settings.layout = $settings.layout.map(perspective => ({ ...perspective, asWhite: !perspective.asWhite }))
+    newGame()
+  }
+
 </script>
 
 <div
@@ -64,7 +72,7 @@
           <Icon path={mdiFormatRotate90} flip="vertical" />
         </button>
         <button on:click={() => asWhite = !asWhite}>
-          <Icon path={mdiArrowUpDownBold} />
+          <Icon path={mdiSwapVerticalBold} />
         </button>
         <button on:click={() => flipOpponentPieces = !flipOpponentPieces}>
           <Icon path={mdiChessPawn} flip={flipOpponentPieces ? undefined : "vertical"} />
@@ -78,9 +86,14 @@
   <Modal local bind:open={openOutcome} on:close={() => outcomeClosed = true}>
     <svelte:fragment slot="title">Game over!</svelte:fragment>
     <p>{outcomeToString(game.outcome, game.termination)}</p>
-    <button slot="actions" class="new-game-button" on:click={() => game = START_GAME}>
-      New game
-    </button>
+    <svelte:fragment slot="actions">
+      <button class="new-game-button" on:click={rematch}>
+        Rematch
+      </button>
+      <button class="new-game-button" on:click={newGame}>
+        New game
+      </button>
+    </svelte:fragment>
   </Modal>
 </div>
 
