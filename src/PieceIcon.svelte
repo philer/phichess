@@ -1,4 +1,4 @@
-<script lang="ts">
+<script context="module" lang="ts">
   import {
     mdiChessBishop,
     mdiChessKing,
@@ -10,24 +10,28 @@
 
   import Icon from "./Icon.svelte"
 
+  const paths: Record<string, string> = {
+    "": mdiChessPawn,
+    "N": mdiChessKnight,
+    "B": mdiChessBishop,
+    "R": mdiChessRook,
+    "Q": mdiChessQueen,
+    "K": mdiChessKing,
+  }
+</script>
+
+<script lang="ts">
   export let piece: string
   export let size: string | undefined = undefined
   export let flip: "horizontal" | "vertical" | undefined = undefined
   export let rotate: number = 0
+
+  const path = paths[piece]
 </script>
 
-{#if piece === ""}
-  <Icon path={mdiChessPawn} {size} {flip} {rotate} />
-{:else if piece === "N"}
-  <Icon path={mdiChessKnight} {size} {flip} {rotate} />
-{:else if piece === "B"}
-  <Icon path={mdiChessBishop} {size} {flip} {rotate} />
-{:else if piece === "R"}
-  <Icon path={mdiChessRook} {size} {flip} {rotate} />
-{:else if piece === "Q"}
-  <Icon path={mdiChessQueen} {size} {flip} {rotate} />
-{:else if piece === "K"}
-  <Icon path={mdiChessKing} {size} {flip} {rotate} />
+
+{#if path}
+  <Icon {path} {size} {flip} {rotate} />
 {:else}
   {piece}
 {/if}
