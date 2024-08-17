@@ -48,10 +48,10 @@ export type MoveInput = {
   readonly from: Square
   readonly to: Square
   readonly promotion?: PromotablePiece
-  readonly capture?: ColorPiece
 }
 
 export type Move = MoveInput & {
+  readonly capture?: ColorPiece
   readonly check: boolean
   readonly mate: boolean
   readonly algebraic: AlgebraicMove
@@ -439,11 +439,8 @@ const checkMove = (
         if (!capture) {
           const enPassantSquare = shift(fileDelta, 0, from) as Square
           capture = board[enPassantSquare]
-          if (!capture) {
-            return err("Pawns can only move diagonally when capturing.")
-          }
           if (capture !== invert(toMove)) {
-            return err("Pawns can only capture pawns en passant.")
+            return err("Pawns can only move diagonally when capturing.")
           }
           const prev = history[history.length - 1]
           if (prev.to !== enPassantSquare || prev.from !== shift(0, 2 * forwards, enPassantSquare)) {
@@ -541,7 +538,7 @@ const checkMove = (
   if (isInCheck(toMove, newBoard)) {
     return err("You are in check.")
   }
-  return ok({ from, to, promotion, capture })
+  return ok({ from, to, promotion })
 }
 
 
@@ -681,22 +678,24 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
   (typeof input === "string" ? decodeAlgebraicMove : checkMove)(game, input)
     .map(move => {
       const { board, toMove, graveyard } = game
-      const { from, to, promotion, capture } = move
+      const { from, to, promotion } = move
       const opponent = invert(toMove)
       const { [from]: piece, [to]: captureTarget, ...remainingBoard } = board
+      const rankDelta = to.charCodeAt(0) - from.charCodeAt(0)
+      let capture = captureTarget
 
       const newBoard: Mutable<Board> = {
         ...remainingBoard,
         [to]: promotion ? `${toMove}${promotion}` : piece,
       }
 
-      if (!captureTarget && capture === opponent) {
+      if (piece === toMove && rankDelta !== 0 && !capture) {
         // En passant pawn capture
         // @ts-ignore remainingBoard isn't empty
         delete newBoard[`${to[0]}${from[1]}`]
+        capture = opponent
       }
 
-      const rankDelta = to.charCodeAt(0) - from.charCodeAt(0)
       if (piece === `${toMove}K` && abs(rankDelta) > 1) {
         // Castling, move the rook & king
         const rank = to[1] as Rank
@@ -711,6 +710,7 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
           newBoard[`g${rank}`] = `${toMove}K`
           newBoard[`f${rank}`] = `${toMove}R`
         }
+        capture = undefined // own rook
       }
 
       const check = isInCheck(opponent, newBoard)
@@ -720,8 +720,8 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
         history: [...game.history, move],
       })
       const mate = check && !hasMoves
-      const algebraic = toAlgebraic({ ...move, check, mate }, board).unwrap()
-      const history = [...game.history, { ...move, check, mate, algebraic }]
+      const algebraic = toAlgebraic({ ...move, capture, check, mate }, board).unwrap()
+      const history = [...game.history, { ...move, capture, check, mate, algebraic }]
 
       const fiftyMoveCounter = capture || piece === toMove ? 0 : game.fiftyMoveCounter + 1
 

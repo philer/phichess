@@ -176,6 +176,11 @@ describe.concurrent(applyMove, () => {
       const game = makeGame("d4 d5 b3 b6 Bb2 Bb7 Nc3 Nc6 Qd2 Qd7  Rb1 Rb8 Ra1 Ra8 Rb1")
       expect(applyMove(game, "O-O-O")).toEqual(err(expect.any(String)))
     })
+
+    test("castling by dropping king on rook does not capture", () => {
+      const game = makeGame("Nf3 Nf6 g3 g6 Bg2 Bg7")
+      expect(applyMove(game, { from: "e1", to: "h1" }).unwrap().graveyard).toEqual([])
+    })
   })
 
   describe.concurrent("promotion", () => {
