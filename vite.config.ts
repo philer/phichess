@@ -7,6 +7,18 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: "es2022",
   },
+
+  // Silence SASS nested deprecation warning
+  // see https://sass-lang.com/documentation/breaking-changes/mixed-decls/
+  css: {
+    preprocessorOptions: {
+      sass: {
+        api: "modern",
+        silenceDeprecations: ["mixed-decls"],
+      },
+    },
+  },
+
   plugins: [
     svelte({
       preprocess: vitePreprocess(),
