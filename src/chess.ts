@@ -577,11 +577,11 @@ const decodeAlgebraicMove = (game: GameInput, algebraic: string): Result<MoveInp
     const [_, to, promotion] = matchArray as PawnMoveMatch
     const singleStepFrom = shift(0, -forwards, to)
     if (singleStepFrom && board[singleStepFrom] === toMove) {
-      return checkMove(game, { from: singleStepFrom, to, promotion })
+      return ok({ from: singleStepFrom, to, promotion })
     }
     const doubleStepFrom = shift(0, -2 * forwards, to)
     if (doubleStepFrom && board[doubleStepFrom] === toMove) {
-      return checkMove(game, { from: doubleStepFrom, to, promotion })
+      return ok({ from: doubleStepFrom, to, promotion })
     }
     return err(`There is no Pawn to move to ${to}.`)
   }
@@ -592,7 +592,7 @@ const decodeAlgebraicMove = (game: GameInput, algebraic: string): Result<MoveInp
     if (!from) {
       return err(`There is no Pawn that can capture on ${to}.`)
     }
-    return checkMove(game, { from, to, promotion })
+    return ok({ from, to, promotion })
   }
 
   if (matchArray = PIECE_MOVE_OR_CAPTURE_PATTERN.exec(algebraic)) {
@@ -623,13 +623,13 @@ const decodeAlgebraicMove = (game: GameInput, algebraic: string): Result<MoveInp
       .returnType<Result<Square, string>>()
       .with(0, () => err(`No candidate ${PIECE_NAMES[piece]} found`))  // TODO details
       .with(1, () => ok(candidates[0]))
-      .otherwise(() => err(`Ambiguous move: multiple ${PIECE_NAMES[piece]} could move to ${to}.`))
-      .flatMap(from => checkMove(game, { from, to }))
+      .otherwise(() => err(`Ambiguous move: multiple ${PIECE_NAMES[piece]}s could move to ${to}.`))
+      .flatMap(from => ok({ from, to }))
   }
 
   if (matchArray = CASTLING_PATTERN.exec(algebraic)) {
     const rank = toMove === "w" ? "1" : "8"
-    return checkMove(game, { from: `e${rank}`, to: `${matchArray[1] ? "c" : "g"}${rank}` })
+    return ok({ from: `e${rank}`, to: `${matchArray[1] ? "c" : "g"}${rank}` })
   }
 
   return err(`'${algebraic}' is not a known move format.`)
@@ -675,7 +675,8 @@ const isInsufficientMaterial = (board: Board): boolean => {
  */
 export const applyMove = (game: Game, input: MoveInput | string): Result<Game, string> =>
   // @ts-ignore too complex, lol
-  (typeof input === "string" ? decodeAlgebraicMove : checkMove)(game, input)
+  (typeof input === "string" ? decodeAlgebraicMove(game, input) : ok(input))
+    .flatMap(input => checkMove(game, input))
     .map(move => {
       const { board, toMove, graveyard } = game
       const { from, to, promotion } = move
