@@ -279,7 +279,9 @@ const generateMoves = function*(from: Square, board: Board): Iterable<MoveInput>
       yield* kingSquares(from).map(to => ({ from, to }))
       const rank = toMove === "w" ? 1 : 8
       if (from === `e${rank}`) {
-        yield* Array.from("acgh" as Iterable<File>, file => ({ from, to: `${file}${rank}` }))
+        for (const file of "acgh" as Iterable<File>) {
+          yield { from, to: `${file}${rank}` }
+        }
       }
       break
     }
