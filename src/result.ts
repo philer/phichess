@@ -1,6 +1,6 @@
 export type Result<T = unknown, E = unknown> = Ok<T, E> | Err<T, E>
 
-export abstract class BaseResult<T = unknown, E = unknown> implements Promise<T>, Iterable<T> {
+export abstract class BaseResult<T = unknown, E = unknown> implements Promise<T> {
 
   static of<T = unknown, E = unknown>(value: T): Result<T, E> {
     return new Ok(value)
@@ -54,11 +54,11 @@ export abstract class BaseResult<T = unknown, E = unknown> implements Promise<T>
     return "Result"
   }
 
-  abstract [Symbol.iterator](): IterableIterator<T>
+  abstract iter(): IterableIterator<T>
 }
 
 export class Ok<T = unknown, E = unknown> extends BaseResult<T, E> {
-  _value: T
+  private _value: T
 
   constructor(value: T) {
     super()
@@ -97,13 +97,13 @@ export class Ok<T = unknown, E = unknown> extends BaseResult<T, E> {
     return Promise.resolve(this._value)
   }
 
-  *[Symbol.iterator]() {
+  *iter() {
     yield this._value
   }
 }
 
 export class Err<T = unknown, E = unknown> extends BaseResult<T, E> {
-  _value: E
+  private _value: E
 
   constructor(value: E) {
     super()
@@ -142,7 +142,7 @@ export class Err<T = unknown, E = unknown> extends BaseResult<T, E> {
     return Promise.reject(this._value)
   }
 
-  *[Symbol.iterator]() {}
+  *iter() {}
 }
 
 /** Create an Ok instance, alias to Result.of */

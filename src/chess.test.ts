@@ -479,6 +479,11 @@ describe(applyHistory, () => {
         termination: "insufficient",
       })))
   })
+
+  test("invalid move: limited error message", () => {
+    expect(applyHistory(START_GAME, ["e4", "e5", "e4", "d5"]))
+      .toEqual(err("Move [2] 'e4' failed: There is no Pawn to move to e4."))
+  })
 })
 
 

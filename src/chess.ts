@@ -306,7 +306,7 @@ const generateMoves = function*(from: Square, board: Board): Iterable<MoveInput>
 
 export const generateLegalMoves = function*(from: Square, game: GameInput): IterableIterator<MoveInput> {
   for (const move of generateMoves(from, game.board)) {
-    yield* checkMove(game, move)
+    yield* checkMove(game, move).iter()
   }
 }
 
@@ -761,11 +761,10 @@ export const applyMove = (game: Game, input: MoveInput | string): Result<Game, s
 /** Validate and apply an array of moves to a given game */
 export const applyHistory = (game: Game, history: readonly (MoveInput | string)[]) =>
   history.reduce(
-    (result, move, idx) => result.isOk()
-      ? result
-          .flatMap(game => applyMove(game, move))
-          .mapError(msg => `Move [${idx}] ${typeof move === "string" ? `'${move}'` : `${move.from}-${move.to}`} failed: ${msg}`)
-      : result,
+    (result, move, idx) => result
+      .flatMap(game => applyMove(game, move)
+        .mapError(msg => `Move [${idx}] ${typeof move === "string" ? `'${move}'` : `${move.from}-${move.to}`} failed: ${msg}`),
+      ),
     ok<Game, string>(game),
   )
 
